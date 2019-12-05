@@ -54,6 +54,7 @@ namespace MusicTime
         private System.Threading.Timer DeviceTimer;
         private System.Threading.Timer TrackStatusBar;
 
+        private static int ONE_SECOND = 1000;
         private static int THIRTY_SECONDS = 1000 * 30;
         private static int ONE_MINUTE = THIRTY_SECONDS * 2;
         private static int ONE_HOUR = ONE_MINUTE * 60;
@@ -142,19 +143,19 @@ namespace MusicTime
                      GetSpotifyUserStatus,
                      null,
                      ZERO_SECOND,
-                     THIRTY_SECONDS/3);
+                    ONE_SECOND*10);
 
             DeviceTimer = new System.Threading.Timer(
                      GetDeviceIDLazilyAsync,
                      null,
                      THIRTY_SECONDS,
-                     THIRTY_SECONDS/3);
+                     ONE_SECOND*10);
 
             TrackStatusBar = new System.Threading.Timer(
                      UpdateCurrentTrackOnStatusAsync,
                      null,
                      THIRTY_SECONDS,
-                     THIRTY_SECONDS / 6);
+                     ONE_SECOND*2);
 
 
         }
@@ -205,22 +206,22 @@ namespace MusicTime
         public static async void UpdateCurrentTrackOnStatusAsync(object state)
         {
             string currentTrack = "";
-            string Pause    = "⏸️";
-            string Play     = "▶️";
-
-            if (SoftwareUserSession.GetSpotifyUserStatus()&& MusicManager.isDeviceOpened())
+            string Pause        = "⏸️";
+            string Play         = "▶️";
+            
+            if (SoftwareUserSession.GetSpotifyUserStatus() && MusicManager.isDeviceOpened())
            {
-                trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
-                
-                if(trackStatus.is_playing == true && trackStatus.item != null)
+                trackStatus  = await MusicManager.SpotifyCurrentTrackAsync();
+
+                if (trackStatus.is_playing == true && trackStatus.item != null)
                 {
                     currentTrack = trackStatus.item.name;
-                    _musicStatus.SetTrackName(Play + " " + currentTrack);
+                    _musicStatus.SetTrackName(Pause + " " + currentTrack);
                 }
                 if(trackStatus.is_playing==false&& trackStatus.item!=null)
                 {
                     currentTrack = trackStatus.item.name;
-                    _musicStatus.SetTrackName(Pause + " " + currentTrack);
+                    _musicStatus.SetTrackName(Play + " " + currentTrack);
                 }
            }
             else

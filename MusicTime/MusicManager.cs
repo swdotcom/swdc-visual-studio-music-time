@@ -267,7 +267,7 @@ namespace MusicTime
             if (MusicClient.IsOk(response))
             {
                 string responseBody = await response.Content.ReadAsStringAsync();
-                trackStatus = JsonConvert.DeserializeObject<TrackStatus>(responseBody);
+                trackStatus         = JsonConvert.DeserializeObject<TrackStatus>(responseBody);
             }
             return trackStatus;
         }

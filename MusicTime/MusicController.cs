@@ -22,14 +22,7 @@ namespace MusicTime
                 {
 
 
-                    if (!MusicManager.isDeviceOpened())
-                    {
-                        await LaunchPlayerAsync();
-
-                        await MusicManager.getDevicesAsync();
-                      
-                        
-                    }
+                    
                     
                     if(await MusicManager.isTrackPlayingAsync())
                     {
@@ -43,7 +36,15 @@ namespace MusicTime
                         MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
                     }
 
-                   
+                    if (!MusicManager.isDeviceOpened())
+                    {
+                        await LaunchPlayerAsync();
+
+                        await MusicManager.getDevicesAsync();
+
+
+                    }
+
 
                 }
             }
