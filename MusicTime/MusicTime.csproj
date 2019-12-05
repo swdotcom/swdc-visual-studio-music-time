@@ -96,6 +96,10 @@
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
     </VSCTCompile>
+    <Content Include="Microsoft.VisualStudio.Services.Icons.Default.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\MusicTimeCo.png" />
     <Content Include="Resources\MusicTimeCoPackage.ico" />
     <Content Include="Resources\MusicTimeDashboardCommand.png" />
