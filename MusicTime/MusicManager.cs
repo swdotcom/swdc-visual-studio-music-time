@@ -40,8 +40,6 @@ namespace MusicTime
                
                 if (auths != null)
                 {
-                    
-                   
                     codyConfig.spotifyClientId          = spotifyTokens.clientId;
                     codyConfig.spotifyClientSecret      = spotifyTokens.clientSecret;
                     codyConfig.spotifyAccessToken       = auths.AccessToken;
@@ -56,10 +54,11 @@ namespace MusicTime
                     UserProfile userProfile             = UserProfile.getInstance;
                     spotifyUser                         = await userProfile.GetUserProfileAsync();
 
-                    bool isConnected = MusicManager.hasSpotifyPlaybackAccess();
+                    bool isConnected                    = MusicManager.hasSpotifyPlaybackAccess();
                     await getDevicesAsync();
-                    MusicTimeCoPackage.GetSpotifyUserStatus(isConnected);
-
+                   
+                    SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
+                    
                 }
                 else
                 {
@@ -140,7 +139,7 @@ namespace MusicTime
             SoftwareCoUtil.setItem("spotify_access_token", null);
             SoftwareCoUtil.setItem("spotify_refresh_token", null);
             spotifyUser = null;
-
+            Logger.Debug(spotifyTokens.clientId);
         }
 
        public static bool hasSpotifyPlaybackAccess()
@@ -148,6 +147,7 @@ namespace MusicTime
       
             if (spotifyUser!= null && spotifyUser.Product == "premium")
             {
+                
                 return true;
             }
             return false;
@@ -162,7 +162,6 @@ namespace MusicTime
                string api = "/v1/me/player/play?" + DeviceID();
 
                 response    = await MusicClient.SpotifyApiPutAsync(api);
-                
                 if (response == null || !MusicClient.IsOk(response))
                 {
                     // refresh the tokens
@@ -187,7 +186,6 @@ namespace MusicTime
                 string api = "/v1/me/player/pause?" + DeviceID();
 
                 response = await MusicClient.SpotifyApiPutAsync(api);
-
                 if (response == null || !MusicClient.IsOk(response))
                 {
                     // refresh the tokens
@@ -211,7 +209,6 @@ namespace MusicTime
                 string api = "/v1/me/player/next?" + DeviceID();
 
                 response = await MusicClient.SpotifyApiPostAsync(api);
-
                 if (response == null || !response.IsSuccessStatusCode)
                 {
                     // refresh the tokens
@@ -233,7 +230,6 @@ namespace MusicTime
                 string api = "/v1/me/player/previous?" + DeviceID();
 
                 response = await MusicClient.SpotifyApiPostAsync(api);
-
                 if (response == null || !response.IsSuccessStatusCode)
                 {
                     // refresh the tokens
@@ -255,7 +251,7 @@ namespace MusicTime
             string api  = "/v1/me/player/currently-playing?" + DeviceID();
 
             response    = await MusicClient.SpotifyApiGetAsync(api);
-
+            
             if (response == null || !MusicClient.IsOk(response))
             {
                 // refresh the tokens

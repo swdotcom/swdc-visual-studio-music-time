@@ -29,29 +29,49 @@ namespace MusicTime
             public string plugin_jwt;
         }
 
-        public static async Task<bool> IsOnlineAsync()
-        {
-            long nowInSec = SoftwareCoUtil.getNowInSeconds();
-            long thresholdSeconds = nowInSec - lastOnlineCheck;
-            if (thresholdSeconds > 60)
-            {
-                // 3 second timeout
-                HttpResponseMessage response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, "/ping", null, 3, null, true /*isOnlineCheck*/);
-                isOnline = SoftwareHttpManager.IsOk(response);
-                lastOnlineCheck = nowInSec;
-            }
 
-            return isOnline;
+        public static async Task isOnlineCheckAsync()
+        {
+            HttpResponseMessage response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, "/ping", null, 3, null, true /*isOnlineCheck*/);
+            MusicTimeCoPackage.isOnline = SoftwareHttpManager.IsOk(response);
+            
         }
 
+        //public static async Task<bool> IsOnlineAsync()
+        //{
+          
+        //    long nowInSec = SoftwareCoUtil.getNowInSeconds();
+          
+        //    long thresholdSeconds = nowInSec - lastOnlineCheck;
+           
+        //    if (thresholdSeconds > 30)
+        //    {
+        //        // 3 second timeout
+        //        HttpResponseMessage response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, "/ping", null, 3, null, true /*isOnlineCheck*/);
+        //        isOnline = SoftwareHttpManager.IsOk(response);
+        //        lastOnlineCheck = nowInSec;
+                
+        //    }
+
+        //    return isOnline;
+        //}
         public static string GetJwt()
         {
             
                 object jwt = SoftwareCoUtil.getItem("jwt");
                 lastJwt = (jwt != null && !((string)jwt).Equals("")) ? (string)jwt : null;
             
-            return lastJwt;
+                return lastJwt;
         }
+
+        //public static string GetJwt()
+        //{
+
+        //        object jwt = SoftwareCoUtil.getItem("jwt");
+        //        lastJwt = (jwt != null && !((string)jwt).Equals("")) ? (string)jwt : null;
+
+        //    return lastJwt;
+        //}
 
         public static async Task<string> CreateAnonymousUserAsync(bool online)
         {
@@ -215,6 +235,47 @@ namespace MusicTime
             return false;
         }
 
+        public static async Task<UserStatus> GetSpotifyUserStatusTokenAsync(bool online)
+        {
+            bool softwareSessionFileExists  = SoftwareCoUtil.softwareSessionFileExists();
+            bool jwtExists                  = SoftwareCoUtil.jwtExists();
+            Auths auths                     = new Auths();
+            UserStatus userStatus           = new UserStatus();
+            
+            if (!jwtExists || !online)
+            {
+                userStatus.loggedIn = false;
+            }
+            else
+            {
+                try
+                {
+                    SpotifyTokens  spotifyTokens = await SoftwareSpotifyManager.GetSpotifyTokenAsync();
+                     auths = await SoftwareSpotifyManager.getMusicTimeUserStatus(online);
+
+                    if (auths.LoggedIn == true)
+                    {
+                        userStatus.loggedIn = true;
+                        MusicTimeCoPackage.UpdateEnableCommands(userStatus.loggedIn);
+                    }
+                    else
+                    {
+                        MusicManager.cleaclearSpotifyAccessInfo(spotifyTokens);
+                    }
+                    
+                }
+                catch (Exception ex)
+                {
+
+
+                }
+                   
+            }
+            return userStatus;
+        }
+
+        
+
         public static bool GetSpotifyUserStatus()
         { 
             
@@ -224,11 +285,11 @@ namespace MusicTime
 
         public static async Task<UserStatus> GetUserStatusAsync(bool isInitialCall)
         {
-            bool online = await IsOnlineAsync();
+            bool online = MusicTimeCoPackage.isOnline;
             bool softwareSessionFileExists = SoftwareCoUtil.softwareSessionFileExists();
             bool jwtExists = SoftwareCoUtil.jwtExists();
 
-            if (!isInitialCall && isOnline && !jwtExists)
+            if (!isInitialCall && online && !jwtExists)
             {
                 await SoftwareUserSession.CreateAnonymousUserAsync(online);
             }
@@ -280,7 +341,7 @@ namespace MusicTime
         public static async void SendHeartbeat(string reason)
         {
             string jwt = GetJwt();
-            bool online = await IsOnlineAsync();
+            bool online = MusicTimeCoPackage.isOnline;
             if (online && jwt != null)
             {
 

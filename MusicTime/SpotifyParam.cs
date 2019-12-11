@@ -9,155 +9,167 @@ using System.Threading.Tasks;
 
 namespace MusicTime
 {
-    
-        public partial class SpotifyParam
-        {
-            [JsonProperty("id")]
-            public long Id { get; set; }
 
-            [JsonProperty("name")]
-            public string Name { get; set; }
+    public partial class SpotifyParam
+    {
+        [JsonProperty("state")]
+        public string State { get; set; }
 
-            [JsonProperty("email")]
-            public string Email { get; set; }
+        [JsonProperty("jwt")]
+        public string Jwt { get; set; }
 
-            [JsonProperty("password")]
-            public object Password { get; set; }
+        [JsonProperty("email")]
+        public string Email { get; set; }
 
-            [JsonProperty("profile_image")]
-            public object ProfileImage { get; set; }
+        [JsonProperty("user")]
+        public User User { get; set; }
+    }
 
-            [JsonProperty("salt")]
-            public object Salt { get; set; }
+    public partial class User
+    {
+        [JsonProperty("id")]
+        public long Id { get; set; }
 
-            [JsonProperty("setup_complete")]
-            public object SetupComplete { get; set; }
+        [JsonProperty("name")]
+        public string Name { get; set; }
 
-            [JsonProperty("code_goals")]
-            public CodeGoals CodeGoals { get; set; }
+        [JsonProperty("email")]
+        public string Email { get; set; }
 
-            [JsonProperty("client_cache")]
-            public object ClientCache { get; set; }
+        [JsonProperty("password")]
+        public bool Password { get; set; }
 
-            [JsonProperty("timezone")]
-            public string Timezone { get; set; }
+        [JsonProperty("profile_image")]
+        public object ProfileImage { get; set; }
 
-            [JsonProperty("offset_minutes")]
-            public long OffsetMinutes { get; set; }
+        [JsonProperty("salt")]
+        public bool Salt { get; set; }
 
-            [JsonProperty("occupation")]
-            public object Occupation { get; set; }
+        [JsonProperty("setup_complete")]
+        public object SetupComplete { get; set; }
 
-            [JsonProperty("company")]
-            public object Company { get; set; }
+        [JsonProperty("code_goals")]
+        public CodeGoals CodeGoals { get; set; }
 
-            [JsonProperty("location")]
-            public object Location { get; set; }
+        [JsonProperty("client_cache")]
+        public object ClientCache { get; set; }
 
-            [JsonProperty("github_id")]
-            public object GithubId { get; set; }
+        [JsonProperty("timezone")]
+        public object Timezone { get; set; }
 
-            [JsonProperty("github_access_token")]
-            public object GithubAccessToken { get; set; }
+        [JsonProperty("offset_minutes")]
+        public long OffsetMinutes { get; set; }
 
-            [JsonProperty("github_refresh_token")]
-            public object GithubRefreshToken { get; set; }
+        [JsonProperty("occupation")]
+        public object Occupation { get; set; }
 
-            [JsonProperty("github_scopes")]
-            public object GithubScopes { get; set; }
+        [JsonProperty("company")]
+        public object Company { get; set; }
 
-            [JsonProperty("google_id")]
-            public object GoogleId { get; set; }
+        [JsonProperty("location")]
+        public object Location { get; set; }
 
-            [JsonProperty("google_access_token")]
-            public object GoogleAccessToken { get; set; }
+        [JsonProperty("github_id")]
+        public object GithubId { get; set; }
 
-            [JsonProperty("google_refresh_token")]
-            public object GoogleRefreshToken { get; set; }
+        [JsonProperty("github_access_token")]
+        public bool GithubAccessToken { get; set; }
 
-            [JsonProperty("permissions")]
-            public object[] Permissions { get; set; }
+        [JsonProperty("github_refresh_token")]
+        public object GithubRefreshToken { get; set; }
 
-            [JsonProperty("invite_timestamp")]
-            public object InviteTimestamp { get; set; }
+        [JsonProperty("github_scopes")]
+        public object GithubScopes { get; set; }
 
-            [JsonProperty("login_timestamp")]
-            public long LoginTimestamp { get; set; }
+        [JsonProperty("google_id")]
+        public object GoogleId { get; set; }
 
-            [JsonProperty("login_count")]
-            public long LoginCount { get; set; }
+        [JsonProperty("google_access_token")]
+        public bool GoogleAccessToken { get; set; }
 
-            [JsonProperty("invite_token")]
-            public object InviteToken { get; set; }
+        [JsonProperty("google_refresh_token")]
+        public object GoogleRefreshToken { get; set; }
 
-            [JsonProperty("plugin_token")]
-            public string PluginToken { get; set; }
+        [JsonProperty("permissions")]
+        public object[] Permissions { get; set; }
 
-            [JsonProperty("reset_token")]
-            public object ResetToken { get; set; }
+        [JsonProperty("login_timestamp")]
+        public long LoginTimestamp { get; set; }
 
-            [JsonProperty("confirm_token")]
-            public object ConfirmToken { get; set; }
+        [JsonProperty("login_count")]
+        public long LoginCount { get; set; }
 
-            [JsonProperty("plugin_jwt")]
-            public string PluginJwt { get; set; }
+        [JsonProperty("invite_token")]
+        public object InviteToken { get; set; }
 
-            [JsonProperty("first_datum_timestamp")]
-            public long FirstDatumTimestamp { get; set; }
+        [JsonProperty("plugin_token")]
+        public string PluginToken { get; set; }
 
-            [JsonProperty("last_datum_timestamp")]
-            public long LastDatumTimestamp { get; set; }
+        [JsonProperty("reset_token")]
+        public object ResetToken { get; set; }
 
-            [JsonProperty("time_to_collect_data")]
-            public object TimeToCollectData { get; set; }
+        [JsonProperty("confirm_token")]
+        public object ConfirmToken { get; set; }
 
-            [JsonProperty("oauths")]
-            public object Oauths { get; set; }
+        [JsonProperty("plugin_jwt")]
+        public string PluginJwt { get; set; }
 
-            [JsonProperty("preferences")]
-            public Preferences Preferences { get; set; }
+        [JsonProperty("oauths")]
+        public object Oauths { get; set; }
 
-            [JsonProperty("mac_addr")]
-            public object MacAddr { get; set; }
+        [JsonProperty("preferences")]
+        public Preferences Preferences { get; set; }
 
-            [JsonProperty("mac_addr_share")]
-            public object MacAddrShare { get; set; }
+        [JsonProperty("mac_addr")]
+        public object MacAddr { get; set; }
 
-            [JsonProperty("deactivated")]
-            public long Deactivated { get; set; }
+        [JsonProperty("mac_addr_share")]
+        public object MacAddrShare { get; set; }
 
-            [JsonProperty("phone")]
-            public object Phone { get; set; }
+        [JsonProperty("deactivated")]
+        public long Deactivated { get; set; }
 
-            [JsonProperty("creation_annotation")]
-            public object CreationAnnotation { get; set; }
+        [JsonProperty("phone")]
+        public object Phone { get; set; }
 
-            [JsonProperty("hostname")]
-            public object Hostname { get; set; }
+        [JsonProperty("creation_annotation")]
+        public object CreationAnnotation { get; set; }
 
-            [JsonProperty("ide_integrations")]
-            public object IdeIntegrations { get; set; }
+        [JsonProperty("hostname")]
+        public object Hostname { get; set; }
 
-            [JsonProperty("last_codetime_metrics_timestamp")]
-            public object LastCodetimeMetricsTimestamp { get; set; }
+        [JsonProperty("last_codetime_metrics_timestamp")]
+        public long LastCodetimeMetricsTimestamp { get; set; }
 
-            [JsonProperty("last_search_file_timestamp")]
-            public object LastSearchFileTimestamp { get; set; }
+        [JsonProperty("last_search_file_timestamp")]
+        public long LastSearchFileTimestamp { get; set; }
 
-            [JsonProperty("createdAt")]
-            public DateTimeOffset CreatedAt { get; set; }
+        [JsonProperty("registered")]
+        public long Registered { get; set; }
 
-            [JsonProperty("updatedAt")]
-            public DateTimeOffset UpdatedAt { get; set; }
+        [JsonProperty("musictime_token")]
+        public string MusictimeToken { get; set; }
 
-            [JsonProperty("apps")]
-            public string[] Apps { get; set; }
+        [JsonProperty("codetime_token")]
+        public object CodetimeToken { get; set; }
 
-            [JsonProperty("auths")]
-            public Auths[] Auths { get; set; }
-        }
+        [JsonProperty("createdAt")]
+        public DateTimeOffset CreatedAt { get; set; }
 
-        public partial class Auths
+        [JsonProperty("updatedAt")]
+        public DateTimeOffset UpdatedAt { get; set; }
+
+        [JsonProperty("integrations")]
+        public Integration[] Integrations { get; set; }
+
+        [JsonProperty("apps")]
+        public string[] Apps { get; set; }
+
+        [JsonProperty("auths")]
+        public Auths[] Auths { get; set; }
+    }
+
+    public partial class Auths
         {
             [JsonProperty("id")]
             public long Id { get; set; }
@@ -197,7 +209,11 @@ namespace MusicTime
 
             [JsonProperty("userId")]
             public long UserId { get; set; }
-        }
+
+            [JsonProperty("loggedIn")]
+            public bool LoggedIn { get; set; }
+
+    }
 
         public partial class CodeGoals
         {
@@ -290,9 +306,46 @@ namespace MusicTime
             public bool ShowGit { get; set; }
         }
 
-       
 
-        internal class ParseStringConverter : JsonConverter
+    public partial class Integration
+    {
+        [JsonProperty("id")]
+        public long Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("value")]
+        public string Value { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("upgraded")]
+        public long Upgraded { get; set; }
+
+        [JsonProperty("last_datum_timestamp")]
+        public object LastDatumTimestamp { get; set; }
+
+        [JsonProperty("last_heartbeat_timestamp")]
+        public object LastHeartbeatTimestamp { get; set; }
+
+        [JsonProperty("version")]
+        public string Version { get; set; }
+
+        [JsonProperty("createdAt")]
+        public DateTimeOffset CreatedAt { get; set; }
+
+        [JsonProperty("updatedAt")]
+        public DateTimeOffset UpdatedAt { get; set; }
+
+        [JsonProperty("userId")]
+        public long UserId { get; set; }
+
+        [JsonProperty("pluginId")]
+        public long PluginId { get; set; }
+    }
+    internal class ParseStringConverter : JsonConverter
         {
             public override bool CanConvert(Type t) => t == typeof(bool) || t == typeof(bool?);
 

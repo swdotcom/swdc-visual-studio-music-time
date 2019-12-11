@@ -18,7 +18,7 @@ namespace MusicTime
 
         public static async Task ConnectToSpotifyAsync()
         {
-            bool online = await SoftwareUserSession.IsOnlineAsync();
+            bool online = MusicTimeCoPackage.isOnline;
             if (!online)
             {
                 return;
@@ -41,9 +41,15 @@ namespace MusicTime
 
                 app_jwt = SoftwareUserSession.GetJwt();
             }
+            
+
+
+            String qryStr = "/auth/spotify?token=" + app_jwt + "&mac="+SoftwareCoUtil.isMac();
+
+            launchWebUrl(Constants.api_endpoint + qryStr);
             try
             {
-                await GetSpotifyTokenAsync(app_jwt);
+                await GetSpotifyTokenAsync();
 
             }
             catch (Exception ex)
@@ -51,18 +57,12 @@ namespace MusicTime
 
 
             }
-
-
-            String qryStr = "/auth/spotify?token=" + app_jwt + "&mac="+SoftwareCoUtil.isMac();
-
-            launchWebUrl(Constants.api_endpoint + qryStr);
-
             refetchSpotifyConnectStatusLazily();
             
 
         }
         
-        private static void refetchSpotifyConnectStatusLazily(int tryCountUntilFound = 5)
+        private static void refetchSpotifyConnectStatusLazily(int tryCountUntilFound = 10)
         {
             Thread.Sleep(TEN_SECONDS);
             SpotifyConnectStatusHandlerAsync(tryCountUntilFound);
@@ -71,7 +71,7 @@ namespace MusicTime
         private static async void SpotifyConnectStatusHandlerAsync(int tryCountUntilFound)
         {
             Auths auths = new Auths();
-            bool online = await SoftwareUserSession.IsOnlineAsync();
+            bool online = MusicTimeCoPackage.isOnline;
             if (!online)
             {
                 return;
@@ -81,8 +81,23 @@ namespace MusicTime
             {
                 try
                 {
-                    auths = await getSpotifyUserAsync(online, app_jwt);
+                    auths = await getMusicTimeUserStatus(online);
 
+                    if (auths == null)
+                    {
+                        // try again if the count is not zero
+                        if (tryCountUntilFound > 0)
+                        {
+                            tryCountUntilFound -= 1;
+                            refetchSpotifyConnectStatusLazily(tryCountUntilFound);
+                        }
+                        
+                    }
+                    else if(auths.LoggedIn==true)  
+                    {
+                        MusicTimeCoPackage.UpdateMusicStatusBar(true);
+                    }
+                    
                 }
                 catch (Exception e)
                 {
@@ -90,42 +105,15 @@ namespace MusicTime
 
                 }
                 
-                if (auths == null)
-                {
-                    // try again if the count is not zero
-                    if (tryCountUntilFound > 0)
-                    {
-                        tryCountUntilFound -= 1;
-                        refetchSpotifyConnectStatusLazily(tryCountUntilFound);
-                    }
-                    else
-                    {
-                        MusicTimeCoPackage.GetSpotifyUserStatus(null);
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        MusicManager musicManager = MusicManager.GetInstance;
-
-                        await musicManager.UpdateSpotifyAccessInfoAsync(auths, spotifyTokens);
-                    }
-                    catch (Exception ex)
-                    {
-
-
-                    }
-
-
-                }
+               
             }
 
         }
 
-        private static async Task GetSpotifyTokenAsync(string app_jwt)
+        public static async Task<SpotifyTokens> GetSpotifyTokenAsync()
         {
-            spotifyTokens = new SpotifyTokens();
+            string app_jwt = SoftwareUserSession.GetJwt();
+            spotifyTokens  = new SpotifyTokens();
             string responseBody = "";
             String endpoint = "/auth/spotify/clientInfo";
             HttpResponseMessage response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, endpoint, app_jwt, app_jwt);
@@ -137,46 +125,70 @@ namespace MusicTime
                     spotifyTokens = JsonConvert.DeserializeObject<SpotifyTokens>(responseBody);
                 }
             }
+            return spotifyTokens;
         }
 
-        private static async Task<Auths> getSpotifyUserAsync(bool isOnline, string app_jwt)
+        public static async Task<Auths> getMusicTimeUserStatus(bool isOnlinet) 
         {
-            Auths auths = null;
-            SpotifyParam spotifyParam = new SpotifyParam();
-            string responseBody = null;
-            String endpoint = "/auth/spotify/user";
-            HttpResponseMessage response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, endpoint, app_jwt, app_jwt);
-            if (SoftwareHttpManager.IsOk(response))
+          
+            string app_jwt                  = SoftwareUserSession.GetJwt();
+            string spotify_refresh_token    = (string)SoftwareCoUtil.getItem("spotify_refresh_token");
+            string responseBody             = null;
+            Auths auths                     = null;
+            SpotifyParam spotifyParam       = new SpotifyParam();
+
+            HttpResponseMessage response    = null;
+
+            if (isOnlinet && (!string.IsNullOrEmpty(app_jwt) || string.IsNullOrEmpty(spotify_refresh_token)))
             {
-                responseBody = await response.Content.ReadAsStringAsync();
-                if (!String.IsNullOrEmpty(responseBody))
+                string api = "/users/plugin/state";
+                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, api, spotify_refresh_token, app_jwt);
+                if (SoftwareHttpManager.IsOk(response))
                 {
-                    spotifyParam = JsonConvert.DeserializeObject<SpotifyParam>(responseBody);
-                }
-            }
-            if (spotifyParam.Auths != null)
-            {
-                auths = new Auths();
-                for (int i = 0; i < spotifyParam.Auths.Length; i++)
-                {
-                    if (spotifyParam.Auths[i].Type == "spotify")
+                    responseBody = await response.Content.ReadAsStringAsync();
+                    spotifyParam    = JsonConvert.DeserializeObject<SpotifyParam>(responseBody);
+
+                    if(spotifyParam.State =="OK")
                     {
-                        auths = spotifyParam.Auths[i];
+                        string email = (string)SoftwareCoUtil.getItem("name");
+                        if(email!=spotifyParam.Email)
+                        {
+                            SoftwareCoUtil.setItem("name", spotifyParam.Email);
+                        }
+                        if (spotifyParam.Jwt != app_jwt)
+                        {
+                            // update it
+                            SoftwareCoUtil.setItem("jwt", spotifyParam.Jwt);
+                        }
 
-                        SoftwareCoUtil.setItem("name", spotifyParam.Email);
+                        if (spotifyParam.User.Auths != null)
+                        {
+                            auths = new Auths();
 
-                        SoftwareCoUtil.setItem("jwt", spotifyParam.PluginJwt);
+                            for (int i = 0; i < spotifyParam.User.Auths.Length; i++)
+                            {
+                                if (spotifyParam.User.Auths[i].Type == "spotify")
+                                {
 
-                        SoftwareCoUtil.setItem("checkstatus", null);
+                                    auths = spotifyParam.User.Auths[i];
 
+                                    auths.LoggedIn = true;
+
+                                    await MusicManager.GetInstance.UpdateSpotifyAccessInfoAsync(auths, spotifyTokens);
+
+                                }
+                            }
+
+                        }
                     }
-                }
 
+                }
             }
+            
+            
 
             return auths;
-
-
+            
         }
 
         public static void launchWebUrl(string url)
@@ -187,19 +199,12 @@ namespace MusicTime
         {
             HttpResponseMessage response = null;
             string app_jwt = "";
-            bool online = await SoftwareUserSession.IsOnlineAsync();
+            bool online = MusicTimeCoPackage.isOnline;
             if (!online)
             {
                 return;
             }
-
-            bool isConnected = MusicManager.hasSpotifyPlaybackAccess();
-            if (!isConnected)
-            {
-
-            }
-            else
-            {
+            
                 app_jwt     = SoftwareUserSession.GetJwt();
                 string api  = "/auth/spotify/disconnect";
                
@@ -207,14 +212,9 @@ namespace MusicTime
                 if (SoftwareHttpManager.IsOk(response))
                 {
                     MusicManager.cleaclearSpotifyAccessInfo(spotifyTokens);
-                    bool isConnect = MusicManager.hasSpotifyPlaybackAccess();
-
-                    MusicTimeCoPackage.GetSpotifyUserStatus(isConnect);
+                    MusicTimeCoPackage.UpdateUserStatusAsync(null);
                 }
-            }
-
-
-
+            
         }
 
     }

@@ -20,10 +20,6 @@ namespace MusicTime
             {
                 if (SoftwareUserSession.GetSpotifyUserStatus())
                 {
-
-
-                    
-                    
                     if(await MusicManager.isTrackPlayingAsync())
                     {
                         await MusicManager.SpotifyWebPauseAsync();
@@ -101,7 +97,7 @@ namespace MusicTime
                         await MusicManager.getDevicesAsync();
                         
                     }
-                    
+
                      await MusicManager.SpotifyWebPlayNextAsync();
                    
                 }

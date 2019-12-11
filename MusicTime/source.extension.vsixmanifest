@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="MusicTime.3826ff94-c43f-4a92-8e02-f5f579924b94" Version="0.1.1" Language="en-US" Publisher="Software.com" />
+        <Identity Id="MusicTime.3826ff94-c43f-4a92-8e02-f5f579924b94" Version="0.1.2" Language="en-US" Publisher="Software.com" />
         <DisplayName>MusicTime</DisplayName>
         <Description xml:space="preserve">Music Time </Description>
         <GettingStartedGuide>https://github.com/swdotcom/swdc-visual-studio-music-time</GettingStartedGuide>

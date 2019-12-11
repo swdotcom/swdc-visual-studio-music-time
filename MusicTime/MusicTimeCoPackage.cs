@@ -41,6 +41,8 @@ namespace MusicTime
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(MusicTimeCoPackage.PackageGuidString)]
+    [ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideAutoLoad(UIContextGuids.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     public sealed class MusicTimeCoPackage : AsyncPackage
     {
@@ -53,6 +55,7 @@ namespace MusicTime
         private System.Threading.Timer timer;
         private System.Threading.Timer DeviceTimer;
         private System.Threading.Timer TrackStatusBar;
+        private System.Threading.Timer OnlineCheckerTimer;
 
         private static int ONE_SECOND = 1000;
         private static int THIRTY_SECONDS = 1000 * 30;
@@ -64,7 +67,8 @@ namespace MusicTime
         private static int ZERO_SECOND = 1;
         private bool connected = false;
 
-        public static UserStatus spotifyUser = new UserStatus();
+        public static bool isOnline = false;
+       // public static UserStatus spotifyUser = new UserStatus();
         private static MusicStatusBar _musicStatus ;
         private static TrackStatus trackStatus = new TrackStatus();
         /// <summary>
@@ -117,6 +121,7 @@ namespace MusicTime
         }
         private async Task InitializeListenersAsync()
         {
+            Logger.Debug("Initialization");
             await InitializeSoftwareStatusAsync();
            
             //Music Commands
@@ -135,15 +140,21 @@ namespace MusicTime
             await PlayPauseCommand.InitializeAsync(this);
             await OpenSpotifyCommand.InitializeAsync(this);
 
-            updateMusicStatusBar(connected);
+           
 
             var autoEvent = new AutoResetEvent(false);
 
-            timer    = new System.Threading.Timer(
-                     GetSpotifyUserStatus,
+            OnlineCheckerTimer = new System.Threading.Timer(
+                     OnlineCheckUpdate,
                      null,
-                     ZERO_SECOND,
-                    ONE_SECOND*10);
+                     ONE_MINUTE,
+                     ONE_MINUTE );
+
+            timer = new System.Threading.Timer(
+                     UpdateUserStatusAsync,
+                     null,
+                    ONE_MINUTE/2,
+                    ONE_MINUTE/3);
 
             DeviceTimer = new System.Threading.Timer(
                      GetDeviceIDLazilyAsync,
@@ -156,16 +167,57 @@ namespace MusicTime
                      null,
                      THIRTY_SECONDS,
                      ONE_SECOND*2);
+            
+              this.InitializeUserInfoAsync();
+
 
 
         }
 
-        public static void GetSpotifyUserStatus(object state)
+        private async void InitializeUserInfoAsync()
         {
-            spotifyUser.loggedIn = SoftwareUserSession.GetSpotifyUserStatus();     
-            UpdateEnableCommands(spotifyUser.loggedIn);
+           
+            bool jwtExists  = SoftwareCoUtil.jwtExists();
+            UpdateMusicStatusBar(false);
+            await SoftwareUserSession.isOnlineCheckAsync();
+          
+            bool online = MusicTimeCoPackage.isOnline;
+            if (!jwtExists || !online)
+            {
+                return;
+            }
+            else
+            {
+                SoftwareUserSession.UserStatus status = await SoftwareUserSession.GetSpotifyUserStatusTokenAsync(online);
+                UpdateMusicStatusBar(status.loggedIn);
+            }
+        }
 
-           // UpdateEnablePlayercontrol(MusicManager.isDeviceOpened());
+        public static async void UpdateUserStatusAsync(object state)
+        {
+            try
+            {
+                SoftwareUserSession.UserStatus status = await SoftwareUserSession.GetSpotifyUserStatusTokenAsync(true);
+                UpdateEnableCommands(status.loggedIn);
+            }
+            catch (Exception e)
+            {
+
+
+            }
+
+        }
+        public static async void OnlineCheckUpdate(object state)
+        {
+            try
+            {
+               SoftwareUserSession.isOnlineCheckAsync();
+            }
+            catch (Exception e)
+            {
+                
+            }
+
         }
 
         public static async void GetDeviceIDLazilyAsync(object state)
@@ -177,14 +229,14 @@ namespace MusicTime
             }
         }
 
-        private static void updateMusicStatusBar(bool Connected)
+        public static void UpdateMusicStatusBar(bool Connected)
         {
            
             _musicStatus.SetStatus(Connected);
             
         }
 
-        private static void UpdateEnableCommands(bool status)
+        public static void UpdateEnableCommands(bool status)
         {
             
                 SoftwareConnectSpotifyCommand.UpdateEnabledState(status);
@@ -205,14 +257,23 @@ namespace MusicTime
 
         public static async void UpdateCurrentTrackOnStatusAsync(object state)
         {
+            Logger.Debug("UpdateCurrentTrack");
             string currentTrack = "";
             string Pause        = "⏸️";
             string Play         = "▶️";
-            
-            if (SoftwareUserSession.GetSpotifyUserStatus() && MusicManager.isDeviceOpened())
-           {
-                trackStatus  = await MusicManager.SpotifyCurrentTrackAsync();
+            string spotify_accessToken = "";
 
+
+            spotify_accessToken = (string)SoftwareCoUtil.getItem("spotify_access_token");
+           
+            if (String.IsNullOrEmpty(spotify_accessToken))
+            {
+                UpdateMusicStatusBar(false);
+                
+            }
+            else if(SoftwareUserSession.GetSpotifyUserStatus() && MusicManager.isDeviceOpened())
+            {
+                trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
                 if (trackStatus.is_playing == true && trackStatus.item != null)
                 {
                     currentTrack = trackStatus.item.name;
@@ -223,11 +284,16 @@ namespace MusicTime
                     currentTrack = trackStatus.item.name;
                     _musicStatus.SetTrackName(Play + " " + currentTrack);
                 }
-           }
+            }
+            else if(!SoftwareUserSession.GetSpotifyUserStatus())
+            {
+                UpdateMusicStatusBar(false);
+            }
             else
             {
-                updateMusicStatusBar(SoftwareUserSession.GetSpotifyUserStatus());
+                UpdateMusicStatusBar(true);
             }
+            
         }
 
         public static class MusicTimeAssembly
