@@ -251,7 +251,7 @@ namespace MusicTime
                 try
                 {
                     SpotifyTokens  spotifyTokens = await SoftwareSpotifyManager.GetSpotifyTokenAsync();
-                     auths = await SoftwareSpotifyManager.getMusicTimeUserStatus(online);
+                    auths                        = await SoftwareSpotifyManager.getMusicTimeUserStatus(online);
 
                     if (auths.LoggedIn == true)
                     {
@@ -296,8 +296,8 @@ namespace MusicTime
 
             bool loggedIn = await IsLoggedOn(online);
 
-            UserStatus currentUserStatus = new UserStatus();
-            currentUserStatus.loggedIn = loggedIn;
+            UserStatus currentUserStatus    = new UserStatus();
+            currentUserStatus.loggedIn      = loggedIn;
 
             if (online && loggedInCacheState != loggedIn)
             {

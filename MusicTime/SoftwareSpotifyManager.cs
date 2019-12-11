@@ -44,7 +44,7 @@ namespace MusicTime
             
 
 
-            String qryStr = "/auth/spotify?token=" + app_jwt + "&mac="+SoftwareCoUtil.isMac();
+            String qryStr = "/auth/spotify?token=" + app_jwt + "&mac="+SoftwareCoUtil.isMac().ToString().ToLower();
 
             launchWebUrl(Constants.api_endpoint + qryStr);
             try
@@ -95,7 +95,9 @@ namespace MusicTime
                     }
                     else if(auths.LoggedIn==true)  
                     {
+                        Logger.Debug("AuthsLogeedIn");
                         MusicTimeCoPackage.UpdateMusicStatusBar(true);
+                        
                     }
                     
                 }

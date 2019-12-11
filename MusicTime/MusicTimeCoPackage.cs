@@ -153,19 +153,19 @@ namespace MusicTime
             timer = new System.Threading.Timer(
                      UpdateUserStatusAsync,
                      null,
-                    ONE_MINUTE/2,
-                    ONE_MINUTE/3);
+                    ONE_MINUTE/6,
+                    ONE_MINUTE/6);
 
             DeviceTimer = new System.Threading.Timer(
                      GetDeviceIDLazilyAsync,
                      null,
-                     THIRTY_SECONDS,
+                     THIRTY_SECONDS/3,
                      ONE_SECOND*10);
 
             TrackStatusBar = new System.Threading.Timer(
                      UpdateCurrentTrackOnStatusAsync,
                      null,
-                     THIRTY_SECONDS,
+                     ZERO_SECOND,
                      ONE_SECOND*2);
             
               this.InitializeUserInfoAsync();
@@ -257,7 +257,6 @@ namespace MusicTime
 
         public static async void UpdateCurrentTrackOnStatusAsync(object state)
         {
-            Logger.Debug("UpdateCurrentTrack");
             string currentTrack = "";
             string Pause        = "⏸️";
             string Play         = "▶️";
@@ -268,31 +267,38 @@ namespace MusicTime
            
             if (String.IsNullOrEmpty(spotify_accessToken))
             {
+               
                 UpdateMusicStatusBar(false);
                 
             }
-            else if(SoftwareUserSession.GetSpotifyUserStatus() && MusicManager.isDeviceOpened())
+            else if(SoftwareUserSession.GetSpotifyUserStatus())
             {
-                trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
-                if (trackStatus.is_playing == true && trackStatus.item != null)
+                if (MusicManager.isDeviceOpened())
                 {
-                    currentTrack = trackStatus.item.name;
-                    _musicStatus.SetTrackName(Pause + " " + currentTrack);
+                    trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
+                    if (trackStatus.is_playing == true && trackStatus.item != null)
+                    {
+                        currentTrack = trackStatus.item.name;
+                        _musicStatus.SetTrackName(Pause + " " + currentTrack);
+                    }
+                    if (trackStatus.is_playing == false && trackStatus.item != null)
+                    {
+                        currentTrack = trackStatus.item.name;
+                        _musicStatus.SetTrackName(Play + " " + currentTrack);
+                    }
                 }
-                if(trackStatus.is_playing==false&& trackStatus.item!=null)
+                else
                 {
-                    currentTrack = trackStatus.item.name;
-                    _musicStatus.SetTrackName(Play + " " + currentTrack);
+                  
+                    UpdateMusicStatusBar(true);
                 }
             }
-            else if(!SoftwareUserSession.GetSpotifyUserStatus())
+            else 
             {
+               
                 UpdateMusicStatusBar(false);
             }
-            else
-            {
-                UpdateMusicStatusBar(true);
-            }
+           
             
         }
 

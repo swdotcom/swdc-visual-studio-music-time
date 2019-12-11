@@ -53,11 +53,10 @@ namespace MusicTime
 
                     UserProfile userProfile             = UserProfile.getInstance;
                     spotifyUser                         = await userProfile.GetUserProfileAsync();
-
                     bool isConnected                    = MusicManager.hasSpotifyPlaybackAccess();
                     await getDevicesAsync();
                    
-                    SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
+                   // SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
                     
                 }
                 else
