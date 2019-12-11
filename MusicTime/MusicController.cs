@@ -20,17 +20,6 @@ namespace MusicTime
             {
                 if (SoftwareUserSession.GetSpotifyUserStatus())
                 {
-
-
-                    if (!MusicManager.isDeviceOpened())
-                    {
-                        await LaunchPlayerAsync();
-
-                        await MusicManager.getDevicesAsync();
-                      
-                        
-                    }
-                    
                     if(await MusicManager.isTrackPlayingAsync())
                     {
                         await MusicManager.SpotifyWebPauseAsync();
@@ -43,7 +32,15 @@ namespace MusicTime
                         MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
                     }
 
-                   
+                    if (!MusicManager.isDeviceOpened())
+                    {
+                        await LaunchPlayerAsync();
+
+                        await MusicManager.getDevicesAsync();
+
+
+                    }
+
 
                 }
             }
@@ -100,7 +97,7 @@ namespace MusicTime
                         await MusicManager.getDevicesAsync();
                         
                     }
-                    
+
                      await MusicManager.SpotifyWebPlayNextAsync();
                    
                 }

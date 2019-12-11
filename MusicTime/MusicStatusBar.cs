@@ -40,7 +40,7 @@ namespace MusicTime
         }
         public void SetTrackName(string currentTrack)
         {
-
+           
             statusbar.SetText(currentTrack);
         }
 

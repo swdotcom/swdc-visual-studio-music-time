@@ -195,7 +195,7 @@
       <IDSymbol value="4133" name="cmdidSoftwareDisconnectSlackCommand" />
       <IDSymbol value="4134" name="cmdidSoftwareSubmitOnGithubCommand" />
       <IDSymbol value="4135" name="cmdidSoftwareSubmitFeedbackCommand" />
-       <IDSymbol name="Toolbar" value="0x1000" />
+      <IDSymbol name="Toolbar" value="0x1000" />
       <IDSymbol name="ToolbarGroup" value="0x1050" />
       <IDSymbol value="4136" name="cmdidPreviousTrackCommand" />
       <IDSymbol value="4137" name="cmdidPlayPauseCommand" />
