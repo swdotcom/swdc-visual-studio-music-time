@@ -1,0 +1,66 @@
+﻿<UserControl x:Class="MusicTime.SpotifyPlayListControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:vsshell="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
+             Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
+             Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="300"
+             Name="MyToolWindow">
+
+    <StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="9*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" >
+                <StackPanel>
+                    <Image Source="Resources\refresh_dark.png"></Image>
+                </StackPanel>
+            </Button>
+        </Grid>
+       
+            <StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                <Image  x:Name="ConnectImage" Width="15" Height="15"></Image>
+                <Label x:Name="ConnectLabel" Foreground="DarkCyan" MouseDoubleClick="ConnectStatusClick" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                <Image x:Name="DeviceImage"  Width="15" Height="15"></Image>
+                <Label x:Name="DeviceLabel" Foreground="DarkCyan" ></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                <Image x:Name="AnalyticImage" Width="15" Height="15"></Image>
+                <Label x:Name="AnalyticLabel" Foreground="DarkCyan" ></Label>
+            </StackPanel>
+            <ItemsControl>
+                <Separator x:Name="Seperator1" Visibility="Hidden" Margin="0,5,0,5"></Separator>
+            </ItemsControl>
+            <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
+                <Image x:Name="GeneratePlaylistImage" Width="15" Height="15"></Image>
+                <Label x:Name="GeneratePlaylistLabel" Foreground="DarkCyan" MouseDoubleClick="GenerateAIPLaylist" ></Label>
+            </StackPanel>
+            
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel x:Name="PlaylistTreeview">
+
+                    </StackPanel>
+                </ScrollViewer>
+            
+            <ItemsControl>
+                <Separator x:Name="Seperator2" Visibility="Hidden" Margin="0,5,0,5"></Separator>
+            </ItemsControl>
+               
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    
+                </ScrollViewer>
+           
+        </StackPanel>
+       
+    </StackPanel>
+    
+</UserControl>

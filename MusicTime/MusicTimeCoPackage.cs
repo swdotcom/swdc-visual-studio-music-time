@@ -44,6 +44,7 @@ namespace MusicTime
     [ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
     [ProvideAutoLoad(UIContextGuids.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
+    [ProvideToolWindow(typeof(SpotifyPlayList))]
     public sealed class MusicTimeCoPackage : AsyncPackage
     {
         /// <summary>
@@ -100,6 +101,7 @@ namespace MusicTime
             _dteEvents = ObjDte.Events.DTEEvents;
             _dteEvents.OnStartupComplete += OnOnStartupComplete;
             InitializeListenersAsync();
+            await SpotifyPlayListCommand.InitializeAsync(this);
          
            
          

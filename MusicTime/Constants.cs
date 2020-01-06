@@ -23,6 +23,7 @@ namespace MusicTime
         internal const string MusicTimeExtension = "Music Time";
         internal const string VSGithubLink = "https://github.com/swdotcom/swdc-visualstudio";
         internal const string SendFeedback = "mailto:cody@software.com";
+        internal const string SOFTWARE_TOP_40_ID = "6jCkTED0V5NEuM8sKbGG1Z";
         internal static string EditorVersion
         {
             get

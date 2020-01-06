@@ -10,11 +10,11 @@ namespace MusicTime
 {
     class MusicManager
     {
-        private static MusicManager instance    = null;
+        private static MusicManager instance = null;
 
-        public static SpotifyUser spotifyUser   = new SpotifyUser();
-        public static CodyConfig codyConfig     = CodyConfig.getInstance;
-        private static Device device            = Device.getInstance;
+        public static SpotifyUser spotifyUser = new SpotifyUser();
+        public static CodyConfig codyConfig = CodyConfig.getInstance;
+        private static Device device = Device.getInstance;
         private static TrackStatus trackStatus = new TrackStatus();
         private MusicManager()
         {
@@ -31,33 +31,37 @@ namespace MusicTime
                 return instance;
             }
         }
+        public static SpotifyUser _spotifyUser { get; set; }
+        public static List<PlaylistItem> _spotifyPlaylists { get; set; }
+        public static List<PlaylistItem> _savedPlaylists { get; set; }
+        public static List<PlaylistItem> _musictimePlaylists { get; set; }
 
         public async Task UpdateSpotifyAccessInfoAsync(Auths auths, SpotifyTokens spotifyTokens)
         {
 
             try
             {
-               
+
                 if (auths != null)
                 {
-                    codyConfig.spotifyClientId          = spotifyTokens.clientId;
-                    codyConfig.spotifyClientSecret      = spotifyTokens.clientSecret;
-                    codyConfig.spotifyAccessToken       = auths.AccessToken;
-                    codyConfig.spotifyRefreshToken      = auths.RefreshToken;
-                    codyConfig.enableSpotifyApi         = SoftwareCoUtil.isMac() ? true : false;
+                    codyConfig.spotifyClientId = spotifyTokens.clientId;
+                    codyConfig.spotifyClientSecret = spotifyTokens.clientSecret;
+                    codyConfig.spotifyAccessToken = auths.AccessToken;
+                    codyConfig.spotifyRefreshToken = auths.RefreshToken;
+                    codyConfig.enableSpotifyApi = SoftwareCoUtil.isMac() ? true : false;
 
                     codyConfig.setConfig(codyConfig);
 
                     SoftwareCoUtil.setItem("spotify_access_token", auths.AccessToken);
                     SoftwareCoUtil.setItem("spotify_refresh_token", auths.RefreshToken);
 
-                    UserProfile userProfile             = UserProfile.getInstance;
-                    spotifyUser                         = await userProfile.GetUserProfileAsync();
-                    bool isConnected                    = MusicManager.hasSpotifyPlaybackAccess();
+                    UserProfile userProfile = UserProfile.getInstance;
+                    _spotifyUser = await userProfile.GetUserProfileAsync();
+                    bool isConnected = MusicManager.hasSpotifyPlaybackAccess();
                     await getDevicesAsync();
-                   
-                   // SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
-                    
+
+                    // SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
+
                 }
                 else
                 {
@@ -68,7 +72,7 @@ namespace MusicTime
             catch (Exception ex)
             {
 
-                
+
             }
 
 
@@ -76,9 +80,9 @@ namespace MusicTime
 
         internal static async Task<bool> isTrackPlayingAsync()
         {
-            bool isTrackPlaying     = false;
-            trackStatus             = await SpotifyCurrentTrackAsync();
-            if(trackStatus.is_playing == true)
+            bool isTrackPlaying = false;
+            trackStatus = await SpotifyCurrentTrackAsync();
+            if (trackStatus.is_playing == true)
             {
                 isTrackPlaying = true;
             }
@@ -94,12 +98,21 @@ namespace MusicTime
 
         public static async Task getDevicesAsync()
         {
-           bool isConnected = MusicManager.hasSpotifyPlaybackAccess();
-            if(isConnected)
+            bool isConnected = MusicManager.hasSpotifyPlaybackAccess();
+            if (isConnected)
             {
                 device = await MusicClient.GetDeviceAsync();
             }
-            
+
+        }
+        public static string getDeviceName()
+        {
+            string devicename = "";
+            if (device.devices != null)
+            {
+                devicename = device.devices[0].name;
+            }
+            return devicename;
         }
         public static bool isDeviceOpened()
         {
@@ -114,7 +127,7 @@ namespace MusicTime
 
         public static string DeviceID()
         {
-            string currentDeviceId  = null;
+            string currentDeviceId = null;
 
             if (device.devices.Count > 0)
             {
@@ -122,9 +135,6 @@ namespace MusicTime
             }
             return currentDeviceId;
         }
-
-
-       
 
         public static void cleaclearSpotifyAccessInfo(SpotifyTokens spotifyTokens)
         {
@@ -137,16 +147,16 @@ namespace MusicTime
             codyConfig.setConfig(codyConfig);
             SoftwareCoUtil.setItem("spotify_access_token", null);
             SoftwareCoUtil.setItem("spotify_refresh_token", null);
-            spotifyUser = null;
+            _spotifyUser = null;
             Logger.Debug(spotifyTokens.clientId);
         }
 
-       public static bool hasSpotifyPlaybackAccess()
+        public static bool hasSpotifyPlaybackAccess()
         {
-      
-            if (spotifyUser!= null && spotifyUser.Product == "premium")
+
+            if (_spotifyUser != null && _spotifyUser.Product == "premium")
             {
-                
+
                 return true;
             }
             return false;
@@ -154,43 +164,43 @@ namespace MusicTime
 
         public static async Task SpotifyWebPlayAsync()
         {
-            HttpResponseMessage response      = null;
-            
+            HttpResponseMessage response = null;
+
             if (!string.IsNullOrEmpty(MusicManager.DeviceID()))
             {
-               string api = "/v1/me/player/play?" + DeviceID();
+                string api = "/v1/me/player/play?" + DeviceID();
 
-                response    = await MusicClient.SpotifyApiPutAsync(api);
+                response = await MusicClient.SpotifyApiPutAsync(api,null);
                 if (response == null || !MusicClient.IsOk(response))
                 {
                     // refresh the tokens
                     await MusicClient.refreshSpotifyTokenAsync();
                     // Try again
-                    response = await MusicClient.SpotifyApiPutAsync(api);
+                    response = await MusicClient.SpotifyApiPutAsync(api,null);
                 }
 
 
             }
-            
-            
+
+
         }
 
         public static async Task SpotifyWebPauseAsync()
         {
             HttpResponseMessage response = null;
-          
+
 
             if (!string.IsNullOrEmpty(MusicManager.DeviceID()))
             {
                 string api = "/v1/me/player/pause?" + DeviceID();
 
-                response = await MusicClient.SpotifyApiPutAsync(api);
+                response = await MusicClient.SpotifyApiPutAsync(api,null);
                 if (response == null || !MusicClient.IsOk(response))
                 {
                     // refresh the tokens
                     await MusicClient.refreshSpotifyTokenAsync();
                     // Try again
-                    response = await MusicClient.SpotifyApiPutAsync(api);
+                    response = await MusicClient.SpotifyApiPutAsync(api,null);
                 }
 
             }
@@ -201,19 +211,19 @@ namespace MusicTime
         public static async Task SpotifyWebPlayNextAsync()
         {
             HttpResponseMessage response = null;
-           
+
 
             if (!string.IsNullOrEmpty(MusicManager.DeviceID()))
             {
                 string api = "/v1/me/player/next?" + DeviceID();
 
-                response = await MusicClient.SpotifyApiPostAsync(api);
+                response = await MusicClient.SpotifyApiPostAsync(api, null);
                 if (response == null || !response.IsSuccessStatusCode)
                 {
                     // refresh the tokens
                     await MusicClient.refreshSpotifyTokenAsync();
                     // Try again
-                    response = await MusicClient.SpotifyApiPostAsync(api);
+                    response = await MusicClient.SpotifyApiPostAsync(api, null);
                 }
 
             }
@@ -223,25 +233,46 @@ namespace MusicTime
         public static async Task SpotifyWebPlayPreviousAsync()
         {
             HttpResponseMessage response = null;
-            
+
             if (!string.IsNullOrEmpty(MusicManager.DeviceID()))
             {
                 string api = "/v1/me/player/previous?" + DeviceID();
 
-                response = await MusicClient.SpotifyApiPostAsync(api);
+                response = await MusicClient.SpotifyApiPostAsync(api, null);
                 if (response == null || !response.IsSuccessStatusCode)
                 {
                     // refresh the tokens
                     await MusicClient.refreshSpotifyTokenAsync();
                     // Try again
-                    response = await MusicClient.SpotifyApiPostAsync(api);
+                    response = await MusicClient.SpotifyApiPostAsync(api, null);
                 }
 
             }
 
-
         }
 
+        public static async Task SpotifyPlayPlaylist(string PlaylistId)
+        {
+            
+            HttpResponseMessage response = null;
+            
+            if (!string.IsNullOrEmpty(MusicManager.DeviceID()))
+            {
+                String api = "/v1/me/player/play?"+ DeviceID();
+
+                response = await MusicClient.SpotifyApiPutAsync(api,null);
+                if (response == null || !MusicClient.IsOk(response))
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiPutAsync(api,null);
+                }
+                
+            }
+           
+    
+        }
 
         public static async Task<TrackStatus> SpotifyCurrentTrackAsync()
         {
