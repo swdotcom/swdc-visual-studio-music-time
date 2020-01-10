@@ -139,7 +139,7 @@ namespace MusicTime
         public object Hostname { get; set; }
 
         [JsonProperty("last_codetime_metrics_timestamp")]
-        public long LastCodetimeMetricsTimestamp { get; set; }
+        public object LastCodetimeMetricsTimestamp { get; set; }
 
         [JsonProperty("last_search_file_timestamp")]
         public long LastSearchFileTimestamp { get; set; }
@@ -353,12 +353,11 @@ namespace MusicTime
             {
                 if (reader.TokenType == JsonToken.Null) return null;
                 var value = serializer.Deserialize<string>(reader);
-                bool b;
-                if (Boolean.TryParse(value, out b))
-                {
-                    return b;
-                }
-                throw new Exception("Cannot unmarshal type bool");
+            if (Boolean.TryParse(value, out bool b))
+            {
+                return b;
+            }
+            throw new Exception("Cannot unmarshal type bool");
             }
 
             public override void WriteJson(JsonWriter writer, object untypedValue, JsonSerializer serializer)

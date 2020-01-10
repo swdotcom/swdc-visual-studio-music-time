@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,6 +32,7 @@ namespace MusicTime
         public string spotifyClientSecret { get; set; }
         public string spotifyClientId { get; set; }
         public bool enableSpotifyApi { get; set; }
+        public string spoftifyUserId { get; set; }
 
         public void setConfig(CodyConfig codyConfig)
         {
@@ -151,8 +153,16 @@ namespace MusicTime
     {
         private string spotify { get; set; }
     }
-
-    public class Item
+    public class Owner
+    {
+        public string display_name { get; set; }
+        public ExternalUrls2 external_urls { get; set; }
+        public string href { get; set; }
+        public string id { get; set; }
+        public string type { get; set; }
+        public string uri { get; set; }
+    }
+    public class Track
     {
         public Album album { get; set; }
         public List<Artist2> artists { get; set; }
@@ -182,16 +192,50 @@ namespace MusicTime
     {
         public Disallows disallows { get; set; }
     }
-
+    
+    public class Tracks
+    {
+        public string href { get; set; }
+        public int total { get; set; }
+    }
+    public class PlaylistItem
+    {
+        public bool collaborative { get; set; }
+        public string description { get; set; }
+        public ExternalUrls external_urls { get; set; }
+        public string href { get; set; }
+        public string id { get; set; }
+        public List<object> images { get; set; }
+        public string name { get; set; }
+        public Owner owner { get; set; }
+        public object primary_color { get; set; }
+        public bool @public { get; set; }
+        public string snapshot_id { get; set; }
+        public Tracks tracks { get; set; }
+        public string type { get; set; }
+        public string uri { get; set; }
+        public DateTime added_at { get; set; }
+        public Track track { get; set; }
+    }
+    public class SpotifySongs
+    {
+        public List<PlaylistItem> items { get; set; }
+        public int total { get; set; }
+        public int limit { get; set; }
+        public int offset { get; set; }
+        public object previous { get; set; }
+        public string href { get; set; }
+        public object next { get; set; }
+    }
     public class TrackStatus
     {
         public long timestamp { get; set; }
         public Context context { get; set; }
         public int progress_ms { get; set; }
-        public Item item { get; set; }
+        public Track item { get; set; }
         public string currently_playing_type { get; set; }
         public Actions actions { get; set; }
         public bool is_playing { get; set; }
     }
-
+    
 }

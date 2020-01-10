@@ -13,10 +13,10 @@ namespace MusicTime
 
     class MusicClient
     {
-      
+
         private static MusicClient instance = null;
         public static CodyConfig codyConfig = CodyConfig.getInstance;
-        public static Device deviceList = Device.getInstance;
+        public static Device deviceList     = Device.getInstance;
         private MusicClient()
         {
         }
@@ -32,22 +32,36 @@ namespace MusicTime
                 return instance;
             }
         }
+        public static bool IsOk(HttpResponseMessage response)
+        {
+            return (response != null && response.StatusCode == HttpStatusCode.OK);
+        }
+
+        public static string QueryString(string api ,List<object> qsOptions)
+        {
+            foreach (var item in qsOptions)
+            {
+                api += "?" + item;
+            }
+            return api;
+
+        }
 
         public static async Task<HttpResponseMessage> SpotifyApiGetAsync(string api)
         {
-            HttpResponseMessage response    = null;
-            HttpClient client               = new HttpClient();
+            HttpResponseMessage response = null;
+            HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", codyConfig.spotifyAccessToken);
 
             try
             {
                 string endpoint = Constants.api_Spotifyendpoint + "" + api;
-                response        = await client.GetAsync(endpoint);
+                response = await client.GetAsync(endpoint);
                 if (MusicClient.IsOk(response))
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
-                    
+
                 }
             }
             catch (Exception ex)
@@ -58,23 +72,24 @@ namespace MusicTime
             return response;
         }
 
-       
-        public static async Task<HttpResponseMessage> SpotifyApiPutAsync(string api)
+        public static async Task<HttpResponseMessage> SpotifyApiPutAsync(string api, string payload)
         {
-            HttpResponseMessage response    = null;
-            HttpClient client               = new HttpClient();
-            HttpContent contentPost         = null;
-            string Payload                  = "";
+            HttpResponseMessage response = null;
+            HttpClient client = new HttpClient();
+            HttpContent contentPost = null;
+           // string Payload = "";
             try
             {
-             client.DefaultRequestHeaders.Authorization =
-             new AuthenticationHeaderValue("Bearer", codyConfig.spotifyAccessToken);
+                if(payload==null)
+                { payload = ""; }
+                client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", codyConfig.spotifyAccessToken);
 
-             
-                contentPost                  = new StringContent(Payload, Encoding.UTF8, "application/json");
-                string endpoint              = Constants.api_Spotifyendpoint + "" + api;
-                response                     = await client.PutAsync(endpoint, contentPost);
-                
+
+                contentPost = new StringContent(payload, Encoding.UTF8, "application/json");
+                string endpoint = Constants.api_Spotifyendpoint + "" + api;
+                response = await client.PutAsync(endpoint, contentPost);
+
 
             }
             catch (Exception ex)
@@ -86,19 +101,23 @@ namespace MusicTime
 
         }
 
-        public static async Task<HttpResponseMessage> SpotifyApiPostAsync(string api)
+        public static async Task<HttpResponseMessage> SpotifyApiPostAsync(string api, string payload)
         {
             HttpResponseMessage response    = null;
             HttpClient client               = new HttpClient();
             HttpContent contentPost         = null;
-            string Payload                  = "";
+            
             try
             {
+                if(payload==null)
+                {
+                    payload = "";
+                }
                 client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", codyConfig.spotifyAccessToken);
 
 
-                contentPost = new StringContent(Payload, Encoding.UTF8, "application/json");
+                contentPost = new StringContent(payload, Encoding.UTF8, "application/json");
                 string endpoint = Constants.api_Spotifyendpoint + "" + api;
                 response = await client.PostAsync(endpoint, contentPost);
 
@@ -113,10 +132,6 @@ namespace MusicTime
 
         }
 
-        public static bool IsOk(HttpResponseMessage response)
-        {
-            return (response != null && response.StatusCode == HttpStatusCode.OK);
-        }
         public static async Task refreshSpotifyTokenAsync()
         {
             try
@@ -160,7 +175,7 @@ namespace MusicTime
 
         public static async Task<Device> GetDeviceAsync()
         {
-           
+
 
             HttpResponseMessage response = null;
             const string api = "/v1/me/player/devices";
@@ -181,5 +196,8 @@ namespace MusicTime
             }
             return deviceList;
         }
+
+        
+
     }
 }

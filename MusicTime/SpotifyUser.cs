@@ -79,7 +79,7 @@ namespace MusicTime
     public class UserProfile
     {
         private static UserProfile instance = null;
-
+        public static CodyConfig codyConfig = CodyConfig.getInstance;
         private UserProfile()
         {
         }
@@ -118,6 +118,7 @@ namespace MusicTime
                 {
                     string responseBody     = await response.Content.ReadAsStringAsync();
                     spotifyUser             = JsonConvert.DeserializeObject<SpotifyUser>(responseBody);
+                    codyConfig.spoftifyUserId = spotifyUser.Id;
                 }
 
 
@@ -130,7 +131,7 @@ namespace MusicTime
 
             return spotifyUser;
         }
-
+        
     }
     public class SpotifyAccessTokens
     {

@@ -81,6 +81,7 @@ namespace MusicTime
             string sessionFile = getSoftwareSessionFile();
             if (File.Exists(sessionFile))
             {
+
                 string content = File.ReadAllText(sessionFile);
                 if (content != null)
                 {
@@ -139,8 +140,9 @@ namespace MusicTime
 
         public static String getDashboardFile()
         {
-            return getSoftwareDataDir(true) + "\\CodeTime.txt";
+            return getSoftwareDataDir(true) + "\\MusicTime.html";
         }
+        
 
         public static String getSoftwareDataDir(bool autoCreate)
         {
