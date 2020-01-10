@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -57,7 +59,7 @@ namespace MusicTime
         private System.Threading.Timer DeviceTimer;
         private System.Threading.Timer TrackStatusBar;
         private System.Threading.Timer OnlineCheckerTimer;
-
+        private System.Threading.Timer PlaylistUpdate;
         private static int ONE_SECOND = 1000;
         private static int THIRTY_SECONDS = 1000 * 30;
         private static int ONE_MINUTE = THIRTY_SECONDS * 2;
@@ -155,8 +157,8 @@ namespace MusicTime
             timer = new System.Threading.Timer(
                      UpdateUserStatusAsync,
                      null,
-                    ONE_MINUTE/6,
-                    ONE_MINUTE/6);
+                    ONE_MINUTE / 6,
+                    ONE_MINUTE / 6);
 
             DeviceTimer = new System.Threading.Timer(
                      GetDeviceIDLazilyAsync,
@@ -169,12 +171,54 @@ namespace MusicTime
                      null,
                      ZERO_SECOND,
                      ONE_SECOND*2);
-            
-              this.InitializeUserInfoAsync();
+
+            //PlaylistUpdate = new System.Threading.Timer(
+            //         UpdatePlaylistCallBackAsync,
+            //         null,
+            //         ONE_MINUTE / 2,
+            //         ONE_MINUTE / 6);
+
+            this.InitializeUserInfoAsync();
 
 
 
         }
+
+        //private async void UpdatePlaylistCallBackAsync(object state)
+        //{
+        //   if(isOnline)
+        //    {
+        //        Playlist.Liked_Playlist = new List<Track>();
+        //        Playlist.Software_Playlists = new List<Track>();
+        //        Playlist.Liked_Playlist  = await Playlist.getSpotifyLikedSongsAsync();
+        //        Playlist.Software_Playlists=  await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
+        //      //await UpdateUsersPlaylistsAsync(); 
+        //    }
+
+        //}
+
+        //private async Task UpdateUsersPlaylistsAsync()
+        //{
+        //    try
+        //    {
+        //        List<Track> tracks = new List<Track>();
+        //        List<PlaylistItem> playlistItems = await Playlist.getPlaylistsAsync();
+        //        Playlist.Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
+        //        foreach (PlaylistItem playlists in playlistItems)
+        //        {
+        //            tracks = await Playlist.getPlaylistTracksAsync(playlists.id);
+        //            Playlist.Users_Playlist.Add(playlists, tracks);
+
+        //        }
+
+        //    }
+        //    catch (Exception e)
+        //    {
+
+
+        //    }
+
+        //}
 
         private async void InitializeUserInfoAsync()
         {
@@ -194,13 +238,14 @@ namespace MusicTime
                 UpdateMusicStatusBar(status.loggedIn);
             }
         }
-
+        
         public static async void UpdateUserStatusAsync(object state)
         {
             try
             {
                 SoftwareUserSession.UserStatus status = await SoftwareUserSession.GetSpotifyUserStatusTokenAsync(true);
                 UpdateEnableCommands(status.loggedIn);
+               
             }
             catch (Exception e)
             {
@@ -220,6 +265,13 @@ namespace MusicTime
                 
             }
 
+        }
+        public static async void LaunchCodeTimeDashboardAsync()
+        {
+            
+            string dashboardFile = SoftwareCoUtil.getDashboardFile();
+            if (File.Exists(dashboardFile))
+                ObjDte.ItemOperations.OpenFile(dashboardFile);
         }
 
         public static async void GetDeviceIDLazilyAsync(object state)

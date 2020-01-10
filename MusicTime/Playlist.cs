@@ -15,7 +15,6 @@ namespace MusicTime
         public static MusicClient musicClient   = MusicClient.getInstance;
         public static CodyConfig codyConfig     = CodyConfig.getInstance;
 
-       
 
         private Playlist()
         {
@@ -33,12 +32,15 @@ namespace MusicTime
             }
         }
 
-        public static List<PlaylistItem> _Playlists { get; set; }
+       // public static List<PlaylistItem> _Playlists { get; set; }
+        public static List<Track> Software_Playlists { get; set; }
+        public static List<Track> Liked_Playlist  { get; set; }
+        public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
 
         public static async Task<List<PlaylistItem>> getPlaylistsAsync()
         {
-           
-            if(codyConfig.spoftifyUserId!= null)
+            List<PlaylistItem> _Playlists = new List<PlaylistItem>();
+            if (codyConfig.spoftifyUserId!= null)
             {
                _Playlists = await getPlaylistsForUserAsync(codyConfig.spoftifyUserId,50,0);     
             }
@@ -53,7 +55,7 @@ namespace MusicTime
             string api                      = "/v1/users/"+ spotifyUserid +"/playlists";
 
             SpotifySongs PlaylistItems      = new SpotifySongs();
-            _Playlists = new List<PlaylistItem>();
+            List<PlaylistItem>  _Playlists = new List<PlaylistItem>();
 
 
             try
@@ -95,7 +97,7 @@ namespace MusicTime
             List<PlaylistItem> playlistItems    = null;
             playlistItems                       = await getPlaylistsAsync();
 
-            foreach (PlaylistItem item in _Playlists)
+            foreach (PlaylistItem item in playlistItems)
             {
                 names.Add(item.name);
             }
@@ -142,6 +144,7 @@ namespace MusicTime
 
 
             }
+          
             return tracks;
         }
         
@@ -151,11 +154,12 @@ namespace MusicTime
             HttpResponseMessage response    = null;
             spotifyUser                     = await UserProfile.getInstance.GetUserProfileAsync();
 
-            JsonObject PlayListProperty     = new JsonObject();
-            PlayListProperty.Add("name", "My AI Top 40");
-            PlayListProperty.Add("public", false);
+            JsonObject _payload     = new JsonObject();
+            _payload.Add("name", "My AI Top 40");
+            _payload.Add("public", false);
+            _payload.Add("description", "");
 
-            String Payload = PlayListProperty.ToString();
+            String Payload = _payload.ToString();
 
             if (spotifyUser.Id == null)
             {
@@ -255,11 +259,14 @@ namespace MusicTime
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
                     spotifySongs        = JsonConvert.DeserializeObject<SpotifySongs>(responseBody);
-                    itemsList           = spotifySongs.items;
+                    itemsList = spotifySongs.items;
 
-                    foreach (PlaylistItem item in itemsList)
+                    if (itemsList.Count > 0)
                     {
-                        LikedSongs.Add(item.track);
+                        foreach (PlaylistItem item in itemsList)
+                        {
+                            LikedSongs.Add(item.track);
+                        }
                     }
                 }
 
@@ -271,6 +278,7 @@ namespace MusicTime
 
 
             }
+           
             return LikedSongs;
         }
 

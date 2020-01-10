@@ -59,8 +59,8 @@ namespace MusicTime
                     _spotifyUser = await userProfile.GetUserProfileAsync();
                     bool isConnected = MusicManager.hasSpotifyPlaybackAccess();
                     await getDevicesAsync();
-
-                    // SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
+                   
+                  //  SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
 
                 }
                 else
@@ -105,14 +105,46 @@ namespace MusicTime
             }
 
         }
-        public static string getDeviceName()
+        public static List<Device> getDevices()
         {
-            string devicename = "";
+            List<Device> devices = null;
             if (device.devices != null)
             {
-                devicename = device.devices[0].name;
+                return devices= device.devices;
             }
-            return devicename;
+            return devices;
+        }
+        public static string getDeviceNames()
+        {
+            string deviceNames = "";
+            if (device.devices != null)
+            {
+                if(device.devices.Count>1)
+                {
+                    foreach (Device item in device.devices)
+                    {
+                        deviceNames = deviceNames + "," + item.name;
+
+                    }
+                   return deviceNames.TrimStart(new char[] { ',' });
+                }
+               
+                return deviceNames;
+            }
+            return deviceNames;
+        }
+        public static string getActiveDeviceName()
+        {
+            string deviceNames = "";
+            if (device.devices != null)
+            {
+                foreach (Device item in device.devices)
+                {
+                    if (item.is_active == true)
+                    { deviceNames = item.name; }
+                }
+            }
+            return deviceNames;
         }
         public static bool isDeviceOpened()
         {
@@ -251,22 +283,30 @@ namespace MusicTime
 
         }
 
-        public static async Task SpotifyPlayPlaylist(string PlaylistId)
+        public static async Task SpotifyPlayPlaylist(string PlaylistId,string trackid)
         {
-            
+            string payload = string.Empty;
+            Payload _payload    = new Payload();
+            _payload.ContextUri = "spotify:playlist:" + PlaylistId;
+            Offset offset = new Offset();
+            offset.Uri = "spotify:track:" + trackid;
+            _payload.Offset = offset; 
+
+           payload = _payload.ToJson();
+
             HttpResponseMessage response = null;
-            
+           
             if (!string.IsNullOrEmpty(MusicManager.DeviceID()))
             {
                 String api = "/v1/me/player/play?"+ DeviceID();
 
-                response = await MusicClient.SpotifyApiPutAsync(api,null);
+                response = await MusicClient.SpotifyApiPutAsync(api,payload);
                 if (response == null || !MusicClient.IsOk(response))
                 {
                     // refresh the tokens
                     await MusicClient.refreshSpotifyTokenAsync();
                     // Try again
-                    response = await MusicClient.SpotifyApiPutAsync(api,null);
+                    response = await MusicClient.SpotifyApiPutAsync(api, payload);
                 }
                 
             }

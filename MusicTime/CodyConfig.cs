@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -236,5 +237,5 @@ namespace MusicTime
         public Actions actions { get; set; }
         public bool is_playing { get; set; }
     }
-
+    
 }

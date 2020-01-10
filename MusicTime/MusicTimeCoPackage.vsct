@@ -39,6 +39,7 @@
         <CommandFlag>NoCustomize</CommandFlag>
         <CommandFlag>DontCache</CommandFlag>
         <Strings>
+          
           <ButtonText>Spotify</ButtonText>
           <CommandName>Spotify Toolbar</CommandName>
         </Strings>
@@ -168,7 +169,7 @@
       
       <Button guid="guidMusicTimeCoPackageCmdSet" id="cmdidSpotifyPlayListCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
-        <Icon guid="guidImages2" id="bmpPic1" />
+       <Icon guid="guidImages11" id="bmpOpen" />
         <Strings>
           <ButtonText>SpotifyPlayList</ButtonText>
         </Strings>

@@ -7,16 +7,15 @@ using System.Windows.Controls;
 
 namespace MusicTime
 {
-    class PlaylistTreeviewItem : TreeViewItem
+    public class PlaylistTreeviewItem : TreeViewItem
     {
-        public string TrackId { get; set; }
-        public string TrackName { get; set; }
+        
         public string PlayListId { get; set; }
-        public PlaylistTreeviewItem(string PlaylistId, string TrackId ,string TrackName)
+        public PlaylistTreeviewItem(string PlaylistId)
         {
             this.PlayListId = PlaylistId;
-            this.TrackId    = TrackId;
-            this.TrackName  = TrackName;
+            
         }
     }
+
 }

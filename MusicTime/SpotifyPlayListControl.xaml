@@ -7,18 +7,18 @@
              Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300"
+             
              Name="MyToolWindow">
-
+    <ScrollViewer Background="Transparent" BorderBrush="Transparent" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="9*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" >
+            <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" >
                 <StackPanel>
-                    <Image Source="Resources\refresh_dark.png"></Image>
+                        <Image Source="Resources\refresh.png"></Image>
                 </StackPanel>
             </Button>
         </Grid>
@@ -47,7 +47,9 @@
             
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel x:Name="PlaylistTreeview">
-
+                    <TreeView x:Name="SoftwarePlaylistTV" Background="Transparent" BorderBrush="Transparent" >
+                        
+                    </TreeView>
                     </StackPanel>
                 </ScrollViewer>
             
@@ -56,11 +58,15 @@
             </ItemsControl>
                
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    
-                </ScrollViewer>
+                <StackPanel x:Name="UsersPlaylistTreeview">
+                    <TreeView x:Name="UsersPlaylistTV" Background="Transparent" BorderBrush="Transparent" >
+
+                    </TreeView>
+                </StackPanel>
+            </ScrollViewer>
            
         </StackPanel>
        
     </StackPanel>
-    
+    </ScrollViewer>
 </UserControl>

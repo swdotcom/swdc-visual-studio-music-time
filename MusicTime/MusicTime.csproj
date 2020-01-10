@@ -64,6 +64,7 @@
     <Compile Include="MusicManager.cs" />
     <Compile Include="MusicStatusBar.cs" />
     <Compile Include="MusicTimeCoPackage.cs" />
+    <Compile Include="Payload.cs" />
     <Compile Include="PlayerCommands\NextTrackCommand.cs" />
     <Compile Include="PlayerCommands\OpenSpotifyCommand.cs" />
     <Compile Include="PlayerCommands\PreviousTrackCommand.cs" />
@@ -109,8 +110,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <Resource Include="Resources\connected.png" />
     <Resource Include="Resources\connected_dark.png" />
+    <Resource Include="Resources\Connected.png" />
     <Content Include="Resources\headphones.png" />
     <Content Include="Resources\headphones_dark.png" />
     <Content Include="Resources\heart-filled.png" />
@@ -129,9 +130,11 @@
     <Content Include="Resources\paw_dark.png" />
     <Content Include="Resources\PlayPauseCommand.png" />
     <Content Include="Resources\PreviousTrackCommand.png" />
-    <Resource Include="Resources\refresh_dark.png" />
-    <Resource Include="Resources\settings.png" />
+    <Resource Include="Resources\settingss.png" />
     <Resource Include="Resources\settings_dark.png" />
+    <Resource Include="Resources\share.png" />
+    <Resource Include="Resources\refresh.png" />
+    <Resource Include="Resources\settings.png" />
     <Content Include="Resources\SoftwareConnectSlackCommand.png" />
     <Content Include="Resources\SoftwareConnectSpotifyCommand.png" />
     <Content Include="Resources\SoftwareDisconnectSlackCommand.png" />

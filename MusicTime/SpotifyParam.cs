@@ -139,7 +139,7 @@ namespace MusicTime
         public object Hostname { get; set; }
 
         [JsonProperty("last_codetime_metrics_timestamp")]
-        public long LastCodetimeMetricsTimestamp { get; set; }
+        public object LastCodetimeMetricsTimestamp { get; set; }
 
         [JsonProperty("last_search_file_timestamp")]
         public long LastSearchFileTimestamp { get; set; }

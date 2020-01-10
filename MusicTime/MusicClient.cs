@@ -77,14 +77,16 @@ namespace MusicTime
             HttpResponseMessage response = null;
             HttpClient client = new HttpClient();
             HttpContent contentPost = null;
-            string Payload = "";
+           // string Payload = "";
             try
             {
+                if(payload==null)
+                { payload = ""; }
                 client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", codyConfig.spotifyAccessToken);
 
 
-                contentPost = new StringContent(Payload, Encoding.UTF8, "application/json");
+                contentPost = new StringContent(payload, Encoding.UTF8, "application/json");
                 string endpoint = Constants.api_Spotifyendpoint + "" + api;
                 response = await client.PutAsync(endpoint, contentPost);
 
