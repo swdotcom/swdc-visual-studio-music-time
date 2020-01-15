@@ -39,7 +39,7 @@
         {
             SetConnectContent();
             System.Windows.Forms.Timer UpdateCallBackTimer = new System.Windows.Forms.Timer();
-            UpdateCallBackTimer.Interval = 5000;//5 seconds
+            UpdateCallBackTimer.Interval = 10000;//5 seconds
             UpdateCallBackTimer.Tick += new System.EventHandler(UpdateCallBack);
             UpdateCallBackTimer.Start();
 
@@ -71,22 +71,22 @@
 
         private async void RefreshAsync(object sender, RoutedEventArgs e)
         {
-            await CheckUserStatusAsync();
-            if (isConnected)
-            {
+           
                 try
                 {
-                    btnRefresh.IsEnabled = false;
+                    e.Handled               = true;
+                    btnRefresh.IsEnabled    = false;
                     await LikedSongsPlaylistAsync();
                     await SoftwareTop40PlaylistAsync();
                     await UsersPlaylistAsync();
-                    btnRefresh.IsEnabled = true;
+
+                    btnRefresh.IsEnabled    = true;
                 }
                 finally
                 {
 
                 }
-            }
+            
            
         }
 
