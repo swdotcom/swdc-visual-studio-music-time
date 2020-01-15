@@ -176,7 +176,7 @@ namespace MusicTime
             //         UpdatePlaylistCallBackAsync,
             //         null,
             //         ONE_MINUTE / 2,
-            //         ONE_MINUTE / 6);
+            //         ONE_MINUTE / 4);
 
             this.InitializeUserInfoAsync();
 
@@ -186,13 +186,14 @@ namespace MusicTime
 
         //private async void UpdatePlaylistCallBackAsync(object state)
         //{
-        //   if(isOnline)
+        //    if (isOnline)
         //    {
-        //        Playlist.Liked_Playlist = new List<Track>();
-        //        Playlist.Software_Playlists = new List<Track>();
-        //        Playlist.Liked_Playlist  = await Playlist.getSpotifyLikedSongsAsync();
-        //        Playlist.Software_Playlists=  await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
-        //      //await UpdateUsersPlaylistsAsync(); 
+        //        //Playlist.Liked_Playlist     = new List<Track>();
+        //        //Playlist.Software_Playlists = new List<Track>();
+
+        //        //Playlist.Liked_Playlist     = await Playlist.getSpotifyLikedSongsAsync();
+        //        //Playlist.Software_Playlists = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
+        //        await UpdateUsersPlaylistsAsync(); 
         //    }
 
         //}
@@ -201,9 +202,10 @@ namespace MusicTime
         //{
         //    try
         //    {
-        //        List<Track> tracks = new List<Track>();
-        //        List<PlaylistItem> playlistItems = await Playlist.getPlaylistsAsync();
-        //        Playlist.Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
+        //        List<Track> tracks                  = new List<Track>();
+        //        List<PlaylistItem> playlistItems    = await Playlist.getPlaylistsAsync();
+        //        Playlist.Users_Playlist             = new Dictionary<PlaylistItem, List<Track>>();
+
         //        foreach (PlaylistItem playlists in playlistItems)
         //        {
         //            tracks = await Playlist.getPlaylistTracksAsync(playlists.id);
@@ -218,9 +220,9 @@ namespace MusicTime
 
         //    }
 
-        //}
+        //    }
 
-        private async void InitializeUserInfoAsync()
+            private async void InitializeUserInfoAsync()
         {
            
             bool jwtExists  = SoftwareCoUtil.jwtExists();

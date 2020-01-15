@@ -262,6 +262,7 @@ namespace MusicTime
 
 
         }
+
         public static async Task SpotifyWebPlayPreviousAsync()
         {
             HttpResponseMessage response = null;
@@ -283,16 +284,36 @@ namespace MusicTime
 
         }
 
-        public static async Task SpotifyPlayPlaylist(string PlaylistId,string trackid)
+        public static async Task SpotifyPlayPlaylistAsync(string PlaylistId,string trackid)
         {
-            string payload = string.Empty;
+            string payload      = string.Empty;
             Payload _payload    = new Payload();
-            _payload.ContextUri = "spotify:playlist:" + PlaylistId;
-            Offset offset = new Offset();
-            offset.Uri = "spotify:track:" + trackid;
-            _payload.Offset = offset; 
-
-           payload = _payload.ToJson();
+            TrackUris trackUris = new TrackUris();
+            if (!string.IsNullOrEmpty(PlaylistId))
+            {
+               
+                _payload.ContextUri = "spotify:playlist:" + PlaylistId;
+                
+                if (!string.IsNullOrEmpty(trackid))
+                {
+                    Offset offset = new Offset();
+                    offset.Uri = "spotify:track:" + trackid;
+                    _payload.Offset = offset;
+                }
+                payload = _payload.ToJson();
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(trackid))
+                {
+                    string trackID = "spotify:track:" + trackid;
+                    string[] stringArray = new string[] { trackID };
+                    trackUris.Uris = stringArray;
+                    payload = trackUris.ToJson();
+                }
+            }
+            
+          
 
             HttpResponseMessage response = null;
            

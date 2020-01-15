@@ -10,7 +10,7 @@
              
              Name="MyToolWindow">
     <ScrollViewer Background="Transparent" BorderBrush="Transparent" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-    <StackPanel>
+        <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="9*"/>
@@ -27,7 +27,7 @@
 
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image  x:Name="ConnectImage" Width="15" Height="15"></Image>
-                <Label x:Name="ConnectLabel" Foreground="DarkCyan" MouseDoubleClick="ConnectStatusClick" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
+                <Label x:Name="ConnectLabel" Foreground="DarkCyan" MouseDown ="ConnectStatusClick" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image x:Name="DeviceImage"  Width="15" Height="15"></Image>
@@ -42,28 +42,73 @@
             </ItemsControl>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image x:Name="GeneratePlaylistImage" Width="15" Height="15"></Image>
-                <Label x:Name="GeneratePlaylistLabel" Foreground="DarkCyan" MouseDoubleClick="GenerateAIPLaylist" ></Label>
+                <Label x:Name="GeneratePlaylistLabel" Foreground="DarkCyan" MouseDown="GenerateAIPLaylist" ></Label>
             </StackPanel>
-            
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel x:Name="PlaylistTreeview">
-                    <TreeView x:Name="SoftwarePlaylistTV" Background="Transparent" BorderBrush="Transparent" >
-                        
+
+
+                <StackPanel x:Name="AIPLaylistTreeview">
+                    <TreeView x:Name="LikePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                        <TreeView.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                      Color="LightGoldenrodYellow" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                      Color="Transparent" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                      Color="LightGoldenrodYellow" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                      Color="Transparent" />
+                        </TreeView.Resources>
+         
                     </TreeView>
-                    </StackPanel>
-                </ScrollViewer>
-            
-            <ItemsControl>
+                </StackPanel>
+                <StackPanel >
+                    <TreeView x:Name="SoftwarePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                        <TreeView.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                      Color="LightGoldenrodYellow" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                      Color="Transparent" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                      Color="LightGoldenrodYellow" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                      Color="Transparent" />
+                        </TreeView.Resources>
+                    </TreeView>
+                </StackPanel>
+                <StackPanel >
+                    <TreeView x:Name="AIPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                        <TreeView.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                      Color="LightGoldenrodYellow" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                      Color="Transparent" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                      Color="LightGoldenrodYellow" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                      Color="Transparent" />
+                        </TreeView.Resources>
+                    </TreeView>
+                </StackPanel>
+                <ItemsControl>
                 <Separator x:Name="Seperator2" Visibility="Hidden" Margin="0,5,0,5"></Separator>
             </ItemsControl>
                
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
+               
                 <StackPanel x:Name="UsersPlaylistTreeview">
-                    <TreeView x:Name="UsersPlaylistTV" Background="Transparent" BorderBrush="Transparent" >
-
+                    <TreeView x:Name="UsersPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto">
+                        <TreeView.Resources>
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                      Color="LightGoldenrodYellow" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                      Color="Transparent" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                      Color="LightGoldenrodYellow" />
+                            <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                      Color="Transparent" />
+                        </TreeView.Resources>
                     </TreeView>
                 </StackPanel>
-            </ScrollViewer>
+           
            
         </StackPanel>
        
