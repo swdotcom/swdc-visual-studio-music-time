@@ -44,20 +44,20 @@
             UpdateCallBackTimer.Start();
 
 
-            System.Windows.Forms.Timer UpdateTreeviewTimer = new System.Windows.Forms.Timer();
-            UpdateTreeviewTimer.Interval = 25000;//5 seconds
-            UpdateTreeviewTimer.Tick += new System.EventHandler(UpdateTreeCallBack);
-            UpdateTreeviewTimer.Start();
+            //System.Windows.Forms.Timer UpdateTreeviewTimer = new System.Windows.Forms.Timer();
+            //UpdateTreeviewTimer.Interval = 25000;//5 seconds
+            //UpdateTreeviewTimer.Tick += new System.EventHandler(UpdateTreeCallBack);
+            //UpdateTreeviewTimer.Start();
 
         }
         private void UpdateCallBack(object sender, EventArgs e)
         {
             UpdateTreeviewAsync();
         }
-        private void UpdateTreeCallBack(object sender, EventArgs e)
-        {
-            RefreshAsync(null,null);
-        }
+        //private void UpdateTreeCallBack(object sender, EventArgs e)
+        //{
+        //    RefreshAsync(null, null);
+        //}
 
         //checks user is connected or not ,sets static boolean variable 
         private async Task CheckUserStatusAsync()
