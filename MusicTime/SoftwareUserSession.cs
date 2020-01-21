@@ -244,18 +244,19 @@ namespace MusicTime
             
             if (!jwtExists || !online)
             {
-                userStatus.loggedIn = false;
+                userStatus.loggedIn         = false;
             }
             else
             {
                 try
                 {
                     SpotifyTokens  spotifyTokens = await SoftwareSpotifyManager.GetSpotifyTokenAsync();
-                    auths                        = await SoftwareSpotifyManager.getMusicTimeUserStatus(online);
+                    auths                        = await SoftwareSpotifyManager.GetMusicTimeUserStatusAsync(online);
 
                     if (auths.LoggedIn == true)
                     {
-                        userStatus.loggedIn = true;
+                        userStatus.loggedIn      = true;
+
                         MusicTimeCoPackage.UpdateEnableCommands(userStatus.loggedIn);
                     }
                     else

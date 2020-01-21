@@ -140,7 +140,7 @@ namespace MusicTime
 
         public static String getDashboardFile()
         {
-            return getSoftwareDataDir(true) + "\\MusicTime.html";
+            return getSoftwareDataDir(true) + "\\MusicTime.txt";
         }
         
 

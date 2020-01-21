@@ -34,7 +34,7 @@ namespace MusicTime
 
                     if (!MusicManager.isDeviceOpened())
                     {
-                        await LaunchPlayerAsync();
+                        await LaunchPlayerAsync(new options());
 
                         await MusicManager.getDevicesAsync();
 
@@ -63,7 +63,7 @@ namespace MusicTime
                 {
                     if (!MusicManager.isDeviceOpened())
                     {
-                        await LaunchPlayerAsync();
+                        await LaunchPlayerAsync(new options());
 
                         await MusicManager.getDevicesAsync();
                         
@@ -92,7 +92,7 @@ namespace MusicTime
                 {
                     if (!MusicManager.isDeviceOpened())
                     {
-                        await LaunchPlayerAsync();
+                        await LaunchPlayerAsync(new options());
 
                         await MusicManager.getDevicesAsync();
                         
@@ -110,17 +110,60 @@ namespace MusicTime
            
         }
 
-        public static async Task LaunchPlayerAsync()
+        public static async Task LaunchPlayerAsync(options options)
         {
-            
-            if (SoftwareUserSession.GetSpotifyUserStatus())
-            { 
-                SoftwareSpotifyManager.launchWebUrl("https://open.spotify.com/");
-                MusicTimeCoPackage.UpdateEnablePlayercontrol(true);
+
+            LaunchWebPlayerAsync(new options());
+
+            Thread.Sleep(5000);
+         
+            if (!string.IsNullOrEmpty(options.playlist_id))
+            {
+               await MusicManager.SpotifyPlayPlaylistAsync(options.playlist_id, options.track_id);
             }
-            
+            else
+            {
+                await MusicManager.SpotifyPlayPlaylistAsync(null, options.track_id);
+            }
+
         }
 
+        private static void LaunchWebPlayerAsync(options options )
+        {
+            CodyConfig codyConfig   = CodyConfig.getInstance;
+            string userID           = codyConfig.spoftifyUserId;
+
+            if (SoftwareUserSession.GetSpotifyUserStatus())
+            {
+                if (!string.IsNullOrEmpty(options.album_id))
+                {
+                    string albumId = MusicUtil.CreateSpotifyIdFromUri(options.album_id);
+                    SoftwareSpotifyManager.launchWebUrl("https://open.spotify.com/album/" + albumId);
+                }
+                else if (!string.IsNullOrEmpty(options.track_id))
+                {
+                    string trackId = MusicUtil.CreateSpotifyIdFromUri(options.track_id);
+                    SoftwareSpotifyManager.launchWebUrl("https://open.spotify.com/track/" + trackId);
+
+                }
+                else if (!string.IsNullOrEmpty(options.playlist_id))
+                {
+                    string playlistId = MusicUtil.CreateSpotifyIdFromUri(options.playlist_id);
+
+                    SoftwareSpotifyManager.launchWebUrl("https://open.spotify.com/playlist/" + playlistId);
+                }
+                else
+                    SoftwareSpotifyManager.launchWebUrl("https://open.spotify.com/browse");
+
+
+                MusicTimeCoPackage.UpdateEnablePlayercontrol(true);
+            }
+        }
+
+       
+      
+
+     
     }
    
 

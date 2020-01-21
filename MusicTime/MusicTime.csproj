@@ -64,6 +64,7 @@
     <Compile Include="MusicManager.cs" />
     <Compile Include="MusicStatusBar.cs" />
     <Compile Include="MusicTimeCoPackage.cs" />
+    <Compile Include="MusicUtil.cs" />
     <Compile Include="Payload.cs" />
     <Compile Include="PlayerCommands\NextTrackCommand.cs" />
     <Compile Include="PlayerCommands\OpenSpotifyCommand.cs" />
@@ -121,6 +122,7 @@
     <Content Include="Resources\heart-outlined_dark.png" />
     <Content Include="Resources\loading.png" />
     <Content Include="Resources\loading_dark.png" />
+    <Resource Include="Resources\menu.png" />
     <Content Include="Resources\MusicTimeCo.png" />
     <Content Include="Resources\MusicTimeCoPackage.ico" />
     <Content Include="Resources\MusicTimeDashboardCommand.png" />

@@ -37,6 +37,8 @@ namespace MusicTime
         public static List<Track> Liked_Playlist  { get; set; }
         public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
 
+        public static string PlayListID { get; set; }
+        
         public static async Task<List<PlaylistItem>> getPlaylistsAsync()
         {
             List<PlaylistItem> _Playlists = new List<PlaylistItem>();
@@ -148,28 +150,32 @@ namespace MusicTime
             return tracks;
         }
         
-        public static async Task generateMyAIPlaylistAsync()
+        public static async Task<string> generateMyAIPlaylistAsync()
         {
             SpotifyUser spotifyUser         = null;
             HttpResponseMessage response    = null;
             spotifyUser                     = await UserProfile.getInstance.GetUserProfileAsync();
+            SpotifySongs spotifySongs       = new SpotifySongs();
 
-            JsonObject _payload     = new JsonObject();
-            _payload.Add("name", "My AI Top 40");
-            _payload.Add("public", false);
-            _payload.Add("description", "");
-
-            String Payload = _payload.ToString();
-
-            if (spotifyUser.Id == null)
-            {
-                return;
-            }
-
-            string api = "/v1/users/" + spotifyUser.Id + "/playlists";
             try
             {
-                response = await MusicClient.SpotifyApiPostAsync(api, Payload);
+
+                JsonObject _payload         = new JsonObject();
+
+                _payload.Add("name", Constants.PERSONAL_TOP_SONGS_NAME);
+                _payload.Add("public", false);
+                _payload.Add("description", "");
+
+                string Payload = _payload.ToString();
+
+                if (spotifyUser.Id == null)
+                {
+                    return PlayListID;
+                }
+
+                string api  = "/v1/users/" + spotifyUser.Id + "/playlists";
+
+                response    = await MusicClient.SpotifyApiPostAsync(api, Payload);
 
                 if (response == null || !response.IsSuccessStatusCode)
                 {
@@ -182,16 +188,17 @@ namespace MusicTime
                 if (MusicClient.IsOk(response))
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
-
+                    spotifySongs        = JsonConvert.DeserializeObject<SpotifySongs>(responseBody);
+                    PlayListID          = spotifySongs.id;
                 }
-
+                
             }
             catch (Exception ex)
             {
 
 
             }
-
+            return PlayListID;
         }
 
       
@@ -235,6 +242,40 @@ namespace MusicTime
 
         }
 
+      
+
+        public static async Task AddTracksToPlaylistAsync(string playlist_id , List<string> trackUris , int postion=0)
+        {
+            string api                      = "/v1/playlists/"+playlist_id+"/tracks";
+            HttpResponseMessage response    = null;
+            string app_jwt                  = SoftwareUserSession.GetJwt();
+            List<string> tracks             = null;
+            string Payload                  = null;
+            tracks                          = MusicUtil.createUrisFromTrackId(trackUris);
+
+
+            JsonObject payload = new JsonObject();
+            payload.Add("uris",tracks);
+            payload.Add("position", postion);
+
+            Payload = payload.ToString();
+
+            if (!string.IsNullOrEmpty(app_jwt))
+            {
+                response = await MusicClient.SpotifyApiPostAsync(api, Payload);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiPostAsync(api, Payload);
+                }
+            }
+
+           
+
+        }
         public static async Task<List<Track>> getSpotifyLikedSongsAsync()
         {
             string api = "/v1/me/tracks?limit=50&offset=0";

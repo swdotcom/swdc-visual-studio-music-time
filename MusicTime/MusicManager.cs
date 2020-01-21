@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -56,8 +57,9 @@ namespace MusicTime
                     SoftwareCoUtil.setItem("spotify_refresh_token", auths.RefreshToken);
 
                     UserProfile userProfile = UserProfile.getInstance;
-                    _spotifyUser = await userProfile.GetUserProfileAsync();
-                    bool isConnected = MusicManager.hasSpotifyPlaybackAccess();
+                    _spotifyUser            = await userProfile.GetUserProfileAsync();
+                    Logger.Debug(_spotifyUser.Id.ToString());
+                    bool isConnected        = MusicManager.hasSpotifyPlaybackAccess();
                     await getDevicesAsync();
                    
                   //  SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
@@ -98,7 +100,7 @@ namespace MusicTime
 
         public static async Task getDevicesAsync()
         {
-            bool isConnected = MusicManager.hasSpotifyPlaybackAccess();
+            bool isConnected = hasSpotifyPlaybackAccess();
             if (isConnected)
             {
                 device = await MusicClient.GetDeviceAsync();
@@ -140,11 +142,24 @@ namespace MusicTime
             {
                 foreach (Device item in device.devices)
                 {
-                    if (item.is_active == true)
+                    if (item.is_active == true || item.type =="computer")
                     { deviceNames = item.name; }
                 }
             }
             return deviceNames;
+        }
+        public static string getActiveDeviceID()
+        {
+            string activeDevice = null;
+            if (device.devices != null)
+            {
+                foreach (Device item in device.devices)
+                {
+                    if (item.is_active == true || item.type == "Computer")
+                    { activeDevice = item.id; }
+                }
+            }
+            return activeDevice;
         }
         public static bool isDeviceOpened()
         {
@@ -289,6 +304,7 @@ namespace MusicTime
             string payload      = string.Empty;
             Payload _payload    = new Payload();
             TrackUris trackUris = new TrackUris();
+            string api = null;
             if (!string.IsNullOrEmpty(PlaylistId))
             {
                
@@ -312,27 +328,30 @@ namespace MusicTime
                     payload = trackUris.ToJson();
                 }
             }
-            
-          
+
+
+            await getDevicesAsync();
 
             HttpResponseMessage response = null;
            
-            if (!string.IsNullOrEmpty(MusicManager.DeviceID()))
+            if (!string.IsNullOrEmpty(getActiveDeviceID()))
             {
-                String api = "/v1/me/player/play?"+ DeviceID();
+               api  = "/v1/me/player/play?device_id=" + getActiveDeviceID();
 
                 response = await MusicClient.SpotifyApiPutAsync(api,payload);
+              
                 if (response == null || !MusicClient.IsOk(response))
                 {
                     // refresh the tokens
                     await MusicClient.refreshSpotifyTokenAsync();
                     // Try again
                     response = await MusicClient.SpotifyApiPutAsync(api, payload);
+                    
                 }
                 
             }
-           
-    
+          
+
         }
 
         public static async Task<TrackStatus> SpotifyCurrentTrackAsync()
@@ -357,6 +376,141 @@ namespace MusicTime
                 trackStatus         = JsonConvert.DeserializeObject<TrackStatus>(responseBody);
             }
             return trackStatus;
+        }
+        public static async Task<List<Track>> getAITop40TracksAsync()
+        {
+            string responseBody             = null;
+            HttpResponseMessage response    = null;
+            string app_jwt                  = SoftwareUserSession.GetJwt();
+           
+            List<Track> TopSongs            = new List<Track>();
+            Track spotifySongs              = new Track();
+
+            string api                      = "/music/recommendations?limit=40";
+
+            if (!string.IsNullOrEmpty(app_jwt))
+            {
+                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, api, "", app_jwt);
+                if (SoftwareHttpManager.IsOk(response))
+                {
+                    responseBody = await response.Content.ReadAsStringAsync();
+                    TopSongs = JsonConvert.DeserializeObject<List<Track>>(responseBody);
+
+                }
+
+            }
+
+            return TopSongs;
+
+        }
+        public static async Task SeedSongsToPlaylistAsync(string playListId)
+        {
+            List<Track> SwtopSongs  = null;
+            List<string> Uris       = new List<string>();
+            try
+            {
+                SwtopSongs = await getAITop40TracksAsync();
+
+                if (SwtopSongs != null && SwtopSongs.Count > 0)
+                {
+
+                    foreach (Track item in SwtopSongs)
+                    {
+                        Uris.Add(item.id);
+                    }
+
+                    await Playlist.AddTracksToPlaylistAsync(playListId, Uris, 0);
+                }
+            }
+            catch (Exception ex)
+            {
+
+
+            }
+        }
+
+        public static async Task UpdateSavedPlaylistsAsync(string playlist_id,int playlistTypeId, string name)
+        {
+            string responseBody             = null;
+            HttpResponseMessage response    = null;
+            string app_jwt                  = SoftwareUserSession.GetJwt();
+
+            JsonObject payload = new JsonObject();
+            payload.Add("playlist_id", playlist_id);
+            payload.Add("playlistTypeId", playlistTypeId);
+            payload.Add("name", name);
+            string Payload      = payload.ToString();
+
+            string api          = "/music/playlist/generated";
+
+            if (!string.IsNullOrEmpty(app_jwt))
+            {
+                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Put, api, Payload, app_jwt);
+                if (SoftwareHttpManager.IsOk(response))
+                {
+                    responseBody = await response.Content.ReadAsStringAsync();
+                 
+                }
+
+            }
+
+        }
+        public static async Task FetchSavedPlayListAsync()
+        {
+            HttpResponseMessage response    = null;
+            string responseBody             = null;
+            string app_jwt                  = SoftwareUserSession.GetJwt();
+            string api                      = "/music/playlist/generated";
+            if (!string.IsNullOrEmpty(app_jwt))
+            {
+                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, api, "", app_jwt);
+
+                if (SoftwareHttpManager.IsOk(response))
+                {
+                    responseBody = await response.Content.ReadAsStringAsync();
+                    
+                }
+
+            }
+
+        }
+
+        public static async Task GetMusicTimeDashboardFileAsync()
+        {
+            HttpResponseMessage response    = null;
+            string responseBody             = null;
+            string app_jwt                  = SoftwareUserSession.GetJwt();
+            string api                      = "/dashboard/music";
+            string dashboardFile            = SoftwareCoUtil.getDashboardFile();
+            if (!string.IsNullOrEmpty(app_jwt))
+            {
+                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, api, "", app_jwt);
+
+                if (SoftwareHttpManager.IsOk(response))
+                {
+                    responseBody = await response.Content.ReadAsStringAsync();
+
+
+                    if (File.Exists(dashboardFile))
+                    {
+                        File.SetAttributes(dashboardFile, FileAttributes.Normal);
+                    }
+
+                    try
+                    {
+
+                        File.WriteAllText(dashboardFile, responseBody);
+                        
+                    }
+                    catch (Exception e)
+                    {
+
+
+                    }
+                }
+
+            }
+
         }
     }
 }

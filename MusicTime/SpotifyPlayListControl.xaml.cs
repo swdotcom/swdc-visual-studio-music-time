@@ -42,32 +42,29 @@
             UpdateCallBackTimer.Interval = 10000;//5 seconds
             UpdateCallBackTimer.Tick += new System.EventHandler(UpdateCallBack);
             UpdateCallBackTimer.Start();
-
-
-            //System.Windows.Forms.Timer UpdateTreeviewTimer = new System.Windows.Forms.Timer();
-            //UpdateTreeviewTimer.Interval = 25000;//5 seconds
-            //UpdateTreeviewTimer.Tick += new System.EventHandler(UpdateTreeCallBack);
-            //UpdateTreeviewTimer.Start();
-
+            
         }
         private void UpdateCallBack(object sender, EventArgs e)
         {
             UpdateTreeviewAsync();
         }
-        //private void UpdateTreeCallBack(object sender, EventArgs e)
-        //{
-        //    RefreshAsync(null, null);
-        //}
+
+        private void ConnectStatusClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            isConnected = MusicManager.hasSpotifyPlaybackAccess();
+            if (!isConnected)
+            {
+                SoftwareSpotifyManager.ConnectToSpotifyAsync();
+            }
+        }
 
         //checks user is connected or not ,sets static boolean variable 
         private async Task CheckUserStatusAsync()
         {
             bool online = MusicTimeCoPackage.isOnline;
-            SoftwareUserSession.UserStatus status = await SoftwareUserSession.GetSpotifyUserStatusTokenAsync(online);
-            isConnected = status.loggedIn;
-
+            isConnected = MusicManager.hasSpotifyPlaybackAccess();
+            Logger.Debug(isConnected.ToString());
         }
-
 
         private async void RefreshAsync(object sender, RoutedEventArgs e)
         {
@@ -106,11 +103,11 @@
                     
                     if (!isAIPlaylistUpdated)
                     {
-                        await LikedSongsPlaylistAsync();
-                        await SoftwareTop40PlaylistAsync();
+                         LikedSongsPlaylistAsync();
+                         SoftwareTop40PlaylistAsync();
                     }
                  
-                    if (!isUsersPlaylistUpdated) { await UsersPlaylistAsync(); }
+                    if (!isUsersPlaylistUpdated) {  UsersPlaylistAsync(); }
                         
                 }
                 else
@@ -286,11 +283,22 @@
 
         }
 
-        private void GenerateAIPLaylist(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private async void GenerateAIPLaylist(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            //Playlist.generateMyAIPlaylistAsync();
+            Playlist.PlayListID          = await Playlist.generateMyAIPlaylistAsync();
+
+            if (Playlist.PlayListID != null)
+            {
+                await MusicManager.UpdateSavedPlaylistsAsync(Playlist.PlayListID, Constants.PERSONAL_TOP_SONGS_PLID,
+                    Constants.PERSONAL_TOP_SONGS_NAME);
+
+               await MusicManager.SeedSongsToPlaylistAsync(Playlist.PlayListID);
+               await MusicManager.FetchSavedPlayListAsync();
+            }
         }
-       
+
+        
+
         private TreeViewItem getSoftwareTopTree()
         {
             if (SoftwareTop40treeItem == null)
@@ -310,7 +318,6 @@
             return LikedSongtreeItem;
         }
        
-      
         private async Task LikedSongsPlaylistAsync()
         {
             try
@@ -360,51 +367,6 @@
             }
 
 
-        }
-
-        private async void PlayLikedSongs(object sender, MouseButtonEventArgs e)
-        {
-            try
-            {
-                string playlistID   = string.Empty;
-                string trackID      = string.Empty;
-
-                PlaylistTreeviewItem parent = null;
-                PlaylistTreeviewItem item   = sender as PlaylistTreeviewItem;
-               
-                parent = GetSelectedTreeViewItemParent(item);
-
-                if (parent != null)
-                {
-                    playlistID  = parent.PlayListId;
-                    trackID     = item.PlayListId;
-                   
-                }
-                else
-                {
-                    playlistID = item.PlayListId;
-                   
-                }
-
-
-                if (MusicManager.isDeviceOpened())
-                {
-                    await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
-                }
-                else
-                {
-                    await MusicController.LaunchPlayerAsync();
-
-                    await MusicManager.getDevicesAsync();
-                    await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
-                }
-
-            }
-            catch (Exception ex)
-            {
-
-
-            }
         }
 
         private async Task SoftwareTop40PlaylistAsync()
@@ -518,7 +480,7 @@
             {
                 string playlistID       = string.Empty;
                 string trackID          = string.Empty;
-
+                options options         = new options();
 
                 PlaylistTreeviewItem item   = sender as PlaylistTreeviewItem;
                 playlistID                  = item.PlayListId;
@@ -530,11 +492,10 @@
                 }
                 else
                 {
-                    await MusicController.LaunchPlayerAsync();
-
-                    await MusicManager.getDevicesAsync();
-
-                    await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
+                    options.playlist_id = playlistID;
+                    await MusicController.LaunchPlayerAsync(options);
+                    
+                   // await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
                 }
 
             }
@@ -544,7 +505,6 @@
 
             }
         }
-
         private async void PlaySelectedSongAsync(object sender, MouseButtonEventArgs e)
         {
             try
@@ -575,10 +535,10 @@
                     }
                     else
                     {
-                        await MusicController.LaunchPlayerAsync();
-
-                        await MusicManager.getDevicesAsync();
-                        await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
+                     
+                        await MusicController.LaunchPlayerAsync(new options(null,playlistID,trackID));
+                       
+                      //  await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
                     }
                 
             }
@@ -588,6 +548,49 @@
                 
             }
            
+        }
+        private async void PlayLikedSongs(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                string playlistID = string.Empty;
+                string trackID = string.Empty;
+                options options = new options();
+                PlaylistTreeviewItem parent = null;
+                PlaylistTreeviewItem item = sender as PlaylistTreeviewItem;
+
+                parent = GetSelectedTreeViewItemParent(item);
+
+                if (parent != null)
+                {
+                    playlistID = parent.PlayListId;
+                    trackID = item.PlayListId;
+
+                }
+                else
+                {
+                    playlistID = item.PlayListId;
+
+                }
+
+
+                if (MusicManager.isDeviceOpened())
+                {
+                    await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
+                }
+                else
+                {
+                   
+                    await MusicController.LaunchPlayerAsync(new options(null,playlistID,trackID));
+                    
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+
+            }
         }
 
         private PlaylistTreeviewItem GetSelectedTreeViewItemParent(PlaylistTreeviewItem item)
@@ -684,12 +687,21 @@
             return result;
         }
 
-        private void ConnectStatusClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void WebAnaylticsClick(object sender, MouseButtonEventArgs e)
         {
-            isConnected = MusicManager.hasSpotifyPlaybackAccess();
-            if (!isConnected)
+            try
             {
-                 SoftwareSpotifyManager.ConnectToSpotifyAsync();
+                isConnected = MusicManager.hasSpotifyPlaybackAccess();
+                if (isConnected)
+                {
+                    string url = "https://app.software.com/music";
+                    SoftwareSpotifyManager.launchWebUrl(url);
+                }
+            }
+            catch (Exception ex)
+            {
+
+               
             }
         }
     }

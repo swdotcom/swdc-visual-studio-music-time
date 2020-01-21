@@ -268,12 +268,16 @@ namespace MusicTime
             }
 
         }
-        public static async void LaunchCodeTimeDashboardAsync()
+        public static async void LaunchMusicTimeDashboardAsync()
         {
+
+            await MusicManager.GetMusicTimeDashboardFileAsync();
             
             string dashboardFile = SoftwareCoUtil.getDashboardFile();
             if (File.Exists(dashboardFile))
                 ObjDte.ItemOperations.OpenFile(dashboardFile);
+            
+            
         }
 
         public static async void GetDeviceIDLazilyAsync(object state)

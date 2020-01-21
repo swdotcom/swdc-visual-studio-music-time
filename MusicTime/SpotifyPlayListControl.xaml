@@ -7,21 +7,28 @@
              Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
-             
+            
              Name="MyToolWindow">
     <ScrollViewer Background="Transparent" BorderBrush="Transparent" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="9*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" >
+                <ColumnDefinition Width="15*"/>
+                <ColumnDefinition Width="1.5*"/>
+                <ColumnDefinition Width="1.5*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent"  >
                 <StackPanel>
                         <Image Source="Resources\refresh.png"></Image>
                 </StackPanel>
             </Button>
-        </Grid>
+                <Button x:Name="Sort" Grid.Column="2" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" Margin="0,0,0,5">
+                    <StackPanel>
+                        <Image Source="Resources\menu.png"></Image>
+                    </StackPanel>
+                    
+                </Button>
+            </Grid>
        
             <StackPanel>
 
@@ -35,7 +42,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image x:Name="AnalyticImage" Width="15" Height="15"></Image>
-                <Label x:Name="AnalyticLabel" Foreground="DarkCyan" ></Label>
+                    <Label x:Name="AnalyticLabel" Foreground="DarkCyan" MouseDown ="WebAnaylticsClick" Background="Transparent" BorderBrush="Transparent" BorderThickness="0"></Label>
             </StackPanel>
             <ItemsControl>
                 <Separator x:Name="Seperator1" Visibility="Hidden" Margin="0,5,0,5"></Separator>
@@ -50,11 +57,11 @@
                     <TreeView x:Name="LikePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
-                      Color="LightGoldenrodYellow" />
+                      Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
                       Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
-                      Color="LightGoldenrodYellow" />
+                      Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
                       Color="Transparent" />
                         </TreeView.Resources>
@@ -65,11 +72,11 @@
                     <TreeView x:Name="SoftwarePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
-                      Color="LightGoldenrodYellow" />
+                      Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
                       Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
-                      Color="LightGoldenrodYellow" />
+                      Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
                       Color="Transparent" />
                         </TreeView.Resources>
@@ -79,11 +86,11 @@
                     <TreeView x:Name="AIPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
-                      Color="LightGoldenrodYellow" />
+                      Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
                       Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
-                      Color="LightGoldenrodYellow" />
+                      Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
                       Color="Transparent" />
                         </TreeView.Resources>
@@ -98,11 +105,11 @@
                     <TreeView x:Name="UsersPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto">
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
-                      Color="LightGoldenrodYellow" />
+                      Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
                       Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
-                      Color="LightGoldenrodYellow" />
+                      Color="Transparent" />
                             <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
                       Color="Transparent" />
                         </TreeView.Resources>
