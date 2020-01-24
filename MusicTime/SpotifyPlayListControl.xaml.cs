@@ -199,43 +199,44 @@
                     DeviceImage.Source   = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
                     List<Device> devices = null;
 
-                    if(MusicManager.getDevices()!= null )
-                    {
-                        devices = MusicManager.getDevices();
+                    
+                    devices = MusicManager.getDevices();
 
-                        if(devices.Count>1)
-                        {
-                            DeviceLabel.Content = "Available on" + MusicManager.getDeviceNames();
-                        }
-                        else
-                        {
-                            string Active_Device = MusicManager.getActiveDeviceName();
-                            if(!string.IsNullOrEmpty(Active_Device))
+                    if(devices.Count>0)
+                    {
+                       
+                        string Active_Device = MusicManager.getActiveDeviceName();
+
+                            if (!string.IsNullOrEmpty(Active_Device))
                             {
-                                DeviceLabel.Content = "Listening on " + MusicManager.getActiveDeviceName();
+                                DeviceLabel.Content     = "Listening on " + MusicManager.getActiveDeviceName();
+                                DeviceLabel.ToolTip     = "Listening on a Spotify device";
                             }
-                            else { DeviceLabel.Content = "No device is active"; }
-
-                        }
+                            else
+                            {
+                                DeviceLabel.Content     = "Connected on " + MusicManager.getDeviceNames();
+                            if (devices.Count > 1)
+                                DeviceLabel.ToolTip     = "Multiple Spotify devices connected";
+                            else
+                                DeviceLabel.ToolTip     = "Spotify device connected";
+                            }  
 
                     }
-                    else
-                    {
-                        DeviceLabel.Content = "Device is not detected";
-                    }
-
-
+                        
+                        
                 }
                 else
                 {
-                    DeviceImage.Source  = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
-                    DeviceLabel.Content = "Device is not detected";
+
+                    DeviceImage.Source      = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
+                    DeviceLabel.Content     = "No device detected";
+                    DeviceLabel.ToolTip     = null;
                 }
             }
             else
             {
                 DeviceLabel.Content = null;
-                DeviceImage.Source = null;
+                DeviceImage.Source  = null;
             }
 
         }

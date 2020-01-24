@@ -37,7 +37,7 @@
                 <Label x:Name="ConnectLabel" Foreground="DarkCyan" MouseDown ="ConnectStatusClick" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
-                <Image x:Name="DeviceImage"  Width="15" Height="15"></Image>
+                    <Image x:Name="DeviceImage"  Width="15" Height="15"></Image>
                 <Label x:Name="DeviceLabel" Foreground="DarkCyan" ></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">

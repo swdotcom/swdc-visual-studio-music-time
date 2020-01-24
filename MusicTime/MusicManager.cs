@@ -121,8 +121,13 @@ namespace MusicTime
             string deviceNames = "";
             if (device.devices != null)
             {
-                if(device.devices.Count>1)
+                if(device.devices.Count==0)
                 {
+                    deviceNames = device.devices[0].name;
+                }
+                if(device.devices.Count>0)
+                {
+
                     foreach (Device item in device.devices)
                     {
                         deviceNames = deviceNames + "," + item.name;
@@ -130,6 +135,7 @@ namespace MusicTime
                     }
                    return deviceNames.TrimStart(new char[] { ',' });
                 }
+
                
                 return deviceNames;
             }
@@ -142,7 +148,7 @@ namespace MusicTime
             {
                 foreach (Device item in device.devices)
                 {
-                    if (item.is_active == true || item.type =="computer")
+                    if (item.is_active == true && item.type =="Computer")
                     { deviceNames = item.name; }
                 }
             }
@@ -156,7 +162,7 @@ namespace MusicTime
                 foreach (Device item in device.devices)
                 {
                     if (item.is_active == true || item.type == "Computer")
-                    { activeDevice = item.id; }
+                    { activeDevice = item.id; break; }
                 }
             }
             return activeDevice;

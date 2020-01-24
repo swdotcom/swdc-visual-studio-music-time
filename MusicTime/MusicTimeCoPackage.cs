@@ -154,17 +154,17 @@ namespace MusicTime
                      ONE_MINUTE,
                      ONE_MINUTE );
 
-            timer = new System.Threading.Timer(
-                     UpdateUserStatusAsync,
-                     null,
-                    ONE_MINUTE / 6,
-                    ONE_MINUTE / 6);
+            //timer = new System.Threading.Timer(
+            //         UpdateUserStatusAsync,
+            //         null,
+            //        ONE_MINUTE / 6,
+            //        ONE_MINUTE / 6);
 
             DeviceTimer = new System.Threading.Timer(
                      GetDeviceIDLazilyAsync,
                      null,
                      THIRTY_SECONDS/3,
-                     ONE_SECOND*10);
+                     ONE_SECOND*5);
 
             TrackStatusBar = new System.Threading.Timer(
                      UpdateCurrentTrackOnStatusAsync,
