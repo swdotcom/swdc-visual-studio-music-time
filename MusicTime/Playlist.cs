@@ -35,7 +35,7 @@ namespace MusicTime
         // public static List<PlaylistItem> _Playlists { get; set; }
         public static List<Track> Software_Playlists { get; set; }
         public static List<Track> Liked_Playlist { get; set; }
-        [ThreadStatic] public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
+        public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
 
         public static string PlayListID { get; set; }
         
@@ -57,7 +57,7 @@ namespace MusicTime
             string api                      = "/v1/users/"+ spotifyUserid +"/playlists";
 
             SpotifySongs PlaylistItems      = new SpotifySongs();
-            List<PlaylistItem>  _Playlists  = new List<PlaylistItem>();
+            List<PlaylistItem>  _Playlists = new List<PlaylistItem>();
 
 
             try
