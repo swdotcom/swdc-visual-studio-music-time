@@ -45,11 +45,11 @@ namespace MusicTime
 
                 if (auths != null)
                 {
-                    codyConfig.spotifyClientId = spotifyTokens.clientId;
-                    codyConfig.spotifyClientSecret = spotifyTokens.clientSecret;
-                    codyConfig.spotifyAccessToken = auths.AccessToken;
-                    codyConfig.spotifyRefreshToken = auths.RefreshToken;
-                    codyConfig.enableSpotifyApi = SoftwareCoUtil.isMac() ? true : false;
+                    codyConfig.spotifyClientId      = spotifyTokens.clientId;
+                    codyConfig.spotifyClientSecret  = spotifyTokens.clientSecret;
+                    codyConfig.spotifyAccessToken   = auths.AccessToken;
+                    codyConfig.spotifyRefreshToken  = auths.RefreshToken;
+                    codyConfig.enableSpotifyApi     = SoftwareCoUtil.isMac() ? true : false;
 
                     codyConfig.setConfig(codyConfig);
 
@@ -59,7 +59,7 @@ namespace MusicTime
                     UserProfile userProfile = UserProfile.getInstance;
                     _spotifyUser            = await userProfile.GetUserProfileAsync();
                     Logger.Debug(_spotifyUser.Id.ToString());
-                    bool isConnected        = MusicManager.hasSpotifyPlaybackAccess();
+                    bool isConnected        = hasSpotifyPlaybackAccess();
                     await getDevicesAsync();
                    
                   //  SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
@@ -67,7 +67,7 @@ namespace MusicTime
                 }
                 else
                 {
-                    MusicManager.cleaclearSpotifyAccessInfo(spotifyTokens);
+                    cleaclearSpotifyAccessInfo(spotifyTokens);
                 }
 
             }
@@ -455,23 +455,29 @@ namespace MusicTime
             }
 
         }
-        public static async Task FetchSavedPlayListAsync()
+
+        public static async Task<PlaylistItem> FetchSavedPlayListAsync()
         {
             HttpResponseMessage response    = null;
             string responseBody             = null;
             string app_jwt                  = SoftwareUserSession.GetJwt();
             string api                      = "/music/playlist/generated";
+            PlaylistItem AIPlaylist         = null;
+            SpotifySongs spotifySongs       = new SpotifySongs();
             if (!string.IsNullOrEmpty(app_jwt))
             {
                 response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, api, "", app_jwt);
 
-                if (SoftwareHttpManager.IsOk(response))
-                {
-                    responseBody = await response.Content.ReadAsStringAsync();
-                    
-                }
+                    if (MusicClient.IsOk(response))
+                    {
+                        responseBody    = await response.Content.ReadAsStringAsync();
+                        spotifySongs    = JsonConvert.DeserializeObject<SpotifySongs>(responseBody);
+ 
+                    }
 
             }
+
+            return AIPlaylist;
 
         }
 

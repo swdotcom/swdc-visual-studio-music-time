@@ -193,7 +193,7 @@ namespace MusicTime
 
         //        //Playlist.Liked_Playlist     = await Playlist.getSpotifyLikedSongsAsync();
         //        //Playlist.Software_Playlists = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
-        //        await UpdateUsersPlaylistsAsync(); 
+        //        await UpdateUsersPlaylistsAsync();
         //    }
 
         //}
@@ -202,7 +202,7 @@ namespace MusicTime
         //{
         //    try
         //    {
-        //        List<Track> tracks                  = new List<Track>();
+        //        List<Track> tracks = new List<Track>();
         //        List<PlaylistItem> playlistItems    = await Playlist.getPlaylistsAsync();
         //        Playlist.Users_Playlist             = new Dictionary<PlaylistItem, List<Track>>();
 
@@ -220,9 +220,9 @@ namespace MusicTime
 
         //    }
 
-        //    }
+        //}
 
-            private async void InitializeUserInfoAsync()
+        private async void InitializeUserInfoAsync()
         {
            
             bool jwtExists  = SoftwareCoUtil.jwtExists();

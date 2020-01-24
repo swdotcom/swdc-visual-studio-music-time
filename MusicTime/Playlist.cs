@@ -11,9 +11,9 @@ namespace MusicTime
 
     class Playlist
     {
-        private static Playlist instance        = null;
-        public static MusicClient musicClient   = MusicClient.getInstance;
-        public static CodyConfig codyConfig     = CodyConfig.getInstance;
+        private static Playlist instance = null;
+        public static MusicClient musicClient = MusicClient.getInstance;
+        public static CodyConfig codyConfig = CodyConfig.getInstance;
 
 
         private Playlist()
@@ -32,10 +32,10 @@ namespace MusicTime
             }
         }
 
-       // public static List<PlaylistItem> _Playlists { get; set; }
+        // public static List<PlaylistItem> _Playlists { get; set; }
         public static List<Track> Software_Playlists { get; set; }
-        public static List<Track> Liked_Playlist  { get; set; }
-        public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
+        public static List<Track> Liked_Playlist { get; set; }
+        [ThreadStatic] public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
 
         public static string PlayListID { get; set; }
         
@@ -57,7 +57,7 @@ namespace MusicTime
             string api                      = "/v1/users/"+ spotifyUserid +"/playlists";
 
             SpotifySongs PlaylistItems      = new SpotifySongs();
-            List<PlaylistItem>  _Playlists = new List<PlaylistItem>();
+            List<PlaylistItem>  _Playlists  = new List<PlaylistItem>();
 
 
             try
@@ -204,7 +204,7 @@ namespace MusicTime
       
         public static async Task<List<Track>> getTopSpotifyTracksAsync()
         {
-            String api                      = "/v1/me/top/tracks?time_range=medium_term&limit=40";
+            string api                      = "/v1/me/top/tracks?time_range=medium_term&limit=40";
             HttpResponseMessage response    = null;
             SpotifySongs spotifySongs       = new SpotifySongs();
             List<Track>  TopSongs           = new List<Track>();
