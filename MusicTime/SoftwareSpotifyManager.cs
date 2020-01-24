@@ -97,7 +97,7 @@ namespace MusicTime
                     {
                         Logger.Debug("AuthsLogeedIn");
                         MusicTimeCoPackage.UpdateMusicStatusBar(true);
-                        
+                        MusicTimeCoPackage.UpdateEnableCommands(auths.LoggedIn);
                     }
                     
                 }
