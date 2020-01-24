@@ -81,7 +81,7 @@ namespace MusicTime
             {
                 try
                 {
-                    auths = await getMusicTimeUserStatus(online);
+                    auths = await GetMusicTimeUserStatusAsync(online);
 
                     if (auths == null)
                     {
@@ -130,7 +130,7 @@ namespace MusicTime
             return spotifyTokens;
         }
 
-        public static async Task<Auths> getMusicTimeUserStatus(bool isOnlinet) 
+        public static async Task<Auths> GetMusicTimeUserStatusAsync(bool isOnlinet) 
         {
           
             string app_jwt                  = SoftwareUserSession.GetJwt();
@@ -157,7 +157,7 @@ namespace MusicTime
                         {
                             SoftwareCoUtil.setItem("name", spotifyParam.Email);
                         }
-                        if (spotifyParam.Jwt != app_jwt)
+                        if (spotifyParam.Jwt != app_jwt && spotifyParam.Jwt !=null)
                         {
                             // update it
                             SoftwareCoUtil.setItem("jwt", spotifyParam.Jwt);

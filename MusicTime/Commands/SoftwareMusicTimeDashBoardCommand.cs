@@ -89,7 +89,7 @@ namespace MusicTime
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
-            MusicTimeCoPackage.LaunchCodeTimeDashboardAsync();
+            MusicTimeCoPackage.LaunchMusicTimeDashboardAsync();
         }
 
         public static async void UpdateEnabledState(bool Connected)

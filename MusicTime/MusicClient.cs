@@ -34,7 +34,7 @@ namespace MusicTime
         }
         public static bool IsOk(HttpResponseMessage response)
         {
-            return (response != null && response.StatusCode == HttpStatusCode.OK);
+            return (response != null &&( response.StatusCode == HttpStatusCode.OK||response.StatusCode ==HttpStatusCode.Created) );
         }
 
         public static string QueryString(string api ,List<object> qsOptions)
@@ -176,10 +176,9 @@ namespace MusicTime
         public static async Task<Device> GetDeviceAsync()
         {
 
-
             HttpResponseMessage response = null;
-            const string api = "/v1/me/player/devices";
-            response = await MusicClient.SpotifyApiGetAsync(api);
+            const string api    = "/v1/me/player/devices";
+            response            = await MusicClient.SpotifyApiGetAsync(api);
 
             if (response == null || !response.IsSuccessStatusCode)
             {
@@ -192,7 +191,7 @@ namespace MusicTime
             if (MusicClient.IsOk(response))
             {
                 string responseBody = await response.Content.ReadAsStringAsync();
-                deviceList = JsonConvert.DeserializeObject<Device>(responseBody);
+                deviceList          = JsonConvert.DeserializeObject<Device>(responseBody);
             }
             return deviceList;
         }

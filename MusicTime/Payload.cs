@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace MusicTime
 {
-    
 
     public partial class Payload
     {
@@ -25,7 +24,7 @@ namespace MusicTime
         [JsonProperty("uri")]
         public string Uri { get; set; }
     }
-
+   
     public partial class Payload
     {
         public static Payload FromJson(string json) => JsonConvert.DeserializeObject<Payload>(json, MusicTime.Converter.Settings);

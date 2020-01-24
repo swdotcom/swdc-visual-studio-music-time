@@ -226,6 +226,7 @@ namespace MusicTime
         public object previous { get; set; }
         public string href { get; set; }
         public object next { get; set; }
+        public string id { get; set; }
     }
     public class TrackStatus
     {
@@ -237,5 +238,16 @@ namespace MusicTime
         public Actions actions { get; set; }
         public bool is_playing { get; set; }
     }
-    
+    public class options
+    {
+        public string playlist_id { get; set; }
+        public string track_id { get; set; }
+        public string album_id { get; set; }
+        public options(string album_id =null,string playlist_id=null,string track_id=null)
+        {
+            this.album_id = album_id;
+            this.playlist_id = playlist_id;
+            this.track_id = track_id;
+        }
+    }
 }

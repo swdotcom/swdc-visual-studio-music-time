@@ -90,8 +90,8 @@ namespace MusicTime.PlayerCommands
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
-          
-                MusicController.LaunchPlayerAsync();
+            options options = new options();
+                MusicController.LaunchPlayerAsync(options);
            
 
         }
