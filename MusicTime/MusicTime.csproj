@@ -93,7 +93,6 @@
       <DependentUpon>SpotifyPlayListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="SpotifyUser.cs" />
-    <Compile Include="TrackButton.cs" />
     <Compile Include="TrackUris.cs" />
   </ItemGroup>
   <ItemGroup>
