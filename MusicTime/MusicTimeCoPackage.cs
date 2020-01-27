@@ -632,6 +632,34 @@ namespace MusicTime
            
         }
 
+        private async void SendSongSessionPayload(String songSession)
+        {
+            Logger.Info(DateTime.Now.ToString());
+            string responseBody             = null;
+            HttpResponseMessage response    = null;
+            string app_jwt                  = SoftwareUserSession.GetJwt();
+            bool online                     = MusicTimeCoPackage.isOnline;
+            if (!online)
+            {
+                return;
+            }
+            
+            string api = "/music/session";
+
+            if (!string.IsNullOrEmpty(app_jwt))
+            {
+                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Post, api, songSession, app_jwt);
+                if (SoftwareHttpManager.IsOk(response))
+                {
+                    responseBody = await response.Content.ReadAsStringAsync();
+                   
+                }
+
+            }
+
+
+
+        }
 
         public static async void UpdateUserStatusAsync(object state)
         {
