@@ -773,17 +773,17 @@
             // create Image
             System.Windows.Controls.Image image = new System.Windows.Controls.Image();
             image.Source = new BitmapImage(new Uri("Resources/" + imagePath, UriKind.Relative));
-            
+
             // Label
             Label lbl = new Label();
             lbl.Content = ResizeSongName(text);
-           // lbl.Content = text;
+            // lbl.Content = text;
             lbl.Width   = 150;
-            
+
             lbl.Foreground = System.Windows.Media.Brushes.DarkCyan;
 
             // Add into stack
-            
+
             stack.Children.Add(lbl);
             stack.Children.Add(image);
             // assign stack to header
@@ -792,7 +792,7 @@
             return item;
         }
 
-        private string ResizeSongName(string text)
+              private string ResizeSongName(string text)
         {
             string result = string.Empty;
             if (text.Length > 20)

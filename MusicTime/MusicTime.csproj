@@ -82,6 +82,7 @@
     <Compile Include="Commands\SoftwareSubmitOnGithubCommand.cs" />
     <Compile Include="SimpleJson.cs" />
     <Compile Include="SoftwareCoUtil.cs" />
+    <Compile Include="SoftwareData.cs" />
     <Compile Include="SoftwareHttpManager.cs" />
     <Compile Include="SoftwareSpotifyManager.cs" />
     <Compile Include="SoftwareUserSession.cs" />
@@ -92,6 +93,7 @@
       <DependentUpon>SpotifyPlayListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="SpotifyUser.cs" />
+    <Compile Include="TrackButton.cs" />
     <Compile Include="TrackUris.cs" />
   </ItemGroup>
   <ItemGroup>

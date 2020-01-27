@@ -364,7 +364,7 @@ namespace MusicTime
         {
             HttpResponseMessage response    = null;
 
-            string api  = "/v1/me/player/currently-playing?" + DeviceID();
+            string api  = "/v1/me/player/currently-playing?" + getActiveDeviceID();
 
             response    = await MusicClient.SpotifyApiGetAsync(api);
             
