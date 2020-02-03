@@ -467,7 +467,6 @@
                 if (isConnected)
                 {
                     
-
                     List<PlaylistItem> playlistItems    = await Playlist.getPlaylistsAsync();
                     List<Track> LikedTracks             = new List<Track>();
                     LikedSongIds                        = new List<Track>();
@@ -520,29 +519,21 @@
                     List<PlaylistItem> playlistItems      = await Playlist.getPlaylistsAsync();
                     List<Track> Swtoptracks               = new List<Track>();
 
-                    Swtoptracks = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
-                    treeItem    = GetTreeView("Software top 40", "PAW.png", Constants.SOFTWARE_TOP_40_ID);
-                   
-                    if (Swtoptracks.Count > 0)
+                    treeItem                              = GetTreeView("Software top 40", "PAW.png", Constants.SOFTWARE_TOP_40_ID);
+
+                    treeItem.MouseLeftButtonUp  += PlayPlaylist;
+                    treeItem.Expanded           += AddTracksAsync;
+
+                    treeItem.Items.Add(null);
+                    
+                    if (SoftwarePlaylistTV.Items.Count > 0)
                     {
-                        treeItem.MouseLeftButtonUp += PlayPlaylist;
-
-                        foreach (Track item in Swtoptracks)
-                        {
-                            TreeViewItem playlistTreeviewItem = GetTrackTreeView(item.name, "share.png", item.id);
-                          
-                            playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
-
-                            treeItem.Items.Add(playlistTreeviewItem);
-
-                        }
-                        if (SoftwarePlaylistTV.Items.Count > 0)
-                        {
-                            SoftwarePlaylistTV.Items.Clear();
-                        }
-                        SoftwarePlaylistTV.Items.Add(treeItem);
-                        isAIPlaylistUpdated = true;
+                      SoftwarePlaylistTV.Items.Clear();
                     }
+
+                    SoftwarePlaylistTV.Items.Add(treeItem);
+                    isAIPlaylistUpdated = true;
+                    
                 }
                 else
                 {
@@ -579,17 +570,9 @@
                         TreeViewItem treeItem           = null;
                         treeItem                        = GetTreeView(playlists.name, "spotify.png", playlists.id);
                         treeItem.MouseLeftButtonUp      += PlayPlaylist;
-                        tracks                          = await Playlist.getPlaylistTracksAsync(playlists.id);
-
-                        foreach (Track item in tracks)
-                        {
-                            TreeViewItem playlistTreeviewItem       = GetTrackTreeView(item.name, "share.png", item.id);
-
-                            playlistTreeviewItem.MouseLeftButtonUp  += PlaySelectedSongAsync;
-
-                            treeItem.Items.Add(playlistTreeviewItem);
-                        }
-
+                        treeItem.Expanded               += AddTracksAsync;
+                        treeItem.Items.Add(null);
+                       
                         treeItemList.Add(treeItem);
 
                     }
@@ -618,6 +601,38 @@
 
             }
 
+        }
+
+        private async void AddTracksAsync(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                List<Track> tracks          = new List<Track>();
+                PlaylistTreeviewItem item   = sender as PlaylistTreeviewItem;
+                item.Items.Clear();
+
+                tracks = await Playlist.getPlaylistTracksAsync(item.PlayListId);
+
+                if (tracks.Count<1)
+                {
+                   item.Items.Add("No Songs have been added to this Playlist yet");
+                }
+
+                foreach (Track items in tracks)
+                {
+                    TreeViewItem playlistTreeviewItem = GetTrackTreeView(items.name, "share.png", items.id);
+
+                    playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
+
+                    item.Items.Add(playlistTreeviewItem);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                
+            }
+           
         }
 
         private void SortPlaylist(ref List<PlaylistItem> playlistItems)

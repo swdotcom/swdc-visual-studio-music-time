@@ -130,6 +130,7 @@
     <Resource Include="Resources\PAW.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Resources\open-menu.png" />
     <Content Include="Resources\paw_dark.png" />
     <Content Include="Resources\PlayPauseCommand.png" />
     <Content Include="Resources\PreviousTrackCommand.png" />
