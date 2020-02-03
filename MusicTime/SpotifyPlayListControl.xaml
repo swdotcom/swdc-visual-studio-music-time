@@ -7,11 +7,12 @@
              Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
              Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}"
              mc:Ignorable="d"
-            
-             Name="MyToolWindow">
+          
+            Name="MyToolWindow" Height="auto" Width="auto">
     <ScrollViewer Background="Transparent" BorderBrush="Transparent" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
-        <Grid>
+            <DockPanel>
+        <Grid DockPanel.Dock="Right" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="15*"/>
                 <ColumnDefinition Width="1.5*"/>
@@ -22,14 +23,24 @@
                         <Image Source="Resources\refresh.png"></Image>
                 </StackPanel>
             </Button>
-                <Button x:Name="Sort" Grid.Column="2" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" Margin="0,0,0,5">
-                    <StackPanel>
-                        <Image Source="Resources\menu.png"></Image>
-                    </StackPanel>
-                    
-                </Button>
+                <!--<Button x:Name="Sort" Grid.Column="2" Width="15" Height="15" Background="Transparent" Click="SortOptionClick" BorderBrush="Transparent" Margin="0,0,0,5">
+                   
+                </Button>-->
+                <DockPanel Grid.Column="2" Width="auto" Height="Auto" >
+                    <Menu DockPanel.Dock="Top" Width="auto" Height="15" Background="Transparent" x:Name="SortDock" Visibility="Hidden" >
+                        <MenuItem Margin="0,0,5,0" Width="25">
+                            <MenuItem.Icon>
+                                <Image Source="E:\Client\Software.com\source\repos\MusicTime\MusicTime\Resources\menu.png"/>
+                            </MenuItem.Icon>
+                            <MenuItem Header="Sort A-Z" Click="Az_Sort"/>
+                                <MenuItem Header="Sort Latest" Click="Latest_Sort" />
+                            </MenuItem>
+                    </Menu>
+                   
+                </DockPanel>
+
             </Grid>
-       
+            </DockPanel>
             <StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">

@@ -5,6 +5,7 @@
     using System.ComponentModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Drawing;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using System.Windows;
@@ -28,7 +29,14 @@
         public static Boolean isAIPlaylistUpdated       = false;
         public static Boolean isUsersPlaylistUpdated    = false;
         public static List<Track> LikedSongIds          = null;
-       
+        public static bool SortPlaylistFlag             = false;
+
+        enum SortOrder
+        {
+           Alphabatically_Sort,
+           Latest_Sort
+        }
+
         public SpotifyPlayListControl()
         {
             this.InitializeComponent();
@@ -101,7 +109,7 @@
                     SetDeviceDetectionContent();
                     SeperatorContent();
                     SetGenerateAIContent();
-                    
+                    SetSortContent();
                     if (!isAIPlaylistUpdated)
                     {
                          LikedSongsPlaylistAsync();
@@ -139,6 +147,7 @@
                 SetDeviceDetectionContent();
                 SeperatorContent();
                 GenerateAIContent();
+                SetSortContent();
                
             }
             catch (Exception e)
@@ -147,6 +156,28 @@
 
             }
 
+        }
+
+        private void SetSortContent()
+        {
+            try
+            {
+                if (isConnected)
+                {
+                    SortDock.Visibility = Visibility.Visible;
+                   
+                }
+                else
+                {
+                    SortDock.Visibility = Visibility.Hidden;
+                }
+
+            }
+            catch (Exception e)
+            {
+
+
+            }
         }
 
 
@@ -441,7 +472,7 @@
                     List<Track> LikedTracks             = new List<Track>();
                     LikedSongIds                        = new List<Track>();
                     LikedTracks = await Playlist.getSpotifyLikedSongsAsync();
-                    treeItem    = GetTreeView("LikedSongs", "spotify.png", null);
+                    treeItem    = GetTreeView("Liked Songs", "spotify.png", null);
 
                     if (LikedTracks.Count > 0)
                     {
@@ -535,8 +566,12 @@
             {
                 if (isConnected)
                 {
+                    List<PlaylistItem> playlistItems    = null;
                     List<TreeViewItem> treeItemList     = new List<TreeViewItem>();
-                    List<PlaylistItem> playlistItems    = await Playlist.getPlaylistsAsync();
+                    playlistItems                       = await Playlist.getPlaylistsAsync();
+
+                    SortPlaylist(ref playlistItems);
+ 
                     List<Track> tracks                  = new List<Track>();
                    
                     foreach (PlaylistItem playlists in playlistItems)
@@ -585,7 +620,16 @@
 
         }
 
-       
+        private void SortPlaylist(ref List<PlaylistItem> playlistItems)
+        {
+           
+            if (SortPlaylistFlag == true && playlistItems.Count > 0)
+            {
+                playlistItems = playlistItems.OrderBy(x => x.name).ToList();
+            }
+        }
+
+
         /// <summary>
         /// Functions To Play Selected Songs / Playlist /LikedSongs
         /// </summary>
@@ -739,7 +783,7 @@
         private TreeViewItem GetTreeView(string text, string imagePath,string id)
         {
             PlaylistTreeviewItem item = new PlaylistTreeviewItem(id);
-            
+                       
             // create stack panel
             StackPanel stack  = new StackPanel();
             stack.Orientation = Orientation.Horizontal;
@@ -822,6 +866,21 @@
 
                
             }
+        }
+
+
+        private void Az_Sort(object sender, RoutedEventArgs e)
+        {
+            SortPlaylistFlag        = true;
+            isUsersPlaylistUpdated  = false;
+            UpdateTreeviewAsync();
+        }
+
+        private void Latest_Sort(object sender, RoutedEventArgs e)
+        {
+            SortPlaylistFlag        = false;
+            isUsersPlaylistUpdated  = false;
+            UpdateTreeviewAsync();
         }
     }
 }
