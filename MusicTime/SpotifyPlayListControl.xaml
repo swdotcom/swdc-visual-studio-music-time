@@ -60,12 +60,12 @@
             </ItemsControl>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image x:Name="GeneratePlaylistImage" Width="15" Height="15"></Image>
-                <Label x:Name="GeneratePlaylistLabel" Foreground="DarkCyan" MouseDown="GenerateAIPLaylist" ></Label>
+                <Label x:Name="GeneratePlaylistLabel" Foreground="DarkCyan" MouseDown="GenerateAIPlaylist" ></Label>
             </StackPanel>
 
 
                 <StackPanel x:Name="AIPLaylistTreeview">
-                    <TreeView x:Name="LikePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                    <TreeView x:Name="SoftwarePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
                       Color="Transparent" />
@@ -80,7 +80,7 @@
                     </TreeView>
                 </StackPanel>
                 <StackPanel >
-                    <TreeView x:Name="SoftwarePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                    <TreeView x:Name="AIPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
                       Color="Transparent" />
@@ -94,7 +94,7 @@
                     </TreeView>
                 </StackPanel>
                 <StackPanel >
-                    <TreeView x:Name="AIPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                    <TreeView x:Name="LikePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
                       Color="Transparent" />

@@ -72,6 +72,7 @@
     <Compile Include="PlayerCommands\PlayPauseCommand.cs" />
     <Compile Include="Playlist.cs" />
     <Compile Include="PlaylistTreeviewItem.cs" />
+    <Compile Include="PlaylistTreeviewUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\SoftwareConnectSlackCommand.cs" />
     <Compile Include="Commands\SoftwareConnectSpotifyCommand.cs" />
@@ -120,6 +121,7 @@
     <Content Include="Resources\heart-filled_dark.png" />
     <Content Include="Resources\heart-outlined.png" />
     <Content Include="Resources\heart-outlined_dark.png" />
+    <Resource Include="Resources\Heart_Red.png" />
     <Content Include="Resources\loading.png" />
     <Content Include="Resources\loading_dark.png" />
     <Resource Include="Resources\menu.png" />

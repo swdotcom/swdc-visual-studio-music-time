@@ -11,7 +11,7 @@ namespace MusicTime
 {
     class MusicController
     {
-       private static MusicManager musicManager = MusicManager.GetInstance;
+       private static MusicManager musicManager = MusicManager.getInstance;
        private static Device device             = Device.getInstance;
 
         public static async void PlayPauseTrackAsync()

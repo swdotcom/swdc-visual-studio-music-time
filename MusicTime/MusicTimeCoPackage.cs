@@ -45,6 +45,7 @@ namespace MusicTime
     [Guid(MusicTimeCoPackage.PackageGuidString)]
     [ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
     [ProvideAutoLoad(UIContextGuids.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
+    //[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string, PackageAutoLoadFlags.BackgroundLoad)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     [ProvideToolWindow(typeof(SpotifyPlayList))]
     public sealed class MusicTimeCoPackage : AsyncPackage
@@ -71,7 +72,7 @@ namespace MusicTime
         private bool connected = false;
 
         public static bool isOnline = false;
-       // public static UserStatus spotifyUser = new UserStatus();
+        // public static UserStatus spotifyUser = new UserStatus();
         private static MusicStatusBar _musicStatus ;
         private static TrackStatus trackStatus = new TrackStatus();
         /// <summary>
@@ -227,8 +228,9 @@ namespace MusicTime
            
             bool jwtExists  = SoftwareCoUtil.jwtExists();
             UpdateMusicStatusBar(false);
+            Logger.Debug("isonlineCheck");
             await SoftwareUserSession.isOnlineCheckAsync();
-          
+            Logger.Debug("isonline");
             bool online = MusicTimeCoPackage.isOnline;
             if (!jwtExists || !online)
             {
