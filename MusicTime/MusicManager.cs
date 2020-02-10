@@ -13,15 +13,15 @@ namespace MusicTime
     {
         private static MusicManager instance = null;
 
-        public static SpotifyUser spotifyUser = new SpotifyUser();
-        public static CodyConfig codyConfig = CodyConfig.getInstance;
-        private static Device device = Device.getInstance;
-        private static TrackStatus trackStatus = new TrackStatus();
+        public static SpotifyUser spotifyUser   = new SpotifyUser();
+        public static CodyConfig codyConfig     = CodyConfig.getInstance;
+        private static Device device            = Device.getInstance;
+        private static TrackStatus trackStatus  = new TrackStatus();
         private MusicManager()
         {
         }
 
-        public static MusicManager GetInstance
+        public static MusicManager getInstance
         {
             get
             {
@@ -33,9 +33,10 @@ namespace MusicTime
             }
         }
         public static SpotifyUser _spotifyUser { get; set; }
-        public static List<PlaylistItem> _spotifyPlaylists { get; set; }
-        public static List<PlaylistItem> _savedPlaylists { get; set; }
-        public static List<PlaylistItem> _musictimePlaylists { get; set; }
+        public  List<PlaylistItem> _spotifyPlaylists { get; set; }
+        public  List<PlaylistItem> _savedPlaylists { get; set; }
+        public  List<PlaylistItem> _musictimePlaylists { get; set; }
+        public  List<PlaylistItem> _usersPlaylists { get; set; }
 
         public async Task UpdateSpotifyAccessInfoAsync(Auths auths, SpotifyTokens spotifyTokens)
         {
@@ -397,6 +398,7 @@ namespace MusicTime
             if (!string.IsNullOrEmpty(app_jwt))
             {
                 response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, api, "", app_jwt);
+
                 if (SoftwareHttpManager.IsOk(response))
                 {
                     responseBody = await response.Content.ReadAsStringAsync();
@@ -434,6 +436,31 @@ namespace MusicTime
 
             }
         }
+        public static async Task RefreshSongsToPlaylistAsync(string playListId)
+        {
+            List<Track> SwtopSongs  = null;
+            List<string> Uris       = new List<string>();
+            try
+            {
+                SwtopSongs          = await getAITop40TracksAsync();
+
+                if (SwtopSongs != null && SwtopSongs.Count > 0)
+                {
+
+                    foreach (Track item in SwtopSongs)
+                    {
+                        Uris.Add(item.id);
+                    }
+
+                    await Playlist.ReplaceTrackToPlaylistsyncAsync(playListId, Uris);
+                }
+            }
+            catch (Exception ex)
+            {
+
+
+            }
+        }
 
         public static async Task UpdateSavedPlaylistsAsync(string playlist_id,int playlistTypeId, string name)
         {
@@ -451,7 +478,7 @@ namespace MusicTime
 
             if (!string.IsNullOrEmpty(app_jwt))
             {
-                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Put, api, Payload, app_jwt);
+                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Post, api, Payload, app_jwt);
                 if (SoftwareHttpManager.IsOk(response))
                 {
                     responseBody = await response.Content.ReadAsStringAsync();
@@ -462,28 +489,36 @@ namespace MusicTime
 
         }
 
-        public static async Task<PlaylistItem> FetchSavedPlayListAsync()
+        public static async Task<string> FetchSavedPlayListAsync()
         {
             HttpResponseMessage response    = null;
             string responseBody             = null;
             string app_jwt                  = SoftwareUserSession.GetJwt();
             string api                      = "/music/playlist/generated";
-            PlaylistItem AIPlaylist         = null;
-            SpotifySongs spotifySongs       = new SpotifySongs();
+            string AIPlaylistId             = null;
+
+            List< AiGeneratedPlaylistItem> AIPlyalist  = new List<AiGeneratedPlaylistItem>();
+
             if (!string.IsNullOrEmpty(app_jwt))
             {
-                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, api, "", app_jwt);
+                    response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Get, api, "", app_jwt);
 
                     if (MusicClient.IsOk(response))
                     {
                         responseBody    = await response.Content.ReadAsStringAsync();
-                        spotifySongs    = JsonConvert.DeserializeObject<SpotifySongs>(responseBody);
- 
+                        AIPlyalist      = JsonConvert.DeserializeObject<List<AiGeneratedPlaylistItem>>(responseBody);
+
+                        foreach (AiGeneratedPlaylistItem item in AIPlyalist)
+                        {
+                            AIPlaylistId = item.playlist_id;
+                            break;
+                        }
+                       
                     }
 
             }
 
-            return AIPlaylist;
+            return AIPlaylistId;
 
         }
 
@@ -523,6 +558,13 @@ namespace MusicTime
 
             }
 
+        }
+
+        public  async Task<List<PlaylistItem>> GetAllPlaylistAsync()
+        {
+           _usersPlaylists  = await Playlist.getPlaylistsAsync();
+
+            return _usersPlaylists;
         }
     }
 }

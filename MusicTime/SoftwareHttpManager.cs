@@ -85,7 +85,9 @@ namespace MusicTime
                 }
                 else 
                 {
+                    
                     response = await client.GetAsync(endpoint, cts.Token);
+                   
                 }
             }
             catch (HttpRequestException e)
@@ -163,7 +165,41 @@ namespace MusicTime
             return response;
 
         }
+        public static async Task<HttpResponseMessage> SendRequestDeleteAsync(string api)
+        {
+            HttpResponseMessage response = null;
+            HttpClient client = new HttpClient();
+            string jwt = null;
 
+            try
+            {
+                object jwtObj = SoftwareUserSession.GetJwt();
+
+                if (jwtObj != null)
+                {
+                    jwt = (string)jwtObj;
+                }
+
+                if (jwt != null)
+                {
+                    // add the authorizationn
+                    client.DefaultRequestHeaders.Add("Authorization", jwt);
+                }
+
+               
+                string endpoint         = Constants.api_endpoint + "" + api;
+                response                = await client.DeleteAsync(endpoint);
+
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return response;
+
+        }
         private static void NotifyPostException(Exception e)
         {
            // Logger.Error("We are having trouble sending data to Software.com, reason: " + e.Message);

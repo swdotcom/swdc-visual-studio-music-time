@@ -18,47 +18,49 @@ namespace MusicTime
 
         public static async Task ConnectToSpotifyAsync()
         {
-            bool online = MusicTimeCoPackage.isOnline;
-            if (!online)
+            
+            if (!MusicTimeCoPackage.isOnline)
             {
-                return;
+                await SoftwareUserSession.isOnlineCheckAsync();
             }
 
-            string app_jwt = "";
-            bool softwareSessionFileExists = SoftwareCoUtil.softwareSessionFileExists();
-            bool jwtExists = SoftwareCoUtil.jwtExists();
-
-            if (!softwareSessionFileExists || !jwtExists)
+            if (MusicTimeCoPackage.isOnline)
             {
-                app_jwt = await SoftwareUserSession.GetAppJwtAsync(true);
-                if (app_jwt != null)
+                string app_jwt = "";
+                bool softwareSessionFileExists  = SoftwareCoUtil.softwareSessionFileExists();
+                bool jwtExists                  = SoftwareCoUtil.jwtExists();
+
+                if (!softwareSessionFileExists || !jwtExists)
                 {
-                    SoftwareCoUtil.setItem("jwt", app_jwt);
+                    app_jwt = await SoftwareUserSession.GetAppJwtAsync(true);
+                    if (app_jwt != null)
+                    {
+                        SoftwareCoUtil.setItem("jwt", app_jwt);
+                    }
                 }
+                else
+                {
+
+                    app_jwt = SoftwareUserSession.GetJwt();
+                }
+
+
+
+                String qryStr = "/auth/spotify?token=" + app_jwt + "&mac=" + SoftwareCoUtil.isMac().ToString().ToLower();
+
+                launchWebUrl(Constants.api_endpoint + qryStr);
+                try
+                {
+                    await GetSpotifyTokenAsync();
+
+                }
+                catch (Exception ex)
+                {
+
+
+                }
+                refetchSpotifyConnectStatusLazily();
             }
-            else
-            {
-
-                app_jwt = SoftwareUserSession.GetJwt();
-            }
-            
-
-
-            String qryStr = "/auth/spotify?token=" + app_jwt + "&mac="+SoftwareCoUtil.isMac().ToString().ToLower();
-
-            launchWebUrl(Constants.api_endpoint + qryStr);
-            try
-            {
-                await GetSpotifyTokenAsync();
-
-            }
-            catch (Exception ex)
-            {
-
-
-            }
-            refetchSpotifyConnectStatusLazily();
-            
 
         }
         
@@ -176,7 +178,7 @@ namespace MusicTime
 
                                     auths.LoggedIn = true;
 
-                                    await MusicManager.GetInstance.UpdateSpotifyAccessInfoAsync(auths, spotifyTokens);
+                                    await MusicManager.getInstance.UpdateSpotifyAccessInfoAsync(auths, spotifyTokens);
 
                                 }
                             }

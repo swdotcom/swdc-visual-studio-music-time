@@ -237,7 +237,7 @@ namespace MusicTime
 
         public static async Task<UserStatus> GetSpotifyUserStatusTokenAsync(bool online)
         {
-            bool softwareSessionFileExists  = SoftwareCoUtil.softwareSessionFileExists();
+            //bool softwareSessionFileExists  = SoftwareCoUtil.softwareSessionFileExists();
             bool jwtExists                  = SoftwareCoUtil.jwtExists();
             Auths auths                     = new Auths();
             UserStatus userStatus           = new UserStatus();

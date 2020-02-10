@@ -250,4 +250,14 @@ namespace MusicTime
             this.track_id = track_id;
         }
     }
+
+    public class AiGeneratedPlaylistItem
+    {
+        public bool collaborative { get; set; }
+        public string playlist_id { get; set; }
+        public bool @public { get; set; }
+        public string name { get; set; }
+        public int deleted { get; set; }
+        public int playlistTypeId { get; set; }
+    }
 }
