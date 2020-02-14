@@ -87,9 +87,9 @@
                 {
                     e.Handled = true;
                     btnRefresh.IsEnabled = false;
-                   // await LikedSongsPlaylistAsync();
+                    // await LikedSongsPlaylistAsync();
+                    SetGenerateAIContent();
                     await SoftwareTop40PlaylistAsync();
-
                     //await AIPlaylistAsync();
                     await UsersPlaylistAsync();
                     btnRefresh.IsEnabled = true;
@@ -116,9 +116,9 @@
                     SetDeviceDetectionContent();
                     SeperatorContent(); 
                     SetSortContent();
-                    SetGenerateAIContent();
                     if (!isAIPlaylistUpdated)
                     {
+                        SetGenerateAIContent();
                         AIPlaylistAsync();
                     }
                     if(!isMusicTimePlaylistUpdated)
@@ -344,7 +344,6 @@
             }
             else
             {
-
                 RefreshAIContent();
                 if (!isAIPlaylistUpdated)
                     AIPlaylistAsync();
@@ -356,38 +355,7 @@
     
 
         //AI Playlists Functions
-        private async void GenerateAIPlaylist(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            e.Handled = true;
-            
-            GeneratePlaylistLabel.IsEnabled = false;
-            if (!AIPlyalistGenerated)
-            {
-                Logger.Debug(" AIPlyalistGenerated");
-                Playlist.PlayListID = await Playlist.generateMyAIPlaylistAsync();
-
-                if (Playlist.PlayListID != null)
-                {
-                    //Saved PlaylistId to Backend
-                    await MusicManager.UpdateSavedPlaylistsAsync(Playlist.PlayListID, Constants.PERSONAL_TOP_SONGS_PLID,
-                         Constants.PERSONAL_TOP_SONGS_NAME);
-
-                    //Added Songs to AI playlist From Backend
-                    await MusicManager.SeedSongsToPlaylistAsync(Playlist.PlayListID);
-                    isAIPlaylistUpdated = false;
-                    UpdateTreeviewAsync();
-                }
-
-            }
-            else
-            {
-                Logger.Debug("before RefreshMyAIPlaylist");
-                if (AIPlaylistID!=null)
-                RefreshMyAIPlaylist();
-            }
-            GeneratePlaylistLabel.IsEnabled = true;
-
-        }
+       
         public async Task RefreshMyAIPlaylist()
         {
             Logger.Debug("RefreshMyAIPlaylist");
@@ -406,7 +374,7 @@
 
                 if (AIPlaylistID != null)
                 {
-                    AIPlaylistItem      = await reconcilePlaylistsAsync();
+                    AIPlaylistItem      = await reconcilePlaylistsAsync(AIPlaylistID);
 
                     if(AIPlaylistItem != null)
                     {
@@ -436,14 +404,14 @@
 
         }
 
-        private async Task<PlaylistItem> reconcilePlaylistsAsync()
+        private async Task<PlaylistItem> reconcilePlaylistsAsync(string AIPlaylistID)
         {
             List<PlaylistItem> playlistItems    = await Playlist.getPlaylistsAsync();
             PlaylistItem AIplaylist             = null;
-
+        
             AIplaylist = playlistItems.FirstOrDefault(x => x.id == AIPlaylistID);
 
-            if (playlistItems!=null && AIplaylist == null && AIPlaylistID != null)
+            if (playlistItems.Count>0 && (AIplaylist == null && AIPlaylistID != null))
             {
                 await SoftwareHttpManager.SendRequestDeleteAsync("/music/playlist/generated/" + AIPlaylistID);
                 Logger.Debug("deleted");
@@ -957,15 +925,46 @@
             isUsersPlaylistUpdated  = false;
             UpdateTreeviewAsync();
         }
+        //private async void GenerateAIPlaylist(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        //{
+        //    e.Handled = true;
 
+        //    GeneratePlaylistLabel.IsEnabled = false;
+        //    if (!AIPlyalistGenerated)
+        //    {
+        //        Logger.Debug(" AIPlyalistGenerated");
+        //        Playlist.PlayListID = await Playlist.generateMyAIPlaylistAsync();
+
+        //        if (Playlist.PlayListID != null)
+        //        {
+        //            //Saved PlaylistId to Backend
+        //            await MusicManager.UpdateSavedPlaylistsAsync(Playlist.PlayListID, Constants.PERSONAL_TOP_SONGS_PLID,
+        //                 Constants.PERSONAL_TOP_SONGS_NAME);
+
+        //            //Added Songs to AI playlist From Backend
+        //            await MusicManager.SeedSongsToPlaylistAsync(Playlist.PlayListID);
+        //            isAIPlaylistUpdated = false;
+        //            UpdateTreeviewAsync();
+        //        }
+
+        //    }
+        //    else
+        //    {
+        //        Logger.Debug("before RefreshMyAIPlaylist");
+        //        if (AIPlaylistID != null)
+        //            RefreshMyAIPlaylist();
+        //    }
+        //    GeneratePlaylistLabel.IsEnabled = true;
+
+        //}
         private async void GenerateAIAsync(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-            GeneratePlaylistLabel.Click -= GenerateAIAsync;
+           // GeneratePlaylistLabel.Click -= GenerateAIAsync;
             GeneratePlaylistLabel.IsEnabled = false;
             if (!AIPlyalistGenerated)
             {
-               
+                Logger.Debug(" AIPlyalistGenerated");
                 Playlist.PlayListID = await Playlist.generateMyAIPlaylistAsync();
 
                 if (Playlist.PlayListID != null)
@@ -988,7 +987,7 @@
                    await RefreshMyAIPlaylist();
             }
             GeneratePlaylistLabel.IsEnabled = true;
-            GeneratePlaylistLabel.Click += GenerateAIAsync;
+            //GeneratePlaylistLabel.Click += GenerateAIAsync;
         }
 
         
