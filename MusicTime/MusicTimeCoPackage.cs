@@ -43,8 +43,9 @@ namespace MusicTime
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(MusicTimeCoPackage.PackageGuidString)]
-    [ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
+    //[ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
     [ProvideAutoLoad(UIContextGuids.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
+    //[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string, PackageAutoLoadFlags.BackgroundLoad)]
     //[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string, PackageAutoLoadFlags.BackgroundLoad)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     [ProvideToolWindow(typeof(SpotifyPlayList))]
@@ -104,7 +105,7 @@ namespace MusicTime
             _dteEvents = ObjDte.Events.DTEEvents;
             _dteEvents.OnStartupComplete += OnOnStartupComplete;
             InitializeListenersAsync();
-            await SpotifyPlayListCommand.InitializeAsync(this);
+           
          
            
          
@@ -137,7 +138,7 @@ namespace MusicTime
             await SoftwareDisconnectSlackCommand.InitializeAsync(this);
             await SoftwareSubmitOnGithubCommand.InitializeAsync(this);
             await SoftwareSubmitFeedbackCommand.InitializeAsync(this);
-
+            await SpotifyPlayListCommand.InitializeAsync(this);
             //PlayerControls
 
             await NextTrackCommand.InitializeAsync(this);
@@ -224,22 +225,25 @@ namespace MusicTime
         //}
 
         private async void InitializeUserInfoAsync()
-        {
-           
+        {           
             bool jwtExists  = SoftwareCoUtil.jwtExists();
             UpdateMusicStatusBar(false);
-            Logger.Debug("isonlineCheck");
-            await SoftwareUserSession.isOnlineCheckAsync();
-            Logger.Debug("isonline");
-            bool online = MusicTimeCoPackage.isOnline;
+            Logger.Debug("onlinecheck");
+            await isOnlineCheckAsync();
+            Logger.Debug("Online");
+            bool online = isOnline;
             if (!jwtExists || !online)
             {
                 return;
             }
             else
             {
-                SoftwareUserSession.UserStatus status = await SoftwareUserSession.GetSpotifyUserStatusTokenAsync(online);
+                UserStatus status = await GetSpotifyUserStatusTokenAsync(online);
                 UpdateMusicStatusBar(status.loggedIn);
+                if(status.loggedIn)
+                {
+                    await GetSlackUserStatusTokenAsync(online);
+                }
             }
         }
         

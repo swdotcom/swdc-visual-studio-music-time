@@ -82,6 +82,7 @@
     <Compile Include="Commands\SoftwareSubmitFeedbackCommand.cs" />
     <Compile Include="Commands\SoftwareSubmitOnGithubCommand.cs" />
     <Compile Include="SimpleJson.cs" />
+    <Compile Include="SlackControlManager.cs" />
     <Compile Include="SoftwareCoUtil.cs" />
     <Compile Include="SoftwareHttpManager.cs" />
     <Compile Include="SoftwareSpotifyManager.cs" />

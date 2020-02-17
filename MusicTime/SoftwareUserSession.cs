@@ -261,7 +261,7 @@ namespace MusicTime
                     }
                     else
                     {
-                        MusicManager.cleaclearSpotifyAccessInfo(spotifyTokens);
+                        MusicManager.clearSpotifyAccessInfo(spotifyTokens);
                     }
                     
                 }
@@ -275,7 +275,48 @@ namespace MusicTime
             return userStatus;
         }
 
-        
+        public static async Task GetSlackUserStatusTokenAsync(bool online)
+        {
+          
+            bool jwtExists          = SoftwareCoUtil.jwtExists();
+            Auths auths             = new Auths();
+          
+
+            if (!jwtExists || !online)
+            {
+                return;
+            }
+            else
+            {
+
+                try
+                {
+                    auths = await SlackControlManager.GetSlackUserStatusAsync(online);
+
+                    if (auths.LoggedIn == true)
+                    {
+                        SoftwareDisconnectSlackCommand.UpdateEnabledState(true);
+                        SoftwareConnectSlackCommand.UpdateEnabledState(false);
+                    }
+                    else
+                    {
+                        await MusicManager.UpdateSlackAccesInfoAsync(null);
+                        SoftwareConnectSlackCommand.UpdateEnabledState(true);
+                        SoftwareDisconnectSlackCommand.UpdateEnabledState(false);
+                    }
+
+                   
+                }
+
+                catch (Exception e)
+                {
+
+
+                }
+            
+            }
+           
+        }
 
         public static bool GetSpotifyUserStatus()
         { 

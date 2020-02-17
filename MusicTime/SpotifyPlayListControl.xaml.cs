@@ -180,7 +180,6 @@
             {
                 if (isConnected)
                 {
-
                     ConnectLabel.Content    = "Spotify Connected";
                     ConnectImage.Source     = new BitmapImage(new Uri("Resources/Connected.png", UriKind.Relative));
                 }
