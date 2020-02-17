@@ -68,7 +68,7 @@ namespace MusicTime
                 }
                 else
                 {
-                    cleaclearSpotifyAccessInfo(spotifyTokens);
+                    clearSpotifyAccessInfo(spotifyTokens);
                 }
 
             }
@@ -108,6 +108,19 @@ namespace MusicTime
             }
 
         }
+
+        public static async Task UpdateSlackAccesInfoAsync(Auths auths)
+        {
+            if(auths !=null)
+            {
+                SoftwareCoUtil.setItem("slack_access_token", auths.AccessToken);
+            }
+            else
+            {
+                SoftwareCoUtil.setItem("slack_access_token", null);
+            }
+        }
+
         public static List<Device> getDevices()
         {
             List<Device> devices = null;
@@ -190,7 +203,7 @@ namespace MusicTime
             return currentDeviceId;
         }
 
-        public static void cleaclearSpotifyAccessInfo(SpotifyTokens spotifyTokens)
+        public static void clearSpotifyAccessInfo(SpotifyTokens spotifyTokens)
         {
             CodyConfig codyConfig = CodyConfig.getInstance;
             codyConfig.spotifyClientId = spotifyTokens.clientId;

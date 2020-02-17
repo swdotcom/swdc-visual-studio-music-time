@@ -98,15 +98,17 @@
       </Button>
       <Button guid="guidMusicTimeCoPackageCmdSet" id="cmdidSoftwareConnectSlackCommand" priority="0x0100" type="Button">
         <Parent guid="guidMusicTimeCoPackageCmdSet" id="MyMenuGroup" />
-       
+        <CommandFlag>DynamicVisibility</CommandFlag>
         <Strings>
           <ButtonText>Connect Slack</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidMusicTimeCoPackageCmdSet" id="cmdidSoftwareDisconnectSlackCommand" priority="0x0100" type="Button">
         <Parent guid="guidMusicTimeCoPackageCmdSet" id="MyMenuGroup" />
-      
+        <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>DefaultDisabled</CommandFlag>
+        
         <Strings>
           <ButtonText>Disconnect Slack</ButtonText>
         </Strings>

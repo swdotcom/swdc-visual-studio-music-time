@@ -96,7 +96,7 @@ namespace MusicTime
             return item;
         }
 
-        public static string ResizeSongName(string text)
+       public static string ResizeSongName(string text)
         {
             string result = string.Empty;
             if (text.Length > 20)

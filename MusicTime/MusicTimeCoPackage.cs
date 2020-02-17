@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -44,8 +43,9 @@ namespace MusicTime
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(MusicTimeCoPackage.PackageGuidString)]
-    [ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
+    //[ProvideAutoLoad(UIContextGuids.NoSolution, PackageAutoLoadFlags.BackgroundLoad)]
     [ProvideAutoLoad(UIContextGuids.SolutionExists, PackageAutoLoadFlags.BackgroundLoad)]
+    //[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string, PackageAutoLoadFlags.BackgroundLoad)]
     //[ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExistsAndFullyLoaded_string, PackageAutoLoadFlags.BackgroundLoad)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     [ProvideToolWindow(typeof(SpotifyPlayList))]
@@ -55,20 +55,13 @@ namespace MusicTime
         /// MusicTimeCoPackage GUID string.
         /// </summary>
         public const string PackageGuidString = "cfba9e1f-15c0-4c56-806f-2a8f5060a535";
-
         public static DTE2 ObjDte;
         private DTEEvents _dteEvents;
-        private DocumentEvents _docEvents;
-        private WindowEvents _windowEvents;
-        private TextDocumentKeyPressEvents _textDocKeyEvent;
-
         private System.Threading.Timer timer;
         private System.Threading.Timer DeviceTimer;
         private System.Threading.Timer TrackStatusBar;
         private System.Threading.Timer OnlineCheckerTimer;
         private System.Threading.Timer PlaylistUpdate;
-
-
         private static int ONE_SECOND = 1000;
         private static int THIRTY_SECONDS = 1000 * 30;
         private static int ONE_MINUTE = THIRTY_SECONDS * 2;
@@ -83,10 +76,6 @@ namespace MusicTime
         // public static UserStatus spotifyUser = new UserStatus();
         private static MusicStatusBar _musicStatus ;
         private static TrackStatus trackStatus = new TrackStatus();
-
-
-        private DateTime _lastPostTime = DateTime.UtcNow;
-        private SoftwareData _softwareData;
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicTimeCoPackage"/> class.
         /// </summary>
@@ -116,12 +105,16 @@ namespace MusicTime
             _dteEvents = ObjDte.Events.DTEEvents;
             _dteEvents.OnStartupComplete += OnOnStartupComplete;
             InitializeListenersAsync();
-
+           
+         
            
          
         }
 
-        
+        private void OnOnStartupComplete()
+        {
+            
+        }
 
         public static string GetVersion()
         {
@@ -135,21 +128,6 @@ namespace MusicTime
         private async Task InitializeListenersAsync()
         {
             Logger.Debug("Initialization");
-
-            // VisualStudio Object
-            Events2 events      = (Events2)ObjDte.Events;
-            _textDocKeyEvent    = events.TextDocumentKeyPressEvents;
-            _docEvents          = ObjDte.Events.DocumentEvents;
-
-            // setup event handlers
-            _textDocKeyEvent.AfterKeyPress  += AfterKeyPressedAsync;
-            _docEvents.DocumentOpened       += DocEventsOnDocumentOpenedAsync;
-            _docEvents.DocumentClosing      += DocEventsOnDocumentClosedAsync;
-            _docEvents.DocumentSaved        += DocEventsOnDocumentSaved;
-            _docEvents.DocumentOpening      += DocEventsOnDocumentOpeningAsync;
-
-
-
             await InitializeSoftwareStatusAsync();
            
             //Music Commands
@@ -247,422 +225,28 @@ namespace MusicTime
         //}
 
         private async void InitializeUserInfoAsync()
-        {
-           
+        {           
             bool jwtExists  = SoftwareCoUtil.jwtExists();
             UpdateMusicStatusBar(false);
-            Logger.Debug("isonlineCheck");
-            await SoftwareUserSession.isOnlineCheckAsync();
-            Logger.Debug("isonline");
-            bool online = MusicTimeCoPackage.isOnline;
+            Logger.Debug("onlinecheck");
+            await isOnlineCheckAsync();
+            Logger.Debug("Online");
+            bool online = isOnline;
             if (!jwtExists || !online)
             {
                 return;
             }
             else
             {
-                SoftwareUserSession.UserStatus status = await SoftwareUserSession.GetSpotifyUserStatusTokenAsync(online);
+                UserStatus status = await GetSpotifyUserStatusTokenAsync(online);
                 UpdateMusicStatusBar(status.loggedIn);
+                if(status.loggedIn)
+                {
+                    await GetSlackUserStatusTokenAsync(online);
+                }
             }
         }
-
-        public void Dispose()
-        {
-            if (timer != null)
-            {
-                _textDocKeyEvent.AfterKeyPress  -= AfterKeyPressedAsync;
-                _docEvents.DocumentOpened       -= DocEventsOnDocumentOpenedAsync;
-                _docEvents.DocumentClosing      -= DocEventsOnDocumentClosedAsync;
-                _docEvents.DocumentSaved        -= DocEventsOnDocumentSaved;
-                _docEvents.DocumentOpening      -= DocEventsOnDocumentOpeningAsync;
-
-                timer.Dispose();
-                timer = null;
-
-                // process any remaining data
-                // ProcessSoftwareDataTimerCallbackAsync(null);
-            }
-        }
-        #endregion
-
-        #region Event Handlers
-
-        private void DocEventsOnDocumentSaved(Document document)
-        {
-            if (document == null || document.FullName == null)
-            {
-                return;
-            }
-            String fileName = document.FullName;
-            if (_softwareData == null || !_softwareData.source.ContainsKey(fileName))
-            {
-                return;
-            }
-
-            InitializeSoftwareData(fileName);
-
-            FileInfo fi = new FileInfo(fileName);
-
-            _softwareData.UpdateData(fileName, "length", fi.Length);
-
-            
-        }
-
-        private async void DocEventsOnDocumentOpeningAsync(String docPath, Boolean readOnly)
-        {
-            FileInfo fi = new FileInfo(docPath);
-            String fileName = fi.FullName;
-            InitializeSoftwareData(fileName);
-
-            //Sets end and local_end for source file
-            await _IntialisefileMap(fileName);
-        }
-
-        private async void AfterKeyPressedAsync(
-            string Keypress, TextSelection Selection, bool InStatementCompletion)
-        {
-            String fileName = ObjDte.ActiveWindow.Document.FullName;
-            InitializeSoftwareData(fileName);
-
-            //Sets end and local_end for source file
-            await _IntialisefileMap(fileName);
-
-            if (ObjDte.ActiveWindow.Document.Language != null)
-            {
-                _softwareData.addOrUpdateFileStringInfo(fileName, "syntax", ObjDte.ActiveWindow.Document.Language);
-            }
-            if (!String.IsNullOrEmpty(Keypress))
-            {
-                FileInfo fi = new FileInfo(fileName);
-
-                bool isNewLine = false;
-                if (Keypress == "\b")
-                {
-                    // register a delete event
-                    _softwareData.UpdateData(fileName, "delete", 1);
-                    Logger.Info("Code Time: Delete character incremented");
-                }
-                else if (Keypress == "\r")
-                {
-                    isNewLine = true;
-                }
-                else
-                {
-                    _softwareData.UpdateData(fileName, "add", 1);
-                    Logger.Info("Code Time: KPM incremented");
-                }
-
-                if (isNewLine)
-                {
-                    _softwareData.addOrUpdateFileInfo(fileName, "linesAdded", 1);
-                }
-
-                _softwareData.keystrokes += 1;
-            }
-        }
-
-        private async void DocEventsOnDocumentOpenedAsync(Document document)
-        {
-            if (document == null || document.FullName == null)
-            {
-                return;
-            }
-            String fileName = document.FullName;
-            if (_softwareData == null || !_softwareData.source.ContainsKey(fileName))
-            {
-                return;
-            }
-            //Sets end and local_end for source file
-            await _IntialisefileMap(fileName);
-            try
-            {
-                _softwareData.UpdateData(fileName, "open", 1);
-                Logger.Info("Code Time: File open incremented");
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("DocEventsOnDocumentOpened", ex);
-            }
-        }
-
-        private async void DocEventsOnDocumentClosedAsync(Document document)
-        {
-            if (document == null || document.FullName == null)
-            {
-                return;
-            }
-            String fileName = document.FullName;
-            if (_softwareData == null || !_softwareData.source.ContainsKey(fileName))
-            {
-                return;
-            }
-            //Sets end and local_end for source file
-            await _IntialisefileMap(fileName);
-            try
-            {
-                _softwareData.UpdateData(fileName, "close", 1);
-                Logger.Info("Code Time: File close incremented");
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("DocEventsOnDocumentClosed", ex);
-            }
-        }
-
-        private void OnOnStartupComplete()
-        {
-            //
-        }
-        #endregion
-
-        #region Methods
-
-        private void InitializeSoftwareData(string fileName)
-        {
-            NowTime nowTime = SoftwareCoUtil.GetNowTime();
-            if (_softwareData == null || !_softwareData.initialized)
-            {
-
-
-                // get the project name
-                String projectName = "Untitled";
-                String directoryName = "Unknown";
-                if (ObjDte.Solution != null && ObjDte.Solution.FullName != null && !ObjDte.Solution.FullName.Equals(""))
-                {
-                    projectName = Path.GetFileNameWithoutExtension(ObjDte.Solution.FullName);
-                    string solutionFile = ObjDte.Solution.FullName;
-                    directoryName = Path.GetDirectoryName(solutionFile);
-                }
-                else
-                {
-                    directoryName = Path.GetDirectoryName(fileName);
-                }
-
-                if (_softwareData == null)
-                {
-                    ProjectInfo projectInfo = new ProjectInfo(projectName, directoryName);
-                    _softwareData = new SoftwareData(projectInfo);
-
-                }
-                else
-                {
-                    _softwareData.project.name = projectName;
-                    _softwareData.project.directory = directoryName;
-                }
-                _softwareData.start = nowTime.now;
-                _softwareData.local_start = nowTime.local_now;
-                _softwareData.initialized = true;
-                SoftwareCoUtil.SetTimeout(ONE_MINUTE, HasData, false);
-            }
-            _softwareData.EnsureFileInfoDataIsPresent(fileName, nowTime);
-        }
-        private async Task _IntialisefileMap(string fileName)
-        {
-
-            JsonObject localSource = new JsonObject();
-            foreach (var sourceFiles in _softwareData.source)
-            {
-                object outend = null;
-                JsonObject fileInfoData = null;
-                NowTime nowTime = SoftwareCoUtil.GetNowTime();
-
-                if (fileName != sourceFiles.Key)
-                {
-                    fileInfoData = (JsonObject)sourceFiles.Value;
-                    fileInfoData.TryGetValue("end", out outend);
-
-                    if (long.Parse(outend.ToString()) == 0)
-                    {
-
-                        fileInfoData["end"] = nowTime.now;
-                        fileInfoData["local_end"] = nowTime.local_now;
-
-                    }
-                    localSource.Add(sourceFiles.Key, fileInfoData);
-                }
-                else
-                {
-                    fileInfoData = (JsonObject)sourceFiles.Value;
-                    fileInfoData["end"] = 0;
-                    fileInfoData["local_end"] = 0;
-                    localSource.Add(sourceFiles.Key, fileInfoData);
-                }
-
-                _softwareData.source = localSource;
-
-            }
-
-
-        }
-        public void HasData()
-        {
-
-            if (_softwareData.initialized && (_softwareData.keystrokes > 0 || _softwareData.source.Count > 0) && _softwareData.project != null && _softwareData.project.name != null)
-            {
-
-                SoftwareCoUtil.SetTimeout(ZERO_SECOND, PostData, false);
-            }
-
-        }
-
-        public void PostData()
-        {
-            double offset = 0;
-            long end = 0;
-            long local_end = 0;
-
-            NowTime nowTime = SoftwareCoUtil.GetNowTime();
-            DateTime now = DateTime.UtcNow;
-            if (_softwareData.source.Count > 0)
-            {
-                offset = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).TotalMinutes;
-                _softwareData.offset = Math.Abs((int)offset);
-                if (TimeZone.CurrentTimeZone.DaylightName != null
-                    && TimeZone.CurrentTimeZone.DaylightName != TimeZone.CurrentTimeZone.StandardName)
-                {
-                    _softwareData.timezone = TimeZone.CurrentTimeZone.DaylightName;
-                }
-                else
-                {
-                    _softwareData.timezone = TimeZone.CurrentTimeZone.StandardName;
-                }
-
-                foreach (KeyValuePair<string, object> sourceFiles in _softwareData.source)
-                {
-
-                    JsonObject fileInfoData = null;
-                    fileInfoData = (JsonObject)sourceFiles.Value;
-                    object outend;
-                    fileInfoData.TryGetValue("end", out outend);
-
-                    if (long.Parse(outend.ToString()) == 0)
-                    {
-
-                        end = nowTime.now;
-                        local_end = nowTime.local_now;
-                        _softwareData.addOrUpdateFileInfo(sourceFiles.Key, "end", end);
-                        _softwareData.addOrUpdateFileInfo(sourceFiles.Key, "local_end", local_end);
-
-                    }
-
-                }
-
-                try
-                {
-
-                    _softwareData.end = nowTime.now;
-                    _softwareData.local_end = nowTime.local_now;
-
-                }
-                catch (Exception)
-
-                {
-
-                }
-
-                string softwareDataContent = _softwareData.GetAsJson();
-                Logger.Info("Code Time: sending: " + softwareDataContent);
-
-                if (SoftwareCoUtil.isTelemetryOn())
-                {
-                    StorePayload(_softwareData);
-
-                }
-                else
-                {
-                    Logger.Info("Code Time metrics are currently paused.");
-
-                }
-
-                _softwareData.ResetData();
-                _lastPostTime = now;
-            }
-
-        }
-
-        private void StorePayload(SoftwareData _softwareData)
-        {
-            if (_softwareData != null)
-            {
-                
-                string softwareDataContent = _softwareData.GetAsJson();
-
-                string datastoreFile = SoftwareCoUtil.getSoftwareDataStoreFile();
-                // append to the file
-                File.AppendAllText(datastoreFile, softwareDataContent + Environment.NewLine);
-
-               
-            }
-        }
-
-        private async void SendOfflineData(object stateinfo)
-        {
-            Logger.Info(DateTime.Now.ToString());
-
-            bool online = MusicTimeCoPackage.isOnline;
-            if (!online)
-            {
-                return;
-            }
-
-            string datastoreFile = SoftwareCoUtil.getSoftwareDataStoreFile();
-            if (File.Exists(datastoreFile))
-            {
-                // get the content
-                string[] lines = File.ReadAllLines(datastoreFile);
-
-                if (lines != null && lines.Length > 0)
-                {
-                    List<String> jsonLines = new List<string>();
-                    foreach (string line in lines)
-                    {
-                        if (line != null && line.Trim().Length > 0)
-                        {
-                            jsonLines.Add(line);
-                        }
-                    }
-                    string jsonContent = "[" + string.Join(",", jsonLines) + "]";
-                    HttpResponseMessage response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Post, "/data/batch", jsonContent);
-                    if (SoftwareHttpManager.IsOk(response))
-                    {
-                        // delete the file
-                        File.Delete(datastoreFile);
-                    }
-                }
-            }
-
-           
-        }
-
-        private async void SendSongSessionPayload(String songSession)
-        {
-            Logger.Info(DateTime.Now.ToString());
-            string responseBody             = null;
-            HttpResponseMessage response    = null;
-            string app_jwt                  = SoftwareUserSession.GetJwt();
-            bool online                     = MusicTimeCoPackage.isOnline;
-            if (!online)
-            {
-                return;
-            }
-            
-            string api = "/music/session";
-
-            if (!string.IsNullOrEmpty(app_jwt))
-            {
-                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Post, api, songSession, app_jwt);
-                if (SoftwareHttpManager.IsOk(response))
-                {
-                    responseBody = await response.Content.ReadAsStringAsync();
-                   
-                }
-
-            }
-
-
-
-        }
-
+        
         public static async void UpdateUserStatusAsync(object state)
         {
             try

@@ -46,7 +46,7 @@ namespace MusicTime
 
 
 
-                String qryStr = "/auth/spotify?token=" + app_jwt + "&mac=" + SoftwareCoUtil.isMac().ToString().ToLower();
+                string qryStr = "/auth/spotify?token=" + app_jwt + "&mac=" + SoftwareCoUtil.isMac().ToString().ToLower();
 
                 launchWebUrl(Constants.api_endpoint + qryStr);
                 try
@@ -139,7 +139,7 @@ namespace MusicTime
             string spotify_refresh_token    = (string)SoftwareCoUtil.getItem("spotify_refresh_token");
             string responseBody             = null;
             Auths auths                     = null;
-            SpotifyParam spotifyParam       = new SpotifyParam();
+            UserState userState       = new UserState();
 
             HttpResponseMessage response    = null;
 
@@ -150,31 +150,31 @@ namespace MusicTime
                 if (SoftwareHttpManager.IsOk(response))
                 {
                     responseBody = await response.Content.ReadAsStringAsync();
-                    spotifyParam    = JsonConvert.DeserializeObject<SpotifyParam>(responseBody);
+                    userState = JsonConvert.DeserializeObject<UserState>(responseBody);
 
-                    if(spotifyParam.State =="OK")
+                    if(userState.State =="OK")
                     {
                         string email = (string)SoftwareCoUtil.getItem("name");
-                        if(email!=spotifyParam.Email)
+                        if(email!= userState.Email)
                         {
-                            SoftwareCoUtil.setItem("name", spotifyParam.Email);
+                            SoftwareCoUtil.setItem("name", userState.Email);
                         }
-                        if (spotifyParam.Jwt != app_jwt && spotifyParam.Jwt !=null)
+                        if (userState.Jwt != app_jwt && userState.Jwt !=null)
                         {
                             // update it
-                            SoftwareCoUtil.setItem("jwt", spotifyParam.Jwt);
+                            SoftwareCoUtil.setItem("jwt", userState.Jwt);
                         }
 
-                        if (spotifyParam.User.Auths != null)
+                        if (userState.User.Auths != null)
                         {
-                            auths = new Auths();
+                            
 
-                            for (int i = 0; i < spotifyParam.User.Auths.Length; i++)
+                            for (int i = 0; i < userState.User.Auths.Length; i++)
                             {
-                                if (spotifyParam.User.Auths[i].Type == "spotify")
+                                if (userState.User.Auths[i].Type == "spotify")
                                 {
-
-                                    auths = spotifyParam.User.Auths[i];
+                                    auths = new Auths();
+                                    auths = userState.User.Auths[i];
 
                                     auths.LoggedIn = true;
 
@@ -215,7 +215,7 @@ namespace MusicTime
                 response = await SoftwareHttpManager.SendRequestPutAsync(api,null);
                 if (SoftwareHttpManager.IsOk(response))
                 {
-                    MusicManager.cleaclearSpotifyAccessInfo(spotifyTokens);
+                    MusicManager.clearSpotifyAccessInfo(spotifyTokens);
                     MusicTimeCoPackage.UpdateUserStatusAsync(null);
                 }
             

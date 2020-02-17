@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace MusicTime
 {
 
-    public partial class SpotifyParam
+    public partial class UserState
     {
         [JsonProperty("state")]
         public string State { get; set; }

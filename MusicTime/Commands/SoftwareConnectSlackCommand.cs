@@ -28,7 +28,7 @@ namespace MusicTime
         /// VS Package that provides this command, not null.
         /// </summary>
         private readonly AsyncPackage package;
-
+        private static MenuCommand menuItem;
         /// <summary>
         /// Initializes a new instance of the <see cref="SoftwareConnectSlackCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
@@ -41,7 +41,7 @@ namespace MusicTime
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
-            var menuItem = new MenuCommand(this.Execute, menuCommandID);
+             menuItem = new MenuCommand(this.Execute, menuCommandID);
             commandService.AddCommand(menuItem);
         }
 
@@ -88,18 +88,22 @@ namespace MusicTime
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
-            ThreadHelper.ThrowIfNotOnUIThread();
-            string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
-            string title = "SoftwareConnectSlackCommand";
+            SlackControlManager.ConnectToSlackAsync();
+        }
+        public static async void UpdateEnabledState(bool Connected)
+        {
+            if (menuItem != null)
+            {
+                if (Connected)
+                {
+                    menuItem.Visible = true;
 
-            // Show a message box to prove we were here
-            VsShellUtilities.ShowMessageBox(
-                this.package,
-                message,
-                title,
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                }
+                else
+                {
+                    menuItem.Visible = false;
+                }
+            }
         }
     }
 }
