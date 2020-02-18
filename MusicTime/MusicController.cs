@@ -13,7 +13,7 @@ namespace MusicTime
     {
        private static MusicManager musicManager = MusicManager.getInstance;
        private static Device device             = Device.getInstance;
-
+       private static MusicStateManager musicStateManager = MusicStateManager.getInstance; 
         public static async void PlayPauseTrackAsync()
         {
             try

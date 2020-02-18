@@ -33,9 +33,6 @@ namespace MusicTime
             }
         }
         public static SpotifyUser _spotifyUser { get; set; }
-        public  List<PlaylistItem> _spotifyPlaylists { get; set; }
-        public  List<PlaylistItem> _savedPlaylists { get; set; }
-        public  List<PlaylistItem> _musictimePlaylists { get; set; }
         public  List<PlaylistItem> _usersPlaylists { get; set; }
 
         public async Task UpdateSpotifyAccessInfoAsync(Auths auths, SpotifyTokens spotifyTokens)
@@ -93,7 +90,7 @@ namespace MusicTime
             return isTrackPlaying;
         }
 
-        public static async Task<string> CurrentTrack()
+        public static async Task<string> CurrentTrackAsync()
         {
             trackStatus = await SpotifyCurrentTrackAsync();
             return trackStatus.item.name.ToString();
@@ -396,6 +393,29 @@ namespace MusicTime
                 trackStatus         = JsonConvert.DeserializeObject<TrackStatus>(responseBody);
             }
             return trackStatus;
+        }
+        public  async Task<Track> GetCurrentTrackAsync()
+        {
+            HttpResponseMessage response = null;
+            Track track = null;
+            string api = "/v1/me/player/currently-playing?" + getActiveDeviceID();
+
+            response = await MusicClient.SpotifyApiGetAsync(api);
+
+            if (response == null || !MusicClient.IsOk(response))
+            {
+                // refresh the tokens
+                await MusicClient.refreshSpotifyTokenAsync();
+                // Try again
+                response = await MusicClient.SpotifyApiGetAsync(api);
+            }
+
+            if (MusicClient.IsOk(response))
+            {
+                string responseBody = await response.Content.ReadAsStringAsync();
+                track = JsonConvert.DeserializeObject<Track>(responseBody);
+            }
+            return track;
         }
         public static async Task<List<Track>> getAITop40TracksAsync()
         {

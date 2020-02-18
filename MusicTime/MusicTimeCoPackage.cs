@@ -56,7 +56,10 @@ namespace MusicTime
         /// </summary>
         public const string PackageGuidString = "cfba9e1f-15c0-4c56-806f-2a8f5060a535";
         public static DTE2 ObjDte;
+        private DocumentEvents _docEvents;
         private DTEEvents _dteEvents;
+        private TextDocumentKeyPressEvents _textDocKeyEvent;
+
         private System.Threading.Timer timer;
         private System.Threading.Timer DeviceTimer;
         private System.Threading.Timer TrackStatusBar;
@@ -76,6 +79,8 @@ namespace MusicTime
         // public static UserStatus spotifyUser = new UserStatus();
         private static MusicStatusBar _musicStatus ;
         private static TrackStatus trackStatus = new TrackStatus();
+        private SoftwareData _softwareData;
+        private DateTime _lastPostTime = DateTime.UtcNow;
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicTimeCoPackage"/> class.
         /// </summary>
@@ -105,17 +110,9 @@ namespace MusicTime
             _dteEvents = ObjDte.Events.DTEEvents;
             _dteEvents.OnStartupComplete += OnOnStartupComplete;
             InitializeListenersAsync();
-           
-         
-           
-         
-        }
 
-        private void OnOnStartupComplete()
-        {
-            
         }
-
+        
         public static string GetVersion()
         {
             return string.Format("{0}.{1}.{2}", MusicTimeAssembly.Version.Major, MusicTimeAssembly.Version.Minor, MusicTimeAssembly.Version.Build);
@@ -127,9 +124,20 @@ namespace MusicTime
         }
         private async Task InitializeListenersAsync()
         {
+            await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             Logger.Debug("Initialization");
             await InitializeSoftwareStatusAsync();
-           
+            Events2 events = (Events2)ObjDte.Events;
+            _textDocKeyEvent = events.TextDocumentKeyPressEvents;
+            _docEvents = ObjDte.Events.DocumentEvents;
+
+            // setup event handlers
+            _textDocKeyEvent.AfterKeyPress += AfterKeyPressedAsync;
+            _docEvents.DocumentOpened += DocEventsOnDocumentOpenedAsync;
+            _docEvents.DocumentClosing += DocEventsOnDocumentClosedAsync;
+            _docEvents.DocumentSaved += DocEventsOnDocumentSaved;
+            _docEvents.DocumentOpening += DocEventsOnDocumentOpeningAsync;
+
             //Music Commands
             await SoftwareConnectSpotifyCommand.InitializeAsync(this);
             await SoftwareDisconnectSpotifyCommand.InitializeAsync(this);
@@ -156,29 +164,20 @@ namespace MusicTime
                      ONE_MINUTE,
                      ONE_MINUTE );
 
-            //timer = new System.Threading.Timer(
-            //         UpdateUserStatusAsync,
-            //         null,
-            //        ONE_MINUTE / 6,
-            //        ONE_MINUTE / 6);
-
+           
             DeviceTimer = new System.Threading.Timer(
                      GetDeviceIDLazilyAsync,
                      null,
-                     THIRTY_SECONDS/3,
-                     ONE_SECOND*5);
+                     THIRTY_SECONDS/2,
+                     ONE_SECOND*10);
 
             TrackStatusBar = new System.Threading.Timer(
                      UpdateCurrentTrackOnStatusAsync,
                      null,
                      ZERO_SECOND,
-                     ONE_SECOND*2);
+                     ONE_SECOND*15);
 
-            //PlaylistUpdate = new System.Threading.Timer(
-            //         UpdatePlaylistCallBackAsync,
-            //         null,
-            //         ONE_MINUTE / 2,
-            //         ONE_MINUTE / 4);
+          
 
             this.InitializeUserInfoAsync();
 
@@ -186,43 +185,7 @@ namespace MusicTime
 
         }
 
-        //private async void UpdatePlaylistCallBackAsync(object state)
-        //{
-        //    if (isOnline)
-        //    {
-        //        //Playlist.Liked_Playlist     = new List<Track>();
-        //        //Playlist.Software_Playlists = new List<Track>();
-
-        //        //Playlist.Liked_Playlist     = await Playlist.getSpotifyLikedSongsAsync();
-        //        //Playlist.Software_Playlists = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
-        //        await UpdateUsersPlaylistsAsync();
-        //    }
-
-        //}
-
-        //private async Task UpdateUsersPlaylistsAsync()
-        //{
-        //    try
-        //    {
-        //        List<Track> tracks = new List<Track>();
-        //        List<PlaylistItem> playlistItems    = await Playlist.getPlaylistsAsync();
-        //        Playlist.Users_Playlist             = new Dictionary<PlaylistItem, List<Track>>();
-
-        //        foreach (PlaylistItem playlists in playlistItems)
-        //        {
-        //            tracks = await Playlist.getPlaylistTracksAsync(playlists.id);
-        //            Playlist.Users_Playlist.Add(playlists, tracks);
-
-        //        }
-
-        //    }
-        //    catch (Exception e)
-        //    {
-
-
-        //    }
-
-        //}
+     
 
         private async void InitializeUserInfoAsync()
         {           
@@ -368,6 +331,317 @@ namespace MusicTime
             
         }
 
+        #region Event Handlers
+
+        private void DocEventsOnDocumentSaved(Document document)
+        {
+            if (document == null || document.FullName == null)
+            {
+                return;
+            }
+            String fileName = document.FullName;
+            if (_softwareData == null || !_softwareData.source.ContainsKey(fileName))
+            {
+                return;
+            }
+
+            InitializeSoftwareData(fileName);
+
+            FileInfo fi = new FileInfo(fileName);
+
+            _softwareData.UpdateData(fileName, "length", fi.Length);
+
+          
+        }
+
+        private async void DocEventsOnDocumentOpeningAsync(String docPath, Boolean readOnly)
+        {
+            FileInfo fi = new FileInfo(docPath);
+            String fileName = fi.FullName;
+            InitializeSoftwareData(fileName);
+
+            //Sets end and local_end for source file
+            await IntialisefileMap(fileName);
+        }
+
+        private async void AfterKeyPressedAsync(
+            string Keypress, TextSelection Selection, bool InStatementCompletion)
+        {
+            String fileName = ObjDte.ActiveWindow.Document.FullName;
+            InitializeSoftwareData(fileName);
+
+            //Sets end and local_end for source file
+            await IntialisefileMap(fileName);
+
+            if (ObjDte.ActiveWindow.Document.Language != null)
+            {
+                _softwareData.addOrUpdateFileStringInfo(fileName, "syntax", ObjDte.ActiveWindow.Document.Language);
+            }
+            if (!String.IsNullOrEmpty(Keypress))
+            {
+                FileInfo fi = new FileInfo(fileName);
+
+                bool isNewLine = false;
+                if (Keypress == "\b")
+                {
+                    // register a delete event
+                    _softwareData.UpdateData(fileName, "delete", 1);
+                    Logger.Info("Code Time: Delete character incremented");
+                }
+                else if (Keypress == "\r")
+                {
+                    isNewLine = true;
+                }
+                else
+                {
+                    _softwareData.UpdateData(fileName, "add", 1);
+                    Logger.Info("Code Time: KPM incremented");
+                }
+
+                if (isNewLine)
+                {
+                    _softwareData.addOrUpdateFileInfo(fileName, "linesAdded", 1);
+                }
+
+                _softwareData.keystrokes += 1;
+            }
+        }
+
+        private async void DocEventsOnDocumentOpenedAsync(Document document)
+        {
+            if (document == null || document.FullName == null)
+            {
+                return;
+            }
+            String fileName = document.FullName;
+            if (_softwareData == null || !_softwareData.source.ContainsKey(fileName))
+            {
+                return;
+            }
+            //Sets end and local_end for source file
+            await IntialisefileMap(fileName);
+            try
+            {
+                _softwareData.UpdateData(fileName, "open", 1);
+                Logger.Info("Code Time: File open incremented");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("DocEventsOnDocumentOpened", ex);
+            }
+        }
+
+        private async void DocEventsOnDocumentClosedAsync(Document document)
+        {
+            if (document == null || document.FullName == null)
+            {
+                return;
+            }
+            String fileName = document.FullName;
+            if (_softwareData == null || !_softwareData.source.ContainsKey(fileName))
+            {
+                return;
+            }
+            //Sets end and local_end for source file
+            await IntialisefileMap(fileName);
+            try
+            {
+                _softwareData.UpdateData(fileName, "close", 1);
+                Logger.Info("Code Time: File close incremented");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("DocEventsOnDocumentClosed", ex);
+            }
+        }
+        private void InitializeSoftwareData(string fileName)
+        {
+            string MethodName = "InitializeSoftwareData";
+            NowTime nowTime = SoftwareCoUtil.GetNowTime();
+            if (_softwareData == null || !_softwareData.initialized)
+            {
+
+
+                // get the project name
+                String projectName = "Untitled";
+                String directoryName = "Unknown";
+                if (ObjDte.Solution != null && ObjDte.Solution.FullName != null && !ObjDte.Solution.FullName.Equals(""))
+                {
+                    projectName = Path.GetFileNameWithoutExtension(ObjDte.Solution.FullName);
+                    string solutionFile = ObjDte.Solution.FullName;
+                    directoryName = Path.GetDirectoryName(solutionFile);
+                }
+                else
+                {
+                    directoryName = Path.GetDirectoryName(fileName);
+                }
+
+                if (_softwareData == null)
+                {
+                    ProjectInfo projectInfo = new ProjectInfo(projectName, directoryName);
+                    _softwareData = new SoftwareData(projectInfo);
+
+                }
+                else
+                {
+                    _softwareData.project.name = projectName;
+                    _softwareData.project.directory = directoryName;
+                }
+                _softwareData.start = nowTime.now;
+                _softwareData.local_start = nowTime.local_now;
+                _softwareData.initialized = true;
+                SoftwareCoUtil.SetTimeout(ONE_MINUTE, HasData, false);
+            }
+            _softwareData.EnsureFileInfoDataIsPresent(fileName, nowTime);
+        }
+        private async Task IntialisefileMap(string fileName)
+        {
+
+            JsonObject localSource = new JsonObject();
+            foreach (var sourceFiles in _softwareData.source)
+            {
+                object outend = null;
+                JsonObject fileInfoData = null;
+                NowTime nowTime = SoftwareCoUtil.GetNowTime();
+
+                if (fileName != sourceFiles.Key)
+                {
+                    fileInfoData = (JsonObject)sourceFiles.Value;
+                    fileInfoData.TryGetValue("end", out outend);
+
+                    if (long.Parse(outend.ToString()) == 0)
+                    {
+
+                        fileInfoData["end"] = nowTime.now;
+                        fileInfoData["local_end"] = nowTime.local_now;
+
+                    }
+                    localSource.Add(sourceFiles.Key, fileInfoData);
+                }
+                else
+                {
+                    fileInfoData = (JsonObject)sourceFiles.Value;
+                    fileInfoData["end"] = 0;
+                    fileInfoData["local_end"] = 0;
+                    localSource.Add(sourceFiles.Key, fileInfoData);
+                }
+
+                _softwareData.source = localSource;
+
+            }
+
+
+        }
+
+        public void HasData()
+        {
+
+            if (_softwareData.initialized && (_softwareData.keystrokes > 0 || _softwareData.source.Count > 0) && _softwareData.project != null && _softwareData.project.name != null)
+            {
+
+                SoftwareCoUtil.SetTimeout(ZERO_SECOND, PostData, false);
+            }
+
+        }
+
+        public void PostData()
+        {
+            double offset   = 0;
+            long end        = 0;
+            long local_end  = 0;
+
+            NowTime nowTime = SoftwareCoUtil.GetNowTime();
+            DateTime now    = DateTime.UtcNow;
+            if (_softwareData.source.Count > 0)
+            {
+                offset = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).TotalMinutes;
+                _softwareData.offset = Math.Abs((int)offset);
+                if (TimeZone.CurrentTimeZone.DaylightName != null
+                    && TimeZone.CurrentTimeZone.DaylightName != TimeZone.CurrentTimeZone.StandardName)
+                {
+                    _softwareData.timezone = TimeZone.CurrentTimeZone.DaylightName;
+                }
+                else
+                {
+                    _softwareData.timezone = TimeZone.CurrentTimeZone.StandardName;
+                }
+
+                foreach (KeyValuePair<string, object> sourceFiles in _softwareData.source)
+                {
+
+                    JsonObject fileInfoData = null;
+                    fileInfoData = (JsonObject)sourceFiles.Value;
+                    object outend;
+                    fileInfoData.TryGetValue("end", out outend);
+
+                    if (long.Parse(outend.ToString()) == 0)
+                    {
+
+                        end = nowTime.now;
+                        local_end = nowTime.local_now;
+                        _softwareData.addOrUpdateFileInfo(sourceFiles.Key, "end", end);
+                        _softwareData.addOrUpdateFileInfo(sourceFiles.Key, "local_end", local_end);
+
+                    }
+
+                }
+
+                try
+                {
+
+                    _softwareData.end = nowTime.now;
+                    _softwareData.local_end = nowTime.local_now;
+
+                }
+                catch (Exception)
+
+                {
+
+                }
+
+                string softwareDataContent = _softwareData.GetAsJson();
+                Logger.Info("Code Time: sending: " + softwareDataContent);
+
+                if (SoftwareCoUtil.isTelemetryOn())
+                {
+                    StorePayload(_softwareData);
+                }
+                else
+                {
+                    Logger.Info("Code Time metrics are currently paused.");
+
+                }
+
+                _softwareData.ResetData();
+                _lastPostTime = now;
+            }
+
+        }
+
+        private void StorePayload(SoftwareData _softwareData)
+        {
+            if (_softwareData != null)
+            {
+
+                long keystrokes             = _softwareData.keystrokes;
+
+                string softwareDataContent  = _softwareData.GetAsJson();
+
+                string datastoreFile        = SoftwareCoUtil.getSoftwareDataStoreFile();
+                // append to the file
+                File.AppendAllText(datastoreFile, softwareDataContent + Environment.NewLine);
+                
+            }
+        }
+
+        private void OnOnStartupComplete()
+        {
+            //
+        }
+        #endregion
+
+
+
         public static class MusicTimeAssembly
         {
             static readonly Assembly Reference      = typeof(MusicTimeAssembly).Assembly;
@@ -410,7 +684,23 @@ namespace MusicTime
                 _musicStatus = new MusicStatusBar(statusbar);
             }
         }
+        public void Dispose()
+        {
+            if (timer != null)
+            {
+                _textDocKeyEvent.AfterKeyPress -= AfterKeyPressedAsync;
+                _docEvents.DocumentOpened -= DocEventsOnDocumentOpenedAsync;
+                _docEvents.DocumentClosing -= DocEventsOnDocumentClosedAsync;
+                _docEvents.DocumentSaved -= DocEventsOnDocumentSaved;
+                _docEvents.DocumentOpening -= DocEventsOnDocumentOpeningAsync;
 
+                timer.Dispose();
+                timer = null;
+
+                // process any remaining data
+                // ProcessSoftwareDataTimerCallbackAsync(null);
+            }
+        }
         #endregion
     }
 }

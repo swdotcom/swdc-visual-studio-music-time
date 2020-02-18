@@ -62,6 +62,7 @@
     <Compile Include="MusicClient.cs" />
     <Compile Include="MusicController.cs" />
     <Compile Include="MusicManager.cs" />
+    <Compile Include="MusicStateManager.cs" />
     <Compile Include="MusicStatusBar.cs" />
     <Compile Include="MusicTimeCoPackage.cs" />
     <Compile Include="MusicUtil.cs" />
