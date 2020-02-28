@@ -205,6 +205,10 @@ namespace MusicTime
         {
             return getSoftwareDataDir(true) + "\\data.json";
         }
+        public static string getMusicDataStoreFile()
+        {
+            return getSoftwareDataDir(true) + "\\musicData.json";
+        }
         public static bool isMac()
         {
             PlatformID platformID = Environment.OSVersion.Platform;

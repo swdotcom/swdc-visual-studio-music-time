@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,6 +74,26 @@ namespace MusicTime
 
         public List<Device> devices { get; set; }
     }
+
+
+    public enum trackState
+    {
+        Playing ,
+        Paused ,
+        Advertisement ,
+        NotAssigned,
+        GrantError 
+    }
+    public enum PlayerType
+    {
+        MacItunesDesktop ,
+        MacSpotifyDesktop,
+        WindowsSpotifyDesktop,
+        WebSpotify,
+        NotAssigned,
+        track
+    }
+
     public partial class ExternalUrls
     {
         private string spotify { get; set; }
@@ -98,6 +120,7 @@ namespace MusicTime
         public string name { get; set; }
         public string type { get; set; }
         public string uri { get; set; }
+        public List<string> genres { get; set; }
     }
 
     public class ExternalUrls3
@@ -115,7 +138,7 @@ namespace MusicTime
     public class Album
     {
         public string album_type { get; set; }
-        public List<Artist> artists { get; set; }
+        public List<Artist> artists_name { get; set; }
         public List<string> available_markets { get; set; }
         public ExternalUrls3 external_urls { get; set; }
         public string href { get; set; }
@@ -164,11 +187,23 @@ namespace MusicTime
     }
     public class Track
     {
+        // start and end are in seconds
+        public long start { get; set; }
+        public long local_start { get; set; }
+        public long end { get; set; }
+        public long local_end { get; set; }
+        public string timezone { get; set; }
+        public double offset { get; set; } // in minutes
+        public string os { get; set; }
+        public string version { get; set; }
         public Album album { get; set; }
-        public List<Artist2> artists { get; set; }
+        public string artist { get; set; }
+        public List<string> artist_names { get; set; }
+        public List<Artist> artists { get; set; }
         public List<string> available_markets { get; set; }
-        public int disc_number { get; set; }
-        public int duration_ms { get; set; }
+        public double disc_number { get; set; }
+        public double duration { get; set; }
+        public double duration_ms { get; set; }
         public bool @explicit { get; set; }
         public ExternalIds external_ids { get; set; }
         public ExternalUrls5 external_urls { get; set; }
@@ -176,13 +211,46 @@ namespace MusicTime
         public string id { get; set; }
         public bool is_local { get; set; }
         public string name { get; set; }
-        public int popularity { get; set; }
+        public double popularity { get; set; }
         public string preview_url { get; set; }
-        public int track_number { get; set; }
-        public string type { get; set; }
+        public double track_number { get; set; }
+        public PlayerType player_type { get; set; }
         public string uri { get; set; }
+        public string genre { get; set; }
+        public string error { get; set; }
+        public bool loved { get; set; }
+        public double played_count { get; set; }
+        public double volume { get; set; }
+        public double progress_ms { get; set; }
+        public AudioFeature features { get; set; } 
+        public trackState state { get; set; }
+        public string type { get; set; }
+        public List<JsonObject> source = new List<JsonObject>();
     }
 
+    //public class SpotifyAudioFeature
+    //{
+    //    public string id { get; set; }
+    //    public string uri { get; set; }
+    //    public string track_href { get; set; }
+    //    public string analysis_url { get; set; }
+      
+    //    public double danceability { get; set; }
+    //    public double energy { get; set; }
+    //    public double key { get; set; }
+    //    public double loudness { get; set; }
+    //    public double mode { get; set; }
+    //    public double speechiness { get; set; }
+    //    public double acousticness { get; set; }
+    //    public double instrumentalness { get; set; }
+    //    public double liveness { get; set; }
+    //    public double valence { get; set; }
+    //    public double tempo { get; set; }
+    //    public double duration_ms { get; set; }
+    //    public double time_signature { get; set; }
+
+    //}
+    
     public class Disallows
     {
         public bool resuming { get; set; }
@@ -217,6 +285,7 @@ namespace MusicTime
         public DateTime added_at { get; set; }
         public Track track { get; set; }
     }
+
     public class SpotifySongs
     {
         public List<PlaylistItem> items { get; set; }
@@ -238,6 +307,7 @@ namespace MusicTime
         public Actions actions { get; set; }
         public bool is_playing { get; set; }
     }
+
     public class options
     {
         public string playlist_id { get; set; }
@@ -251,6 +321,7 @@ namespace MusicTime
         }
     }
 
+   
     public class AiGeneratedPlaylistItem
     {
         public bool collaborative { get; set; }
@@ -259,5 +330,93 @@ namespace MusicTime
         public string name { get; set; }
         public int deleted { get; set; }
         public int playlistTypeId { get; set; }
+    }
+
+     
+
+    public partial class SpotifyAudioFeature
+    {
+        [JsonProperty("audio_features")]
+        public List<AudioFeature> AudioFeatures { get; set; }
+    }
+
+    public partial class AudioFeature
+    {
+        [JsonProperty("danceability")]
+        public double Danceability { get; set; }
+
+        [JsonProperty("energy")]
+        public double Energy { get; set; }
+
+        [JsonProperty("key")]
+        public long Key { get; set; }
+
+        [JsonProperty("loudness")]
+        public double Loudness { get; set; }
+
+        [JsonProperty("mode")]
+        public long Mode { get; set; }
+
+        [JsonProperty("speechiness")]
+        public double Speechiness { get; set; }
+
+        [JsonProperty("acousticness")]
+        public double Acousticness { get; set; }
+
+        [JsonProperty("instrumentalness")]
+        public double Instrumentalness { get; set; }
+
+        [JsonProperty("liveness")]
+        public double Liveness { get; set; }
+
+        [JsonProperty("valence")]
+        public double Valence { get; set; }
+
+        [JsonProperty("tempo")]
+        public double Tempo { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
+
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("uri")]
+        public string Uri { get; set; }
+
+        [JsonProperty("track_href")]
+        public Uri TrackHref { get; set; }
+
+        [JsonProperty("analysis_url")]
+        public Uri AnalysisUrl { get; set; }
+
+        [JsonProperty("duration_ms")]
+        public long DurationMs { get; set; }
+
+        [JsonProperty("time_signature")]
+        public long TimeSignature { get; set; }
+    }
+
+    public partial class SpotifyAudioFeature
+    {
+        public static SpotifyAudioFeature FromJson(string json) => JsonConvert.DeserializeObject<SpotifyAudioFeature>(json, MusicTime.Converter.Settings);
+    }
+
+    public static class Serializes
+    {
+        public static string ToJson(this SpotifyAudioFeature self) => JsonConvert.SerializeObject(self, MusicTime.Converter.Settings);
+    }
+
+    internal static class Converters
+    {
+        public static readonly JsonSerializerSettings Settings = new JsonSerializerSettings
+        {
+            MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+            DateParseHandling = DateParseHandling.None,
+            Converters =
+            {
+                new IsoDateTimeConverter { DateTimeStyles = DateTimeStyles.AssumeUniversal }
+            },
+        };
     }
 }

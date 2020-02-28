@@ -26,6 +26,9 @@ namespace MusicTime
         internal const string SOFTWARE_TOP_40_ID        = "6jCkTED0V5NEuM8sKbGG1Z";
         internal const string PERSONAL_TOP_SONGS_NAME   = "My AI Top 40";
         internal const int PERSONAL_TOP_SONGS_PLID      = 1;
+        internal static List<string> spotifyGenres = new List<string>() { "summer", "pop", "mood", "electronicdance", "edm", "decades", "hiphop", "rap", "hip-hop", "chill", "workout", "party", "focus", "sleep", "pride", "rock", "dinner", "jazz", "r&b", "rhythm", "romance", "soul", "indie", "gaming", "classical", "heavy metal", "latin", "kids&family", "reggae", "blues", "funk", "punk", "country", "folk", "acoustic", "desi", "arab", "afro","travel", "k-pop"};
+
+
         internal static string EditorVersion
         {
             get

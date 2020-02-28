@@ -20,7 +20,7 @@ namespace MusicTime
         // non-hardcoded attributes
         public JsonObject source = new JsonObject();
         public long keystrokes = 0; // keystroke count
-
+       
         // start and end are in seconds
         public long start;
         public long local_start;
@@ -37,6 +37,10 @@ namespace MusicTime
             project = projectInfo;
             version = MusicTimeCoPackage.GetVersion();
             os = MusicTimeCoPackage.GetOs();
+        }
+        public SoftwareData()
+        {
+
         }
 
         public void ResetData()
@@ -56,32 +60,36 @@ namespace MusicTime
         public IDictionary<string, object> GetAsDictionary()
         {
             IDictionary<string, object> dict = new Dictionary<string, object>();
+            dict.Add("pluginId", this.pluginId);
+            // jsonObj.Add("type", this.type);
+            dict.Add("keystrokes", this.keystrokes);
+            dict.Add("source", this.source);
             dict.Add("start", this.start);
             dict.Add("local_start", this.local_start);
-            dict.Add("pluginId", this.pluginId);
-            dict.Add("keystrokes", this.keystrokes);
-            dict.Add("type", this.type);
-            dict.Add("project", this.project.GetAsDictionary());
-            dict.Add("source", this.GetSourceDictionary());
             dict.Add("timezone", this.timezone);
             dict.Add("offset", this.offset);
+            dict.Add("version", this.version);
+            dict.Add("os", this.os);
+            dict.Add("project", this.project.GetAsJson());
+            dict.Add("end", this.end);
+            dict.Add("local_end", this.local_end);
             return dict;
         }
 
         public string GetAsJson()
         {
-            JsonObject jsonObj = new JsonObject();
-            jsonObj.Add("start", this.start);
-            jsonObj.Add("local_start", this.local_start);
+            JsonObject jsonObj = new JsonObject();     
             jsonObj.Add("pluginId", this.pluginId);
-            jsonObj.Add("type", this.type);
+           // jsonObj.Add("type", this.type);
             jsonObj.Add("keystrokes", this.keystrokes);
             jsonObj.Add("source", this.source);
-            jsonObj.Add("project", this.project.GetAsJson());
+            jsonObj.Add("start", this.start);
+            jsonObj.Add("local_start", this.local_start);
             jsonObj.Add("timezone", this.timezone);
             jsonObj.Add("offset", this.offset);
             jsonObj.Add("version", this.version);
             jsonObj.Add("os", this.os);
+            jsonObj.Add("project", this.project.GetAsJson());
             jsonObj.Add("end", this.end);
             jsonObj.Add("local_end", this.local_end);
             return jsonObj.ToString();

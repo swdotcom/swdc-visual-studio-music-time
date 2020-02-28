@@ -159,7 +159,8 @@ namespace MusicTime
                     //update codyConfig
                     spotifyTokens = JsonConvert.DeserializeObject<SpotifyAccessTokens>(responseBody);
                     codyConfig.spotifyAccessToken = spotifyTokens.access_token;
-
+                    SoftwareCoUtil.setItem("spotify_access_token", spotifyTokens.access_token);
+                   
                 }
 
             }

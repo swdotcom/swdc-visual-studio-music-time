@@ -74,12 +74,13 @@ namespace MusicTime
         private static long day_in_sec = 60 * 60 * 24;
         private static int ZERO_SECOND = 1;
         private bool connected = false;
-
+        public static bool isValidRunningOrPausedTrack = false;
         public static bool isOnline = false;
         // public static UserStatus spotifyUser = new UserStatus();
         private static MusicStatusBar _musicStatus ;
         private static TrackStatus trackStatus = new TrackStatus();
         private SoftwareData _softwareData;
+        public static JsonObject KeystrokeData = new JsonObject();
         private DateTime _lastPostTime = DateTime.UtcNow;
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicTimeCoPackage"/> class.
@@ -107,6 +108,7 @@ namespace MusicTime
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             ObjDte = await GetServiceAsync(typeof(DTE)) as DTE2;
+            
             _dteEvents = ObjDte.Events.DTEEvents;
             _dteEvents.OnStartupComplete += OnOnStartupComplete;
             InitializeListenersAsync();
@@ -175,7 +177,7 @@ namespace MusicTime
                      UpdateCurrentTrackOnStatusAsync,
                      null,
                      ZERO_SECOND,
-                     ONE_SECOND*15);
+                     ONE_SECOND*10);
 
           
 
@@ -191,7 +193,7 @@ namespace MusicTime
         {           
             bool jwtExists  = SoftwareCoUtil.jwtExists();
             UpdateMusicStatusBar(false);
-            Logger.Debug("onlinecheck");
+            Logger.Debug("Onlinecheck");
             await isOnlineCheckAsync();
             Logger.Debug("Online");
             bool online = isOnline;
@@ -309,22 +311,26 @@ namespace MusicTime
                     {
                         currentTrack = trackStatus.item.name;
                         _musicStatus.SetTrackName(Pause + " " + currentTrack);
+                        isValidRunningOrPausedTrack = true;
                     }
                     if (trackStatus.is_playing == false && trackStatus.item != null)
                     {
                         currentTrack = trackStatus.item.name;
                         _musicStatus.SetTrackName(Play + " " + currentTrack);
+                        isValidRunningOrPausedTrack = true;
                     }
                 }
                 else
                 {
                   
                     UpdateMusicStatusBar(true);
+                    isValidRunningOrPausedTrack = false;
                 }
             }
             else 
             {
-               
+
+                isValidRunningOrPausedTrack = false;
                 UpdateMusicStatusBar(false);
             }
            
@@ -622,15 +628,18 @@ namespace MusicTime
         {
             if (_softwareData != null)
             {
-
-                long keystrokes             = _softwareData.keystrokes;
-
+                
                 string softwareDataContent  = _softwareData.GetAsJson();
 
                 string datastoreFile        = SoftwareCoUtil.getSoftwareDataStoreFile();
                 // append to the file
                 File.AppendAllText(datastoreFile, softwareDataContent + Environment.NewLine);
                 
+            }
+            if(isValidRunningOrPausedTrack)
+            {
+                string musicDataFile = SoftwareCoUtil.getMusicDataStoreFile();
+                File.AppendAllText(musicDataFile, _softwareData.GetAsJson() + Environment.NewLine);
             }
         }
 
