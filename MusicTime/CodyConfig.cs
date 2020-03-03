@@ -194,6 +194,7 @@ namespace MusicTime
         public long local_end { get; set; }
         public string timezone { get; set; }
         public double offset { get; set; } // in minutes
+        public string pluginId { get; set; }
         public string os { get; set; }
         public string version { get; set; }
         public Album album { get; set; }
@@ -225,7 +226,7 @@ namespace MusicTime
         public AudioFeature features { get; set; } 
         public trackState state { get; set; }
         public string type { get; set; }
-        public List<JsonObject> source = new List<JsonObject>();
+       
     }
 
     //public class SpotifyAudioFeature
@@ -284,6 +285,53 @@ namespace MusicTime
         public string uri { get; set; }
         public DateTime added_at { get; set; }
         public Track track { get; set; }
+    }
+    public partial class SourceData
+    {
+        [JsonProperty("paste")]
+        public long Paste { get; set; }
+
+        [JsonProperty("open")]
+        public long Open { get; set; }
+
+        [JsonProperty("close")]
+        public long Close { get; set; }
+
+        [JsonProperty("delete")]
+        public long Delete { get; set; }
+
+        [JsonProperty("add")]
+        public long Add { get; set; }
+
+        [JsonProperty("netkeys")]
+        public long Netkeys { get; set; }
+
+        [JsonProperty("length")]
+        public long Length { get; set; }
+
+        [JsonProperty("lines")]
+        public long Lines { get; set; }
+
+        [JsonProperty("linesAdded")]
+        public long LinesAdded { get; set; }
+
+        [JsonProperty("linesRemoved")]
+        public long LinesRemoved { get; set; }
+
+        [JsonProperty("syntax")]
+        public string Syntax { get; set; }
+
+        [JsonProperty("start")]
+        public long Start { get; set; }
+
+        [JsonProperty("local_start")]
+        public long LocalStart { get; set; }
+
+        [JsonProperty("end")]
+        public long End { get; set; }
+
+        [JsonProperty("local_end")]
+        public long LocalEnd { get; set; }
     }
 
     public class SpotifySongs

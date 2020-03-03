@@ -16,7 +16,7 @@ namespace MusicTime
         public double offset { get; set; } // in minutes
         public string os { get; set; }
         public string version { get; set; }
-        public string pluginId { get; set; }
+        public int pluginId { get; set; }
         
         public long Add { get; set; }
         public long Paste { get; set; }
@@ -26,9 +26,9 @@ namespace MusicTime
         public long LinesRemoved { get; set; }
         public long Open { get; set; }
         public long Close { get; set; }
+        public JsonObject  source = new JsonObject();
 
-       
-  
+
         public TrackData(Track track)
         {
             Track.album = track.album;
@@ -63,45 +63,44 @@ namespace MusicTime
             Track.timezone = track.timezone;
             Track.version = track.version;
             Track.player_type = track.player_type;
-            Track.source = track.source;
-           
+          
     
     }
 
-        public IDictionary<string, object> GetAsDictionary()
-        {
-            IDictionary<string, object> dict = new Dictionary<string, object>();
-            //dict.Add("start", Track.start);
-            //dict.Add("local_start", Track.local_start);
-            //dict.Add("keystrokes", Track.keystrokes);
-            //dict.Add("timezone", Track.timezone);
-            //dict.Add("offset", Track.offset);
-            dict.Add("album", Track.album);
-            dict.Add("artist", Track.artist);
-            dict.Add("artists", Track.artists);
-            dict.Add("artist_names", Track.artist_names);
-            dict.Add("available_markets", Track.available_markets);
-            dict.Add("disc_number", Track.disc_number);
-            dict.Add("duration", Track.duration);
-            dict.Add("duration_ms", Track.duration_ms);
-            dict.Add("error", Track.error);
-            dict.Add("@explicit", Track.@explicit);
-            dict.Add("external_ids", Track.external_ids);
-            dict.Add("external_urls", Track.external_urls);
-            dict.Add("features", Track.features);
-            dict.Add("href", Track.href);
-            dict.Add("id", Track.id);
-            dict.Add("is_local", Track.is_local);
-            dict.Add("name", Track.name);
-            dict.Add("played_count", Track.played_count);
-            dict.Add("popularity", Track.popularity);
-            dict.Add("preview_url", Track.preview_url);
-            dict.Add("track_number", Track.track_number);
-            dict.Add("type", Track.type);
-            dict.Add("uri", Track.uri);
-            dict.Add("volume", Track.volume);
-            return dict;
-        }
+        //public IDictionary<string, object> GetAsDictionary()
+        //{
+        //    IDictionary<string, object> dict = new Dictionary<string, object>();
+        //    //dict.Add("start", Track.start);
+        //    //dict.Add("local_start", Track.local_start);
+        //    //dict.Add("keystrokes", Track.keystrokes);
+        //    //dict.Add("timezone", Track.timezone);
+        //    //dict.Add("offset", Track.offset);
+        //    dict.Add("album", Track.album);
+        //    dict.Add("artist", Track.artist);
+        //    dict.Add("artists", Track.artists);
+        //    dict.Add("artist_names", Track.artist_names);
+        //    dict.Add("available_markets", Track.available_markets);
+        //    dict.Add("disc_number", Track.disc_number);
+        //    dict.Add("duration", Track.duration);
+        //    dict.Add("duration_ms", Track.duration_ms);
+        //    dict.Add("error", Track.error);
+        //    dict.Add("@explicit", Track.@explicit);
+        //    dict.Add("external_ids", Track.external_ids);
+        //    dict.Add("external_urls", Track.external_urls);
+        //    dict.Add("features", Track.features);
+        //    dict.Add("href", Track.href);
+        //    dict.Add("id", Track.id);
+        //    dict.Add("is_local", Track.is_local);
+        //    dict.Add("name", Track.name);
+        //    dict.Add("played_count", Track.played_count);
+        //    dict.Add("popularity", Track.popularity);
+        //    dict.Add("preview_url", Track.preview_url);
+        //    dict.Add("track_number", Track.track_number);
+        //    dict.Add("type", Track.type);
+        //    dict.Add("uri", Track.uri);
+        //    dict.Add("volume", Track.volume);
+        //    return dict;
+        //}
 
         public string GetAsJson()
         {
@@ -135,6 +134,7 @@ namespace MusicTime
             jsonObj.Add("local_start", Track.local_start);
             jsonObj.Add("end", Track.end);
             jsonObj.Add("local_end", Track.local_end);
+
             jsonObj.Add("add", this.Add);
             jsonObj.Add("paste", this.Paste);
             jsonObj.Add("delete", this.Delete);
@@ -145,13 +145,13 @@ namespace MusicTime
             jsonObj.Add("close", this.Close);
             jsonObj.Add("keystrokes", this.keystrokes);
            
-            jsonObj.Add("timezone", Track.timezone);
-            jsonObj.Add("offset", Track.offset);
+            jsonObj.Add("timezone", this.timezone);
+            jsonObj.Add("offset", this.offset);
             jsonObj.Add("pluginId", this.pluginId);
             jsonObj.Add("os", this.os);
             jsonObj.Add("version", this.version);
            
-            jsonObj.Add("source", Track.source);
+            jsonObj.Add("source", this.source);
             return jsonObj.ToString();
         }
     }

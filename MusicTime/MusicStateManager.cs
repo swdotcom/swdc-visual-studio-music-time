@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace MusicTime
 {
@@ -81,7 +82,7 @@ namespace MusicTime
                         {
                             ExsitingTrack = new Track();
                         }
-
+                        
 
                         ExsitingTrack.start         = nowTime.now;
                         ExsitingTrack.local_start   = nowTime.local_now;
@@ -119,7 +120,7 @@ namespace MusicTime
 
         private async void gatherCodingDataAndSendSongSessionAsync(Track songSession)
         {
-           // TrackData songSession = new TrackData(trackData);
+          
 
            if(songSession.album!=null)
             {
@@ -161,37 +162,7 @@ namespace MusicTime
                     
                 genreP = await MusicManager.getGenreAsync(artistName, songName, artistId);
             }
-
-           
-
-           
-            if (payloads.Count > 0)
-            {
-               List<SoftwareData> softwareData = new List<SoftwareData>();
-
-                foreach (string item in payloads)
-                {
-                    SoftwareData datas = new SoftwareData();
-                    datas = JsonConvert.DeserializeObject<SoftwareData>(item);
-                    softwareData.Add(datas);
-                }
-
-                foreach (SoftwareData item in softwareData)
-                {
-
-                    foreach (var keyValue in item.source)
-                    {
-
-
-                    }
-
-
-                    songSession.source.Add(item.source);
-                }
-
-                
-                
-            }
+            
 
             if (fullTrackP!=null)
             {
@@ -206,24 +177,167 @@ namespace MusicTime
                 {
                     songSession.genre = fullTrackP.genre;
                 }
-                
-                
+ 
             }
-
-           
+            
 
             TrackData trackData = new TrackData(songSession);
+            trackData           = setInitialValues(trackData);
 
+            if (payloads.Count > 0)
+            {
+                List<SoftwareData> softwareData = new List<SoftwareData>();
+
+                foreach (string item in payloads)
+                {
+                    SoftwareData datas = new SoftwareData();
+                    datas = JsonConvert.DeserializeObject<SoftwareData>(item);
+                    softwareData.Add(datas);
+                }
+                
+                
+
+                trackData =  buildAggregateData(softwareData, trackData);
+               
+                
+            }
             // send the music data, if we're online
-            sendMusicData(trackData);
+            sendMusicDataAsync(trackData);
 
         }
 
-        private void sendMusicData(TrackData songSessionPayload)
+        private TrackData setInitialValues(TrackData songSession)
+        {
+            #region OS_Version_Offset_Values
+
+            if (songSession.timezone == null)
+            {
+                songSession.timezone = TimeZone.CurrentTimeZone.StandardName;
+            }
+            if (songSession.pluginId == 0)
+            {
+                songSession.pluginId = Constants.PluginId;
+            }
+            if (songSession.offset == 0)
+            {
+                songSession.offset = SoftwareCoUtil.GetNowTime().offset_now;
+            }
+            if (songSession.os == null)
+            {
+                songSession.os = MusicTimeCoPackage.GetOs();
+            }
+            if (songSession.version == null)
+            {
+                songSession.version = MusicTimeCoPackage.GetVersion();
+            }
+            return songSession;
+            #endregion
+        }
+
+        private TrackData buildAggregateData(List<SoftwareData> softwareData, TrackData songSession)
+        {
+            long TotalKeystroke = 0;
+            long add  = 0;
+            long delete = 0;
+            long open = 0;
+            long close = 0;
+            long linesAdded = 0;
+            long linesRemoved = 0;
+            long netkeys = 0;
+
+            #region OS_Version_Offset_Values
+
+            if (songSession.timezone == null)
+            {
+                songSession.timezone = TimeZone.CurrentTimeZone.StandardName;
+            }
+            if (songSession.pluginId == null)
+            {
+                songSession.pluginId = Constants.PluginId;
+            }
+            if (songSession.offset == 0)
+            {
+                songSession.offset = SoftwareCoUtil.GetNowTime().offset_now;
+            }
+            if (songSession.os == null)
+            {
+                songSession.os = MusicTimeCoPackage.GetOs();
+            }
+            if (songSession.version == null)
+            {
+                songSession.version = MusicTimeCoPackage.GetVersion();
+            }
+
+            #endregion
+            List<SourceData> sourceData = new List<SourceData>();
+            foreach (SoftwareData item in softwareData)
+            {
+               
+                JsonObject Jobj = new JsonObject();
+                TotalKeystroke = TotalKeystroke + item.keystrokes;
+              
+                foreach (KeyValuePair<string, object> entry in item.source)
+                {
+                    //Jobj =(JsonObject)entry;
+                  
+                    SourceData datas    = new SourceData();
+                    datas               = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
+                    sourceData.Add(datas);
+                   
+                }
+               
+            }
+           
+
+            
+            
+            if(sourceData.Count>0)
+            {
+                foreach (SourceData item in sourceData)
+                {
+                    add     = add + item.Add;
+                    delete  = delete + item.Delete;
+                    open    = open + item.Open;
+                    close   = close + item.Close;
+                    linesAdded      = linesAdded + item.LinesAdded;
+                    linesRemoved    = linesRemoved + item.LinesRemoved;
+                    netkeys         = netkeys + item.Netkeys;
+                }
+            }
+
+
+            songSession.Add                 = add;
+            songSession.Delete              = delete;
+            songSession.Open                = open;
+            songSession.Close               = close;
+            songSession.LinesAdded          = linesAdded;
+            songSession.LinesRemoved        = linesRemoved;
+            songSession.Netkeys             = netkeys;
+            songSession.keystrokes          = TotalKeystroke;
+
+            return songSession;
+
+        }
+
+        private async void sendMusicDataAsync(TrackData songSessionPayload)
         {
             Logger.Debug(songSessionPayload.GetAsJson());
-         
-        }
+            string datastoreFile = SoftwareCoUtil.getMusicDataStoreFile();
+            string api = "/music/session";
+            HttpResponseMessage response = null;
+            string app_jwt = SoftwareUserSession.GetJwt();
+            if (app_jwt != null)
+            {
+
+                response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Post, api, songSessionPayload.GetAsJson(), app_jwt);
+                if (SoftwareHttpManager.IsOk(response))
+                {
+                   // delete the file
+                    File.Delete(datastoreFile);
+                }
+            }
+            
+         }
 
         private Task<List<string>> getDataRows(string FilePath)
         {
