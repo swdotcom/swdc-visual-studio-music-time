@@ -281,11 +281,12 @@ namespace MusicTime
                     //Jobj =(JsonObject)entry;
                   
                     SourceData datas    = new SourceData();
-                    datas               = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
+                    datas = SimpleJson.DeserializeObject<SourceData>(entry.Value.ToString()); 
+                    //datas               = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
                     sourceData.Add(datas);
                    
                 }
-               
+                songSession.source = item.source;
             }
            
 

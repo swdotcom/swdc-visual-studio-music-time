@@ -35,6 +35,29 @@ namespace MusicTime
             return parent as PlaylistTreeviewItem;
 
         }
+        public static PlaylistTreeviewItem GetSelectedContextMenuParent(MenuItem item)
+        {
+            DependencyObject parent = null;
+            try
+            {
+                parent = VisualTreeHelper.GetParent(item);
+
+                while (!(parent is MenuItem))
+                {
+                    parent = VisualTreeHelper.GetParent(parent);
+                }
+
+
+
+            }
+            catch (Exception ex)
+            {
+
+
+            }
+            return parent as PlaylistTreeviewItem;
+
+        }
 
         public static TreeViewItem GetTreeView(string text, string imagePath, string id)
         {
@@ -85,9 +108,9 @@ namespace MusicTime
             lbl.Width = 150;
 
             lbl.Foreground = System.Windows.Media.Brushes.DarkCyan;
-
+           
             // Add into stack
-
+            
             stack.Children.Add(lbl);
             stack.Children.Add(image);
             // assign stack to header
@@ -95,8 +118,8 @@ namespace MusicTime
             item.Background = System.Windows.Media.Brushes.Transparent;
             return item;
         }
-
-       public static string ResizeSongName(string text)
+        
+        public static string ResizeSongName(string text)
         {
             string result = string.Empty;
             if (text.Length > 20)

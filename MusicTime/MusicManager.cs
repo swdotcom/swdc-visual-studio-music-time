@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using SoftwareCo;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -578,7 +579,8 @@ namespace MusicTime
                 if (SoftwareHttpManager.IsOk(response))
                 {
                     responseBody = await response.Content.ReadAsStringAsync();
-                    TopSongs = JsonConvert.DeserializeObject<List<Track>>(responseBody);
+                    TopSongs = SimpleJson.DeserializeObject<List<Track>>(responseBody);
+                  //  TopSongs = JsonConvert.DeserializeObject<List<Track>>(responseBody);
 
                 }
 

@@ -622,7 +622,7 @@
                 List<Track> tracks          = new List<Track>();
                 PlaylistTreeviewItem item   = sender as PlaylistTreeviewItem;
                 item.Items.Clear();
-
+              
                 if(item.PlayListId == "Liked Songs")
                 {
                     tracks = await Playlist.getSpotifyLikedSongsAsync();
@@ -634,7 +634,6 @@
                 if (tracks.Count<1)
                 {
                     TreeViewItem treeviewItem = PlaylistTreeviewUtil.GetTreeView("Your tracks will appear here", null, "EmptyPlaylist");
-                   
                     item.Items.Add(treeviewItem);
                 }
 
@@ -647,6 +646,9 @@
                     else
                         playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
 
+                    //playlistTreeviewItem.ContextMenu =  this.FindResource("cmButton") as ContextMenu;
+                    playlistTreeviewItem.ContextMenu = await GetContextMenuAsync(items.id);
+
                     item.Items.Add(playlistTreeviewItem);
                 }
             }
@@ -657,6 +659,99 @@
             }
            
         }
+
+        
+        private static async Task<ContextMenu> GetContextMenuAsync(string playlistId)
+        {
+            ContextMenu contextMenu = new ContextMenu();
+
+            MenuItem AddMenu    = new MenuItem();
+            AddMenu.Header      = "Add Song";
+
+            MenuItem RemoveMenu = new MenuItem();
+            RemoveMenu.Header   = "Remove Song";
+
+            MenuItem ShareMenuItem  = new MenuItem();
+            ShareMenuItem.Header    = "Share";
+            
+            MenuItem FacebookMenu   = new MenuItem();
+            FacebookMenu.Header     = "Facebook";
+            FacebookMenu.Click      += ShareOnFb;
+
+            MenuItem TwitterMenu    = new MenuItem();
+            TwitterMenu.Header      = "Twitter";
+
+            MenuItem WhatsAppMenu   = new MenuItem();
+            WhatsAppMenu.Header     = "WhatsApp";
+
+            MenuItem TumblerMenu    = new MenuItem();
+            TumblerMenu.Header      = "Tumbler";
+
+            MenuItem slackMenuItem =  await GetSlackMenuItemAsync();
+
+            ShareMenuItem.Items.Add(FacebookMenu);
+            ShareMenuItem.Items.Add(TwitterMenu);
+            ShareMenuItem.Items.Add(WhatsAppMenu);
+            ShareMenuItem.Items.Add(TumblerMenu);
+            ShareMenuItem.Items.Add(slackMenuItem);
+
+            contextMenu.Items.Add(AddMenu);
+            contextMenu.Items.Add(RemoveMenu);
+            contextMenu.Items.Add(ShareMenuItem);
+            return contextMenu;
+        }
+
+        private static async Task<MenuItem> GetSlackMenuItemAsync()
+        {
+            MenuItem SlackMenuItem = new MenuItem();
+            bool slackConnected = true;
+            if (slackConnected)
+            {
+                SlackMenuItem.Header = "Slack";
+                List<Channel> channels = await SlackControlManager.GetSalckChannels();
+                foreach (Channel item in channels)
+                {
+                    MenuItem menuItem = new MenuItem();
+                    menuItem.Header = item.Name;
+                    menuItem.Click += ShareOnSlackChannel; ;
+                    SlackMenuItem.Items.Add(menuItem);
+                    
+                }
+
+            }
+            else
+            {
+                SlackMenuItem.Header = "Connect Slack";
+                SlackMenuItem.Click += SlackMenuItem_Click;
+            }
+            
+
+          
+            
+
+          
+
+            return SlackMenuItem;
+        }
+
+        private static void ShareOnSlackChannel(object sender, RoutedEventArgs e)
+        {
+           
+        }
+
+        private static void SlackMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SlackControlManager.ConnectToSlackAsync();
+        }
+
+        private static async void ShareOnFb(object sender, RoutedEventArgs e)
+        {
+         
+            
+        }
+
+        
+
 
         private void SortPlaylist(ref List<PlaylistItem> playlistItems)
         {
@@ -795,103 +890,7 @@
             }
         }
 
-        //private static PlaylistTreeviewItem GetSelectedTreeViewItemParent(PlaylistTreeviewItem item)
-        //{
-        //    DependencyObject parent = null;
-        //    try
-        //    {
-        //        parent = VisualTreeHelper.GetParent(item);
-
-        //        while (!(parent is PlaylistTreeviewItem))
-        //        {
-        //            parent = VisualTreeHelper.GetParent(parent);
-        //        }
-
-
-               
-        //    }
-        //    catch ( Exception ex)
-        //    {
-
-                
-        //    }
-        //    return parent as PlaylistTreeviewItem;
-
-        //}
-
-        //private static TreeViewItem GetTreeView(string text, string imagePath,string id)
-        //{
-        //    PlaylistTreeviewItem item = new PlaylistTreeviewItem(id);
-                       
-        //    // create stack panel
-        //    StackPanel stack  = new StackPanel();
-        //    stack.Orientation = Orientation.Horizontal;
-
-        //    if (!string.IsNullOrEmpty(imagePath))
-        //    {
-        //        // create Image
-        //        System.Windows.Controls.Image image = new System.Windows.Controls.Image();
-        //        image.Source = new BitmapImage(new Uri("Resources/" + imagePath, UriKind.Relative));
-        //        stack.Children.Add(image);
-        //    }
-        //    // Label
-
-        //    Label lbl   = new Label();
-        //    lbl.Content = text;
-        //    lbl.Foreground = System.Windows.Media.Brushes.DarkCyan;
-
-        //    // Add into stack
-           
-        //    stack.Children.Add(lbl);
-
-        //    // assign stack to header
-        //    item.Header = stack;
-        //    return item;
-        //}
-
-        //private static TreeViewItem GetTrackTreeView(string text, string imagePath, string id)
-        //{
-        //    PlaylistTreeviewItem item = new PlaylistTreeviewItem(id);
-
-        //    // create stack panel
-        //    StackPanel stack    = new StackPanel();
-        //    stack.Orientation   = Orientation.Horizontal;
-
-        //    // create Image
-        //    System.Windows.Controls.Image image = new System.Windows.Controls.Image();
-        //    image.Source = new BitmapImage(new Uri("Resources/" + imagePath, UriKind.Relative));
-            
-        //    // Label
-        //    Label lbl = new Label();
-        //    lbl.Content = PlaylistTreeviewUtil.ResizeSongName(text);
-        //   // lbl.Content = text;
-        //    lbl.Width   = 150;
-            
-        //    lbl.Foreground = System.Windows.Media.Brushes.DarkCyan;
-
-        //    // Add into stack
-            
-        //    stack.Children.Add(lbl);
-        //    stack.Children.Add(image);
-        //    // assign stack to header
-        //    item.Header = stack;
-        //    item.Background = System.Windows.Media.Brushes.Transparent;
-        //    return item;
-        //}
-
-        //private static string ResizeSongName(string text)
-        //{
-        //    string result = string.Empty;
-        //    if (text.Length > 20)
-        //    {
-        //        result = string.Concat(text.Substring(0, 20), "...");
-        //    }
-        //    else
-        //    {
-        //        result = text;
-        //    }
-        //    return result;
-        //}
+    
 
         private void WebAnaylticsClick(object sender, MouseButtonEventArgs e)
         {
@@ -989,6 +988,14 @@
             //GeneratePlaylistLabel.Click += GenerateAIAsync;
         }
 
-        
+       
+
+        private void ShareOnFacebook(object sender, RoutedEventArgs e)
+        {
+            PlaylistTreeviewItem parent = null;
+            MenuItem item               = sender as MenuItem;
+            parent = PlaylistTreeviewUtil.GetSelectedContextMenuParent(item);
+            SlackControlManager.ShareOnFacebook(parent.PlayListId);
+        }
     }
 }

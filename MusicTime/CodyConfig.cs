@@ -467,4 +467,120 @@ namespace MusicTime
             },
         };
     }
+
+    public partial class SlackChannel
+    {
+        [JsonProperty("ok")]
+        public bool Ok { get; set; }
+
+        [JsonProperty("channels")]
+        public List<Channel> Channels { get; set; }
+
+        [JsonProperty("response_metadata")]
+        public ResponseMetadata ResponseMetadata { get; set; }
+    }
+
+    public partial class Channel
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("is_channel")]
+        public bool IsChannel { get; set; }
+
+        [JsonProperty("is_group")]
+        public bool IsGroup { get; set; }
+
+        [JsonProperty("is_im")]
+        public bool IsIm { get; set; }
+
+        [JsonProperty("created")]
+        public long Created { get; set; }
+
+        [JsonProperty("is_archived")]
+        public bool IsArchived { get; set; }
+
+        [JsonProperty("is_general")]
+        public bool IsGeneral { get; set; }
+
+        [JsonProperty("unlinked")]
+        public long Unlinked { get; set; }
+
+        [JsonProperty("name_normalized")]
+        public string NameNormalized { get; set; }
+
+        [JsonProperty("is_shared")]
+        public bool IsShared { get; set; }
+
+        [JsonProperty("parent_conversation")]
+        public object ParentConversation { get; set; }
+
+        [JsonProperty("creator")]
+        public string Creator { get; set; }
+
+        [JsonProperty("is_ext_shared")]
+        public bool IsExtShared { get; set; }
+
+        [JsonProperty("is_org_shared")]
+        public bool IsOrgShared { get; set; }
+
+        [JsonProperty("shared_team_ids")]
+        public List<string> SharedTeamIds { get; set; }
+
+        [JsonProperty("pending_shared")]
+        public List<object> PendingShared { get; set; }
+
+        [JsonProperty("pending_connected_team_ids")]
+        public List<object> PendingConnectedTeamIds { get; set; }
+
+        [JsonProperty("is_pending_ext_shared")]
+        public bool IsPendingExtShared { get; set; }
+
+        [JsonProperty("is_member")]
+        public bool IsMember { get; set; }
+
+        [JsonProperty("is_private")]
+        public bool IsPrivate { get; set; }
+
+        [JsonProperty("is_mpim")]
+        public bool IsMpim { get; set; }
+
+        [JsonProperty("topic")]
+        public Purpose Topic { get; set; }
+
+        [JsonProperty("purpose")]
+        public Purpose Purpose { get; set; }
+
+        [JsonProperty("previous_names")]
+        public List<object> PreviousNames { get; set; }
+
+        [JsonProperty("num_members")]
+        public long NumMembers { get; set; }
+    }
+
+    public partial class Purpose
+    {
+        [JsonProperty("value")]
+        public string Value { get; set; }
+
+        [JsonProperty("creator")]
+        public string Creator { get; set; }
+
+        [JsonProperty("last_set")]
+        public long LastSet { get; set; }
+    }
+
+    public partial class ResponseMetadata
+    {
+        [JsonProperty("next_cursor")]
+        public string NextCursor { get; set; }
+    }
+
+    public partial class SlackChannel
+    {
+        public static SlackChannel FromJson(string json) => JsonConvert.DeserializeObject<SlackChannel>(json, MusicTime.Converter.Settings);
+    }
 }
