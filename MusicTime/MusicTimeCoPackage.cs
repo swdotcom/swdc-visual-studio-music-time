@@ -63,6 +63,7 @@ namespace MusicTime
         private System.Threading.Timer timer;
         private System.Threading.Timer DeviceTimer;
         private System.Threading.Timer TrackStatusBar;
+        private System.Threading.Timer getSlackChannelTimer;
         private System.Threading.Timer OnlineCheckerTimer;
         private System.Threading.Timer PlaylistUpdate;
         private static int ONE_SECOND = 1000;
@@ -82,6 +83,8 @@ namespace MusicTime
         private SoftwareData _softwareData;
         public static JsonObject KeystrokeData = new JsonObject();
         private DateTime _lastPostTime = DateTime.UtcNow;
+        public static bool slackConnected = false;
+        public static List<Channel> SlackChannels = null;
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicTimeCoPackage"/> class.
         /// </summary>
@@ -178,8 +181,9 @@ namespace MusicTime
                      null,
                      ZERO_SECOND,
                      ONE_SECOND*10);
+            getSlackChannelTimer = new Timer(getSlackChannelsAsync, null, ZERO_SECOND, ONE_MINUTE);
 
-          
+
 
             this.InitializeUserInfoAsync();
 
@@ -187,7 +191,14 @@ namespace MusicTime
 
         }
 
-     
+        private async void getSlackChannelsAsync(object state)
+        {
+            if (slackConnected)
+            {
+                SlackChannels = await SlackControlManager.GetSalckChannels();
+                
+            }
+        }
 
         private async void InitializeUserInfoAsync()
         {           
@@ -207,7 +218,7 @@ namespace MusicTime
                 UpdateMusicStatusBar(status.loggedIn);
                 if(status.loggedIn)
                 {
-                    await GetSlackUserStatusTokenAsync(online);
+                    slackConnected = await GetSlackUserStatusTokenAsync(online);
                 }
             }
         }

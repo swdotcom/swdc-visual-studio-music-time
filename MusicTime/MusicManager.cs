@@ -12,8 +12,7 @@ namespace MusicTime
 {
     class MusicManager
     {
-        private static MusicManager instance = null;
-
+        private static MusicManager instance    = null;
         public static SpotifyUser spotifyUser   = new SpotifyUser();
         public static CodyConfig codyConfig     = CodyConfig.getInstance;
         private static Device device            = Device.getInstance;
@@ -61,8 +60,6 @@ namespace MusicTime
                     bool isConnected        = hasSpotifyPlaybackAccess();
                     await getDevicesAsync();
                    
-                  //  SoftwareUserSession.GetSpotifyUserStatusTokenAsync(isConnected);
-
                 }
                 else
                 {

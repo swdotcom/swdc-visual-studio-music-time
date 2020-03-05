@@ -23,9 +23,7 @@ namespace MusicTime
                 {
                     parent = VisualTreeHelper.GetParent(parent);
                 }
-
-
-
+                
             }
             catch (Exception ex)
             {
@@ -35,29 +33,7 @@ namespace MusicTime
             return parent as PlaylistTreeviewItem;
 
         }
-        public static PlaylistTreeviewItem GetSelectedContextMenuParent(MenuItem item)
-        {
-            DependencyObject parent = null;
-            try
-            {
-                parent = VisualTreeHelper.GetParent(item);
-
-                while (!(parent is MenuItem))
-                {
-                    parent = VisualTreeHelper.GetParent(parent);
-                }
-
-
-
-            }
-            catch (Exception ex)
-            {
-
-
-            }
-            return parent as PlaylistTreeviewItem;
-
-        }
+      
 
         public static TreeViewItem GetTreeView(string text, string imagePath, string id)
         {
@@ -132,5 +108,7 @@ namespace MusicTime
             }
             return result;
         }
+
+       
     }
 }

@@ -34,6 +34,10 @@
         public static string AIPlaylistID               = null;
 
         public static PlaylistItem AIPlaylistItem       = null;
+        SlackControlManager slackControlManager         =  SlackControlManager.getInstance;
+
+
+
 
         enum SortOrder
         {
@@ -43,13 +47,18 @@
 
         public SpotifyPlayListControl()
         {
-            this.InitializeComponent();
-           
+            this.InitializeComponent(); 
             Init();
+        }
+
+        private void SlackControlManager_eventSlackConnected(object source, EventArgs args)
+        {
+            RefreshAsync(source, null);
         }
 
         private void Init()
         {
+           
             SetConnectContent();
             System.Windows.Forms.Timer UpdateCallBackTimer = new System.Windows.Forms.Timer();
             UpdateCallBackTimer.Interval = 5000;//5 seconds
@@ -87,11 +96,11 @@
                 {
                     e.Handled = true;
                     btnRefresh.IsEnabled = false;
-                    // await LikedSongsPlaylistAsync();
+                   
                     SetGenerateAIContent();
                     await SoftwareTop40PlaylistAsync();
-                    //await AIPlaylistAsync();
-                    await UsersPlaylistAsync();
+                    
+                    await  UsersPlaylistAsync();
                     btnRefresh.IsEnabled = true;
                 }
                 finally
@@ -100,6 +109,13 @@
                 }
 
             }
+        }
+
+        public  async Task updateTrackList()
+        {
+            await SoftwareTop40PlaylistAsync();
+            
+            await UsersPlaylistAsync();
         }
 
         public async Task UpdateTreeviewAsync()
@@ -461,7 +477,7 @@
 
 
         }
-        private async Task SoftwareTop40PlaylistAsync()
+        private  async Task SoftwareTop40PlaylistAsync()
         {
             try
             {
@@ -645,10 +661,8 @@
                         playlistTreeviewItem.MouseLeftButtonUp += PlayLikedSongs;
                     else
                         playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
-
-                    //playlistTreeviewItem.ContextMenu =  this.FindResource("cmButton") as ContextMenu;
+                    
                     playlistTreeviewItem.ContextMenu = await GetContextMenuAsync(items.id);
-
                     item.Items.Add(playlistTreeviewItem);
                 }
             }
@@ -659,60 +673,186 @@
             }
            
         }
-
         
-        private static async Task<ContextMenu> GetContextMenuAsync(string playlistId)
+        private static async Task<ContextMenu> GetContextMenuAsync(string playlist_Id)
         {
             ContextMenu contextMenu = new ContextMenu();
 
-            MenuItem AddMenu    = new MenuItem();
-            AddMenu.Header      = "Add Song";
+            CustomMenu addMenu      = new CustomMenu();
+            addMenu.Header          = "Add Song";
+            addMenu.PlaylistId      = playlist_Id;
+            addMenu.Foreground      = System.Windows.Media.Brushes.DarkCyan;
+            addMenu.Click           += AddMenu_Click;
 
-            MenuItem RemoveMenu = new MenuItem();
-            RemoveMenu.Header   = "Remove Song";
+            CustomMenu removeMenu   = new CustomMenu();
+            removeMenu.Header       = "Remove Song";
+            removeMenu.PlaylistId   = playlist_Id;
+            removeMenu.Foreground   = System.Windows.Media.Brushes.DarkCyan;
+            removeMenu.Click        += RemoveMenu_Click;
 
-            MenuItem ShareMenuItem  = new MenuItem();
-            ShareMenuItem.Header    = "Share";
-            
-            MenuItem FacebookMenu   = new MenuItem();
-            FacebookMenu.Header     = "Facebook";
-            FacebookMenu.Click      += ShareOnFb;
+            CustomMenu copyToClipBoardMenu = new CustomMenu();
+            copyToClipBoardMenu.Header = "Copy to clipboard";
+            copyToClipBoardMenu.PlaylistId = playlist_Id;
+            copyToClipBoardMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
+            copyToClipBoardMenu.Click += CopyToClipBoardMenu_Click;
 
-            MenuItem TwitterMenu    = new MenuItem();
-            TwitterMenu.Header      = "Twitter";
 
-            MenuItem WhatsAppMenu   = new MenuItem();
-            WhatsAppMenu.Header     = "WhatsApp";
+            CustomMenu facebookMenu     = new CustomMenu();
+            facebookMenu.Header         = "Facebook";
+            facebookMenu.PlaylistId     = playlist_Id;
+            facebookMenu.Foreground     = System.Windows.Media.Brushes.DarkCyan;
+            facebookMenu.Click += FacebookMenu_Click;
 
-            MenuItem TumblerMenu    = new MenuItem();
-            TumblerMenu.Header      = "Tumbler";
+            CustomMenu twitterMenu      = new CustomMenu();
+            twitterMenu.Header          = "Twitter";
+            twitterMenu.PlaylistId      = playlist_Id;
+            twitterMenu.Foreground      = System.Windows.Media.Brushes.DarkCyan;
+            twitterMenu.Click           += TwitterMenu_Click; ;
 
-            MenuItem slackMenuItem =  await GetSlackMenuItemAsync();
+            CustomMenu whatsAppMenu     = new CustomMenu();
+            whatsAppMenu.Header         = "WhatsApp";
+            whatsAppMenu.PlaylistId     = playlist_Id;
+            whatsAppMenu.Foreground     = System.Windows.Media.Brushes.DarkCyan;
+            whatsAppMenu.Click += WhatsAppMenu_Click; ;
 
-            ShareMenuItem.Items.Add(FacebookMenu);
-            ShareMenuItem.Items.Add(TwitterMenu);
-            ShareMenuItem.Items.Add(WhatsAppMenu);
-            ShareMenuItem.Items.Add(TumblerMenu);
-            ShareMenuItem.Items.Add(slackMenuItem);
+            CustomMenu tumblerMenu      = new CustomMenu();
+            tumblerMenu.Header          = "Tumbler";
+            tumblerMenu.PlaylistId      = playlist_Id;
+            tumblerMenu.Foreground      = System.Windows.Media.Brushes.DarkCyan;
+            tumblerMenu.Click += TumblerMenu_Click;
 
-            contextMenu.Items.Add(AddMenu);
-            contextMenu.Items.Add(RemoveMenu);
-            contextMenu.Items.Add(ShareMenuItem);
+            CustomMenu shareMenuItem    = new CustomMenu();
+            shareMenuItem.Header        = "Share";
+            shareMenuItem.Foreground    = System.Windows.Media.Brushes.DarkCyan;
+
+            CustomMenu slackMenuItem =  await GetSlackMenuItemAsync(playlist_Id);
+
+            shareMenuItem.Items.Add(facebookMenu);
+            shareMenuItem.Items.Add(twitterMenu);
+            shareMenuItem.Items.Add(whatsAppMenu);
+            shareMenuItem.Items.Add(tumblerMenu);
+            shareMenuItem.Items.Add(slackMenuItem);
+
+            contextMenu.Items.Add(addMenu);
+            contextMenu.Items.Add(removeMenu);
+            contextMenu.Items.Add(copyToClipBoardMenu);
+            contextMenu.Items.Add(shareMenuItem);
+         
             return contextMenu;
         }
 
-        private static async Task<MenuItem> GetSlackMenuItemAsync()
+        private static void CopyToClipBoardMenu_Click(object sender, RoutedEventArgs e)
         {
-            MenuItem SlackMenuItem = new MenuItem();
-            bool slackConnected = true;
-            if (slackConnected)
+            try
+            {
+                CustomMenu item = sender as CustomMenu;
+
+                if(item!=null)
+                    SlackControlManager.CopylinkToClipboard(item.PlaylistId);
+            }
+            catch (Exception ex)
+            {
+
+               
+            }
+         
+
+        }
+
+        private static void AddMenu_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void RemoveMenu_Click(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private static void FacebookMenu_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CustomMenu item = sender as CustomMenu;
+
+                if(item!=null)
+                    SlackControlManager.ShareOnFacebook(item.PlaylistId);
+            }
+            catch (Exception ex)
+            {
+
+               
+            }
+        
+        }
+
+        private static void TumblerMenu_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CustomMenu item = sender as CustomMenu;
+                if(item!=null)
+                    SlackControlManager.ShareOnTumbler(item.PlaylistId);
+            }
+            catch (Exception ex)
+            {
+
+                
+            }
+           
+        }
+
+        private static void WhatsAppMenu_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CustomMenu item = sender as CustomMenu;
+                if (item != null)
+                    SlackControlManager.ShareOnWhatsApp(item.PlaylistId);
+            }
+            catch ( Exception ex)
+            {
+
+                
+            }
+         
+        }
+
+        private static void TwitterMenu_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CustomMenu item = sender as CustomMenu;
+                
+                if(item!=null)
+                SlackControlManager.ShareOnTwitter(item.PlaylistId);
+
+            }
+            catch (Exception ex)
+            {
+
+                
+            }
+          
+        }
+
+        private static async Task<CustomMenu> GetSlackMenuItemAsync(string playlist_id)
+        {
+            CustomMenu SlackMenuItem = new CustomMenu();
+            SlackMenuItem.Foreground = System.Windows.Media.Brushes.DarkCyan;
+
+          
+            if (MusicTimeCoPackage.slackConnected)
             {
                 SlackMenuItem.Header = "Slack";
-                List<Channel> channels = await SlackControlManager.GetSalckChannels();
-                foreach (Channel item in channels)
+              
+                foreach (Channel item in MusicTimeCoPackage.SlackChannels)
                 {
-                    MenuItem menuItem = new MenuItem();
+                    CustomMenu menuItem = new CustomMenu();
                     menuItem.Header = item.Name;
+                    menuItem.PlaylistId = playlist_id;
+                    menuItem.SlackChannelId = item.Id;
+                    menuItem.Foreground = System.Windows.Media.Brushes.DarkCyan;
                     menuItem.Click += ShareOnSlackChannel; ;
                     SlackMenuItem.Items.Add(menuItem);
                     
@@ -736,21 +876,30 @@
 
         private static void ShareOnSlackChannel(object sender, RoutedEventArgs e)
         {
-           
+            try
+            {
+                CustomMenu item = sender as CustomMenu;
+
+                if(item!=null)
+                SlackControlManager.ShareOnSlackChannel(item.SlackChannelId, item.PlaylistId);
+            }
+            catch (Exception ex)
+            {
+
+                
+            }
+          
         }
 
         private static void SlackMenuItem_Click(object sender, RoutedEventArgs e)
         {
             SlackControlManager.ConnectToSlackAsync();
         }
-
-        private static async void ShareOnFb(object sender, RoutedEventArgs e)
+        private void ShareOnFacebook(object sender, RoutedEventArgs e)
         {
-         
-            
         }
 
-        
+
 
 
         private void SortPlaylist(ref List<PlaylistItem> playlistItems)
@@ -923,38 +1072,7 @@
             isUsersPlaylistUpdated  = false;
             UpdateTreeviewAsync();
         }
-        //private async void GenerateAIPlaylist(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        //{
-        //    e.Handled = true;
-
-        //    GeneratePlaylistLabel.IsEnabled = false;
-        //    if (!AIPlyalistGenerated)
-        //    {
-        //        Logger.Debug(" AIPlyalistGenerated");
-        //        Playlist.PlayListID = await Playlist.generateMyAIPlaylistAsync();
-
-        //        if (Playlist.PlayListID != null)
-        //        {
-        //            //Saved PlaylistId to Backend
-        //            await MusicManager.UpdateSavedPlaylistsAsync(Playlist.PlayListID, Constants.PERSONAL_TOP_SONGS_PLID,
-        //                 Constants.PERSONAL_TOP_SONGS_NAME);
-
-        //            //Added Songs to AI playlist From Backend
-        //            await MusicManager.SeedSongsToPlaylistAsync(Playlist.PlayListID);
-        //            isAIPlaylistUpdated = false;
-        //            UpdateTreeviewAsync();
-        //        }
-
-        //    }
-        //    else
-        //    {
-        //        Logger.Debug("before RefreshMyAIPlaylist");
-        //        if (AIPlaylistID != null)
-        //            RefreshMyAIPlaylist();
-        //    }
-        //    GeneratePlaylistLabel.IsEnabled = true;
-
-        //}
+      
         private async void GenerateAIAsync(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
@@ -988,14 +1106,8 @@
             //GeneratePlaylistLabel.Click += GenerateAIAsync;
         }
 
-       
 
-        private void ShareOnFacebook(object sender, RoutedEventArgs e)
-        {
-            PlaylistTreeviewItem parent = null;
-            MenuItem item               = sender as MenuItem;
-            parent = PlaylistTreeviewUtil.GetSelectedContextMenuParent(item);
-            SlackControlManager.ShareOnFacebook(parent.PlayListId);
-        }
+
+      
     }
 }

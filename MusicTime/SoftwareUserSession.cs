@@ -275,16 +275,16 @@ namespace MusicTime
             return userStatus;
         }
 
-        public static async Task GetSlackUserStatusTokenAsync(bool online)
+        public static async Task<bool> GetSlackUserStatusTokenAsync(bool online)
         {
           
             bool jwtExists          = SoftwareCoUtil.jwtExists();
             Auths auths             = new Auths();
-          
+            bool loginFlag = false;
 
             if (!jwtExists || !online)
             {
-                return;
+                return loginFlag;
             }
             else
             {
@@ -297,6 +297,7 @@ namespace MusicTime
                     {
                         SoftwareDisconnectSlackCommand.UpdateEnabledState(true);
                         SoftwareConnectSlackCommand.UpdateEnabledState(false);
+                        loginFlag = true;
                     }
                     else
                     {
@@ -315,7 +316,7 @@ namespace MusicTime
                 }
             
             }
-           
+            return loginFlag;
         }
 
         public static bool GetSpotifyUserStatus()

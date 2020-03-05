@@ -14,7 +14,38 @@ namespace MusicTime
 {
     class SlackControlManager
     {
+        private static SlackControlManager instance = null;
+
+       
+        private SlackControlManager()
+        {
+        }
+
+        public static SlackControlManager getInstance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new SlackControlManager();
+                }
+                return instance;
+            }
+        }
+
+
+
+
+
         private static int TEN_SECONDS = 1000 * 10;
+        public static List<Channel> SlackChannels = null;
+        public static SpotifyPlayListControl PlayListControl = new SpotifyPlayListControl();
+
+        //public delegate void SlackConnectionHandler(object source, EventArgs args);
+
+        //public  event SlackConnectionHandler eventSlackConnected;
+      
+
         public static async Task ConnectToSlackAsync()
         {
            string app_jwt = SoftwareUserSession.GetJwt();
@@ -101,8 +132,11 @@ namespace MusicTime
                                     auths.LoggedIn = true;
 
                                     await MusicManager.UpdateSlackAccesInfoAsync(auths);
+                                    MusicTimeCoPackage.slackConnected = true;
+                                    MusicTimeCoPackage.SlackChannels = await GetSalckChannels();
+                                    
                                     Logger.Debug("Connected to slack");
-
+                                  
                                 }
                             }
 
@@ -117,6 +151,7 @@ namespace MusicTime
             return auths;
         }
 
+       
         private static void launchWebUrl(string url)
         {
             Process.Start(url);
@@ -126,12 +161,6 @@ namespace MusicTime
         {
             List<Channel> slackChannels = null;
             slackChannels = await GetSalckChannels();
-           // ShareOnSlackChannel("CNAR34A9M", "5DRJseEVp9hDxIbtQWaD13");
-          //  ShareOnFacebook("5DRJseEVp9hDxIbtQWaD13");
-           // ShareOnTumbler("5DRJseEVp9hDxIbtQWaD13");
-            //ShareOnTwitter("5DRJseEVp9hDxIbtQWaD13");
-            //ShareOnWhatsApp("5DRJseEVp9hDxIbtQWaD13");
-            CopylinkToClipboard("5DRJseEVp9hDxIbtQWaD13");
             HttpResponseMessage response = null;
             string app_jwt = "";
             bool online = MusicTimeCoPackage.isOnline;
@@ -150,12 +179,11 @@ namespace MusicTime
                 await MusicManager.UpdateSlackAccesInfoAsync(null);
                 SoftwareConnectSlackCommand.UpdateEnabledState(true);
                 SoftwareDisconnectSlackCommand.UpdateEnabledState(false);
+                MusicTimeCoPackage.slackConnected = false;
                 Logger.Debug("Slack Disconnected");
             }
 
         }
-
-
         public static async Task<List<Channel>> GetSalckChannels()
         {
             string api = "https://slack.com/api/conversations.list";
@@ -294,7 +322,7 @@ namespace MusicTime
             string api = "http://tumblr.com/widgets/share/tool?canonicalUrl=" + trackUrl + "&content=" + trackUrl + "&posttype=link&title=Check+out+this+song&caption=Software+Audio+Share&tags=MusicTime";
             launchWebUrl(api);
         }
-        public static async Task ShareOnWhatsApp(string Track_Id)
+        public static  async Task ShareOnWhatsApp(string Track_Id)
         {
             string track_url = "https://open.spotify.com/track/";
             string trackUrl = track_url + Track_Id;

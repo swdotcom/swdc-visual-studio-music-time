@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="CodyConfig.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="CustomMenu.cs" />
     <Compile Include="Guids.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="MusicClient.cs" />
