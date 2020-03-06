@@ -88,7 +88,7 @@ namespace MusicTime
             // Add into stack
             
             stack.Children.Add(lbl);
-            stack.Children.Add(image);
+           // stack.Children.Add(image);
             // assign stack to header
             item.Header = stack;
             item.Background = System.Windows.Media.Brushes.Transparent;

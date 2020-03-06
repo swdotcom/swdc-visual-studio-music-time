@@ -93,7 +93,7 @@
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
-          <ButtonText>Music Time Dashboard</ButtonText>
+          <ButtonText>Open dashboard</ButtonText>
         </Strings>
       </Button>
       <Button guid="guidMusicTimeCoPackageCmdSet" id="cmdidSoftwareConnectSlackCommand" priority="0x0100" type="Button">
@@ -173,7 +173,7 @@
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
        <Icon guid="guidImages11" id="bmpOpen" />
         <Strings>
-          <ButtonText>SpotifyPlayList</ButtonText>
+          <ButtonText>Music Time</ButtonText>
         </Strings>
       </Button>
     </Buttons>

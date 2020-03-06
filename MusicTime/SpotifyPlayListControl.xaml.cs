@@ -34,11 +34,7 @@
         public static string AIPlaylistID               = null;
 
         public static PlaylistItem AIPlaylistItem       = null;
-        SlackControlManager slackControlManager         =  SlackControlManager.getInstance;
-
-
-
-
+     
         enum SortOrder
         {
            Alphabatically_Sort,
@@ -50,12 +46,7 @@
             this.InitializeComponent(); 
             Init();
         }
-
-        private void SlackControlManager_eventSlackConnected(object source, EventArgs args)
-        {
-            RefreshAsync(source, null);
-        }
-
+        
         private void Init()
         {
            
@@ -68,6 +59,13 @@
         }
         private void UpdateCallBack(object sender, EventArgs e)
         {
+            if (isConnected)
+            {
+                btnRefresh.Visibility = Visibility.Visible;
+            }
+            else
+                btnRefresh.Visibility = Visibility.Hidden;
+
             UpdateTreeviewAsync();
         }
 
@@ -217,7 +215,7 @@
             if (isConnected)
             {
 
-                AnalyticLabel.Content   = "See web Analytics";
+                AnalyticLabel.Content   = "See web analytics";
                 AnalyticImage.Source    = new BitmapImage(new Uri("Resources/PAW.png", UriKind.Relative));
             }
             else
@@ -298,7 +296,7 @@
             {
                 //chcek if AI playlits is present or not
                 //if not
-                GeneratePlaylistLabel.Content = "Generate AI Playlist";
+                GeneratePlaylistLabel.Content = "Generate my AI playlist";
                 GeneratePlaylistImage.Source = new BitmapImage(new Uri("Resources/settings.png", UriKind.Relative));
                 // if yes
 
@@ -315,7 +313,7 @@
         {
             if (isConnected)
             {
-                GeneratePlaylistLabel.Content = "Refresh My AI Playlist";
+                GeneratePlaylistLabel.Content = "Refresh my AI playlist";
                 GeneratePlaylistImage.Source = new BitmapImage(new Uri("Resources/settings.png", UriKind.Relative));
             }
             else
@@ -661,8 +659,9 @@
                         playlistTreeviewItem.MouseLeftButtonUp += PlayLikedSongs;
                     else
                         playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
-                    
-                    playlistTreeviewItem.ContextMenu = await GetContextMenuAsync(items.id);
+
+                    playlistTreeviewItem.MouseRightButtonDown += PlaylistTreeviewItem_MouseRightButtonDownAsync;
+                   // playlistTreeviewItem.ContextMenu = await GetContextMenuAsync(items.id);
                     item.Items.Add(playlistTreeviewItem);
                 }
             }
@@ -673,7 +672,14 @@
             }
            
         }
-        
+
+        private async void PlaylistTreeviewItem_MouseRightButtonDownAsync(object sender, MouseButtonEventArgs e)
+        {
+            PlaylistTreeviewItem item = sender as PlaylistTreeviewItem;
+            item.ContextMenu = await GetContextMenuAsync(item.PlayListId);
+
+        }
+
         private static async Task<ContextMenu> GetContextMenuAsync(string playlist_Id)
         {
             ContextMenu contextMenu = new ContextMenu();
@@ -691,7 +697,7 @@
             removeMenu.Click        += RemoveMenu_Click;
 
             CustomMenu copyToClipBoardMenu = new CustomMenu();
-            copyToClipBoardMenu.Header = "Copy to clipboard";
+            copyToClipBoardMenu.Header = "Copy Song Link";
             copyToClipBoardMenu.PlaylistId = playlist_Id;
             copyToClipBoardMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
             copyToClipBoardMenu.Click += CopyToClipBoardMenu_Click;
@@ -722,7 +728,7 @@
             tumblerMenu.Click += TumblerMenu_Click;
 
             CustomMenu shareMenuItem    = new CustomMenu();
-            shareMenuItem.Header        = "Share";
+            shareMenuItem.Header        = "Share Song";
             shareMenuItem.Foreground    = System.Windows.Media.Brushes.DarkCyan;
 
             CustomMenu slackMenuItem =  await GetSlackMenuItemAsync(playlist_Id);

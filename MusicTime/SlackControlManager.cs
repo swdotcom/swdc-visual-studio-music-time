@@ -39,7 +39,7 @@ namespace MusicTime
 
         private static int TEN_SECONDS = 1000 * 10;
         public static List<Channel> SlackChannels = null;
-        public static SpotifyPlayListControl PlayListControl = new SpotifyPlayListControl();
+     
 
         //public delegate void SlackConnectionHandler(object source, EventArgs args);
 
@@ -297,7 +297,7 @@ namespace MusicTime
             string trackUrl = track_url + Track_Id;
 
             Clipboard.SetText(trackUrl);
-            MessageBox.Show("Song link copied to clipboard.");
+            MessageBox.Show("Spotify track link copied to clipboard.");
         }
 
         public static async Task ShareOnFacebook(string Track_Id)

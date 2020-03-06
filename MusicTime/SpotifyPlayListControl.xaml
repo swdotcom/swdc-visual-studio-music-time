@@ -9,37 +9,6 @@
              mc:Ignorable="d"
           
             Name="MyToolWindow" Height="auto" Width="auto">
-    <UserControl.Resources>
-        <ContextMenu x:Key="cmButton">
-            
-            <MenuItem Header="Add Song"
-                          FontSize="14"/>
-
-            <MenuItem Header="Remove Song"
-                          FontSize="14"/>
-
-            <MenuItem Header="Share"
-                          FontSize="14">
-                <MenuItem Header="Facebook"
-                              FontSize="14" Click="ShareOnFacebook"/>
-                <MenuItem Header="WhatsApp"
-                              FontSize="14"/>
-                <MenuItem Header="Tumbler"
-                              FontSize="14"/>
-                <MenuItem Header="Twitter"
-                              FontSize="14"/>
-                <MenuItem Header="Copy to clipboard"
-                              FontSize="14"/>
-                <MenuItem Header="Slack"
-                              FontSize="14" Name="SlackMenuItem">
- 
-                </MenuItem>
-                <MenuItem Header="Connect to slack"
-                              FontSize="14" Visibility="Hidden"/>
-
-            </MenuItem>
-        </ContextMenu>
-    </UserControl.Resources>
     <ScrollViewer Background="Transparent" BorderBrush="Transparent" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel>
             <DockPanel>
@@ -49,7 +18,7 @@
                 <ColumnDefinition Width="1.5*"/>
                 <ColumnDefinition Width="1.5*"/>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent"  >
+                <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" Visibility="Hidden"  >
                 <StackPanel>
                         <Image Source="Resources\refresh.png"></Image>
                 </StackPanel>
