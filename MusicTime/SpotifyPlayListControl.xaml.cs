@@ -59,13 +59,6 @@
         }
         private void UpdateCallBack(object sender, EventArgs e)
         {
-            if (isConnected)
-            {
-                btnRefresh.Visibility = Visibility.Visible;
-            }
-            else
-                btnRefresh.Visibility = Visibility.Hidden;
-
             UpdateTreeviewAsync();
         }
 
@@ -109,12 +102,7 @@
             }
         }
 
-        public  async Task updateTrackList()
-        {
-            await SoftwareTop40PlaylistAsync();
-            
-            await UsersPlaylistAsync();
-        }
+        
 
         public async Task UpdateTreeviewAsync()
         {
@@ -124,7 +112,7 @@
 
                 if (isConnected)
                 {
-                    
+                    btnRefresh.Visibility = Visibility.Visible;
                     SetConnectContent();
                     SetWebAnalyticsContent();
                     SetDeviceDetectionContent();
@@ -161,6 +149,7 @@
         {
             try
             {
+                btnRefresh.Visibility = Visibility.Hidden;
                 UsersPlaylistTV.Items.Clear();
                 SoftwarePlaylistTV.Items.Clear();
                 LikePlaylistTV.Items.Clear();
@@ -542,6 +531,10 @@
                         if (((!string.IsNullOrEmpty(AIPlaylistID) && playlists.id == AIPlaylistID))
                             || playlists.name == Constants.PERSONAL_TOP_SONGS_NAME)
                         { continue; }
+                        if(playlists.id == Constants.SOFTWARE_TOP_40_ID )
+                        {
+                            continue;
+                        }
                         
                         TreeViewItem treeItem           = null;
                         treeItem                        = PlaylistTreeviewUtil.GetTreeView(playlists.name, "spotify.png", playlists.id);

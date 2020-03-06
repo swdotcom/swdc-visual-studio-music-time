@@ -312,8 +312,9 @@ namespace MusicTime
         {
             string track_url = "https://open.spotify.com/track/";
             string trackUrl = track_url + Track_Id;
-            string api = "https://twitter.com/intent/tweet?text=Check+out+this+song&url=" + track_url + "&hashtags=MusicTime&via=via";
+            string api = "https://twitter.com/intent/tweet?text=Check+out+this+track+I’m+listening+to+using&url=" + trackUrl + "&hashtags=MusicTime&via=Software(www.software.com)";
             launchWebUrl(api);
+            
         }
         public static async Task ShareOnTumbler(string Track_Id)
         {
@@ -326,7 +327,8 @@ namespace MusicTime
         {
             string track_url = "https://open.spotify.com/track/";
             string trackUrl = track_url + Track_Id;
-            string api = "https://api.whatsapp.com/send?text=Check+out+this+playlist:" + trackUrl;
+            string api = "https://api.whatsapp.com/send?text=Check+out+this+track+I’m+listening+to+using+Music+Time.+Created+by+Software(www.software.com):" + trackUrl;
+            
             launchWebUrl(api);
         }
       
