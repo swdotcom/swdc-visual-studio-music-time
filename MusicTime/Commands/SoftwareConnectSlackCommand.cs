@@ -42,6 +42,7 @@ namespace MusicTime
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
              menuItem = new MenuCommand(this.Execute, menuCommandID);
+            menuItem.Visible = false;
             commandService.AddCommand(menuItem);
         }
 

@@ -760,12 +760,12 @@
 
         private static void AddMenu_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+           
         }
 
         private static void RemoveMenu_Click(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+           
         }
 
         private static void FacebookMenu_Click(object sender, RoutedEventArgs e)

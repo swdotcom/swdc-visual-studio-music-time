@@ -99,6 +99,8 @@
       <Button guid="guidMusicTimeCoPackageCmdSet" id="cmdidSoftwareConnectSlackCommand" priority="0x0100" type="Button">
         <Parent guid="guidMusicTimeCoPackageCmdSet" id="MyMenuGroup" />
         <CommandFlag>DynamicVisibility</CommandFlag>
+         <CommandFlag>DynamicVisibility</CommandFlag>
+        <CommandFlag>DefaultInvisible</CommandFlag>
         <Strings>
           <ButtonText>Connect Slack</ButtonText>
         </Strings>

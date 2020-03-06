@@ -179,7 +179,24 @@ namespace MusicTime
                                     auths.LoggedIn = true;
 
                                     await MusicManager.getInstance.UpdateSpotifyAccessInfoAsync(auths, spotifyTokens);
+                                    if (auths.LoggedIn)
+                                    {
+                                        Auths slackaAuth    = new Auths();
+                                        slackaAuth          =  await SlackControlManager.GetSlackUserStatusAsync(true);
+                                        if (slackaAuth.LoggedIn == true)
+                                        {
+                                            SoftwareDisconnectSlackCommand.UpdateEnabledState(true);
+                                            SoftwareConnectSlackCommand.UpdateEnabledState(false);
+                                           
+                                        }
+                                        else
+                                        {
+                                            await MusicManager.UpdateSlackAccesInfoAsync(null);
+                                            SoftwareConnectSlackCommand.UpdateEnabledState(true);
+                                            SoftwareDisconnectSlackCommand.UpdateEnabledState(false);
+                                        }
 
+                                    }
                                 }
                             }
 
@@ -217,6 +234,9 @@ namespace MusicTime
                 {
                     MusicManager.clearSpotifyAccessInfo(spotifyTokens);
                     MusicTimeCoPackage.UpdateUserStatusAsync(null);
+                    SoftwareConnectSlackCommand.UpdateEnabledState(false);
+                    SoftwareDisconnectSlackCommand.UpdateEnabledState(false);
+
                 }
             
         }

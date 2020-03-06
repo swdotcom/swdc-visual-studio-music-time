@@ -76,7 +76,7 @@ namespace MusicTime
                 {
                     auths = await GetSlackUserStatusAsync(true);
 
-                    if (auths == null)
+                    if (auths.LoggedIn !=true)
                     {
                         // try again if the count is not zero
                         if (tryCountUntilFound > 0)
@@ -104,7 +104,7 @@ namespace MusicTime
         {
             string app_jwt          = SoftwareUserSession.GetJwt();
             string responseBody     = null;
-            Auths auths             = null;
+            Auths auths             = new Auths();
 
             UserState userState = new UserState();
             HttpResponseMessage response = null;
@@ -136,7 +136,9 @@ namespace MusicTime
                                     MusicTimeCoPackage.SlackChannels = await GetSalckChannels();
                                     
                                     Logger.Debug("Connected to slack");
-                                  
+                                    SoftwareDisconnectSlackCommand.UpdateEnabledState(true);
+                                    SoftwareConnectSlackCommand.UpdateEnabledState(false);
+
                                 }
                             }
 
