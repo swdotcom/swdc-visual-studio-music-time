@@ -33,6 +33,8 @@
         public static bool AIPlyalistGenerated          = false;
         public static string AIPlaylistID               = null;
 
+        public static List<Device> WebDevices       = new List<Device>();
+        public static List<Device> ComputerDevices  = new List<Device>();
         public static PlaylistItem AIPlaylistItem       = null;
      
         enum SortOrder
@@ -115,7 +117,7 @@
                     btnRefresh.Visibility = Visibility.Visible;
                     SetConnectContent();
                     SetWebAnalyticsContent();
-                    SetDeviceDetectionContent();
+                    SetDeviceDetectionContentAsync();
                     SeperatorContent(); 
                     SetSortContent();
                     if (!isAIPlaylistUpdated)
@@ -159,7 +161,7 @@
                 isMusicTimePlaylistUpdated = false;
                 SetConnectContent();
                 SetWebAnalyticsContent();
-                SetDeviceDetectionContent();
+                SetDeviceDetectionContentAsync();
                 SeperatorContent();
                 GenerateAIContent();
                 SetSortContent();
@@ -214,7 +216,57 @@
             }
 
         }
-        private void SetDeviceDetectionContent()
+        //private async void SetDeviceDetectionContentAsyncold()
+        //{
+        //    if (isConnected)
+        //    {
+        //      //  DeviceLabel.Visibility = Visibility.Visible;
+        //        if (MusicManager.isDeviceOpened())
+        //        {
+        //            DeviceImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
+        //            List<Device> devices = null;
+        //            devices = MusicManager.getDevices();
+
+        //            if (devices.Count > 0)
+        //            {
+
+        //                string Active_Device = MusicManager.getActiveDeviceName();
+
+        //                if (!string.IsNullOrEmpty(Active_Device))
+        //                {
+        //                    DeviceLabel.Content = "Listening on " + MusicManager.getActiveDeviceName();
+        //                    DeviceLabel.ToolTip = "Listening on a Spotify device";
+
+        //                }
+        //                else
+        //                {
+        //                    DeviceLabel.Content = "Connected on " + MusicManager.getDeviceNames();
+        //                    if (devices.Count > 1)
+        //                        DeviceLabel.ToolTip = "Multiple Spotify devices connected";
+        //                    else
+        //                        DeviceLabel.ToolTip = "Spotify device connected";
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+
+        //            DeviceImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
+        //            DeviceLabel.Content = "Connect a spotify device";
+        //            DeviceLabel.ContextMenu = await getDeviceContextMenu();
+        //        }
+        //    }
+        //    else
+        //    {
+        //        DeviceLabel.Content = null;
+        //        DeviceImage.Source = null;
+        //    }
+
+        //}
+        
+
+
+        private async void SetDeviceDetectionContentAsync()
         {
             if (isConnected)
             {
@@ -222,40 +274,29 @@
                 if (MusicManager.isDeviceOpened())
                 {
                     DeviceImage.Source   = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
-                    List<Device> devices = null;
-
+                 
+                    List <Device> devices = MusicManager.getDevices();
                     
-                    devices = MusicManager.getDevices();
-
-                    if(devices.Count>0)
+                    if (devices.Count>0)
                     {
-                       
-                        string Active_Device = MusicManager.getActiveDeviceName();
+                        WebDevices      = getWebDevices(devices);
+                        ComputerDevices = getDesktopDevices(devices);
+                        DeviceImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
+                        DeviceLabel.Content = " Spotify device";
+                        DeviceLabel.Click += DeviceLabel_ClickAsync;
 
-                            if (!string.IsNullOrEmpty(Active_Device))
-                            {
-                                DeviceLabel.Content     = "Listening on " + MusicManager.getActiveDeviceName();
-                                DeviceLabel.ToolTip     = "Listening on a Spotify device";
-                            }
-                            else
-                            {
-                                DeviceLabel.Content     = "Connected on " + MusicManager.getDeviceNames();
-                            if (devices.Count > 1)
-                                DeviceLabel.ToolTip     = "Multiple Spotify devices connected";
-                            else
-                                DeviceLabel.ToolTip     = "Spotify device connected";
-                            }  
 
                     }
-                        
-                        
                 }
                 else
                 {
 
                     DeviceImage.Source      = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
-                    DeviceLabel.Content     = "No device detected";
-                    DeviceLabel.ToolTip     = null;
+                    DeviceLabel.Content     = "Connect a spotify device";
+                    WebDevices = new List<Device>();
+                    ComputerDevices = new List<Device>();
+                    DeviceLabel.Click       += DeviceLabel_ClickAsync; 
+                   
                 }
             }
             else
@@ -265,6 +306,66 @@
             }
 
         }
+
+        public async void PlayTrackFromContext(string playlist_id ,string track_id)
+        {
+            DeviceLabel.ContextMenu = await getDeveviceContext(WebDevices, ComputerDevices,playlist_id, track_id);
+        }
+
+        private async void DeviceLabel_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            if(e!=null)
+            e.Handled = true;
+
+            DeviceLabel.ContextMenu = await getDeveviceContext(WebDevices, ComputerDevices,null,null);
+          
+        }
+
+        private List<Device> getWebDevices(List<Device> devices)
+        {
+            List<Device> webDevices = new List<Device>();
+            foreach (Device item in devices)
+            {
+                if(item.name.Contains("Web Player"))
+                {
+                    webDevices.Add(item);
+                }
+            }
+            return webDevices;
+        }
+
+        private List<Device> getDesktopDevices(List<Device> devices)
+        {
+            List<Device> desktopDevices = new List<Device>();
+            foreach (Device item in devices)
+            {
+                if (!item.name.Contains("Web Player"))
+                {
+                    desktopDevices.Add(item);
+                }
+            }
+            return desktopDevices;
+        }
+
+        //private async void DeviceLabel_Click(object sender, RoutedEventArgs e)
+        //{
+           
+        //    e.Handled = true;
+        //    // DeviceLabel.ContextMenu = await getDeviceContextMenu();
+        //    DeviceLabel.ContextMenu = await getDeveviceContext(WebDevices, ComputerDevices);
+        //}
+
+        //private async void DeviceLabel_MouseDownAsync(object sender, MouseButtonEventArgs e)
+        //{
+        //    if (e.ChangedButton == MouseButton.Left)
+        //    {
+        //        Image image = sender as Image;
+        //        DeviceLabel.ContextMenu = await getDeviceContextMenu();
+        //        e.Handled = true;
+        //    }
+        //    // DeviceLabel.ContextMenu = await getDeviceContextMenu();
+        //}
+
         private void SeperatorContent()
         {
             if (isConnected)
@@ -654,7 +755,7 @@
                         playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
 
                     playlistTreeviewItem.MouseRightButtonDown += PlaylistTreeviewItem_MouseRightButtonDownAsync;
-                   // playlistTreeviewItem.ContextMenu = await GetContextMenuAsync(items.id);
+                   
                     item.Items.Add(playlistTreeviewItem);
                 }
             }
@@ -671,6 +772,152 @@
             PlaylistTreeviewItem item = sender as PlaylistTreeviewItem;
             item.ContextMenu = await GetContextMenuAsync(item.PlayListId);
 
+        }
+
+        private static async Task<ContextMenu> getDeviceContextMenu()
+        {
+            ContextMenu contextMenu = new ContextMenu();
+            CustomMenu webPlayerMenu = new CustomMenu();
+            webPlayerMenu.Header = "Launch Web Player";
+
+            webPlayerMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
+            webPlayerMenu.Click += launchWebAndPlayTrack; ;
+
+            CustomMenu desktoPlayerMenu = new CustomMenu();
+            desktoPlayerMenu.Header = "Launch Desktop Player";
+
+            desktoPlayerMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
+            desktoPlayerMenu.Click += launchDesktopAndPlayTrack; ;
+
+            contextMenu.Items.Add(webPlayerMenu);
+            contextMenu.Items.Add(desktoPlayerMenu);
+            contextMenu.IsOpen = true;
+            return contextMenu;
+        }
+
+
+        private  async Task<ContextMenu> getDeveviceContext(List<Device> WebDevices ,List<Device> ComputerDevices, string playlist_id,string track_id)
+        {
+            ContextMenu contextMenu = new ContextMenu();
+
+            if (WebDevices.Count > 0)
+            {
+                foreach (Device item in WebDevices)
+                {
+                    DeviceContextMenu webPlayerMenu = null;
+                    if (item.is_active == true)
+                    {
+                       webPlayerMenu = new DeviceContextMenu();
+                        webPlayerMenu.Header = "Listening on "+item.name;
+                        webPlayerMenu.isActive = item.is_active;
+                        webPlayerMenu.deviceId = item.id;
+                        webPlayerMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
+                        webPlayerMenu.Click += WebPlayerPlay; 
+                    }
+                    else
+                    {
+                        webPlayerMenu = new DeviceContextMenu();
+                        webPlayerMenu.Header = "Available on " + item.name;
+                        webPlayerMenu.isActive = item.is_active;
+                        webPlayerMenu.deviceId = item.id;
+                        webPlayerMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
+                        webPlayerMenu.Click += transferPlayer;
+
+                    }
+                    contextMenu.Items.Add(webPlayerMenu);
+                }
+            }
+            else
+            {
+                DeviceContextMenu webPlayerMenu     = new DeviceContextMenu();
+                webPlayerMenu.Header                = "Launch Web Player";
+                webPlayerMenu.playlist_id           = playlist_id;
+                webPlayerMenu.track_id              = track_id;
+                webPlayerMenu.Foreground            = System.Windows.Media.Brushes.DarkCyan;
+                webPlayerMenu.Click                 += launchWebAndPlayTrack;
+
+                contextMenu.Items.Add(webPlayerMenu);
+            }
+            if (ComputerDevices.Count > 0)
+            {
+                foreach (Device item in ComputerDevices)
+                {
+                    DeviceContextMenu computerMenu = null;
+                    if (item.is_active == true)
+                    {
+                        computerMenu                = new DeviceContextMenu();
+                        computerMenu.Header         = "Listening on " + item.name;
+                        computerMenu.isActive       = item.is_active;
+                        computerMenu.deviceId       = item.id;
+                        computerMenu.Foreground     = System.Windows.Media.Brushes.DarkCyan;
+                        computerMenu.Click          += WebPlayerPlay;
+                    }
+                    else
+                    {
+                        computerMenu            = new DeviceContextMenu();
+                        computerMenu.Header     = "Available on " + item.name;
+                        computerMenu.isActive   = item.is_active;
+                        computerMenu.deviceId   = item.id;
+                        computerMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
+                        computerMenu.Click      += transferPlayer;
+
+                    }
+                    contextMenu.Items.Add(computerMenu);
+                }
+            }
+            else
+            {
+                DeviceContextMenu desktoPlayerMenu  = new DeviceContextMenu();
+                desktoPlayerMenu.Header             = "Launch Desktop Player";
+
+                desktoPlayerMenu.Foreground         = System.Windows.Media.Brushes.DarkCyan;
+                desktoPlayerMenu.Click              += launchDesktopAndPlayTrack;
+                contextMenu.Items.Add(desktoPlayerMenu);
+            }
+            
+            contextMenu.IsOpen = true;
+                return contextMenu;
+        }
+
+        private void transferPlayer(object sender, RoutedEventArgs e)
+        {
+            DeviceContextMenu deviceContextMenu = sender as DeviceContextMenu;
+            MusicManager.SpotifyTransferDevice(deviceContextMenu.deviceId);
+        }
+
+        private void WebPlayerPlay(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private static async void launchDesktopAndPlayTrack(object sender, RoutedEventArgs e)
+        {
+            DeviceContextMenu deviceContextMenu = sender as DeviceContextMenu;
+
+            await MusicController.LaunchDesktopApp();
+            Thread.Sleep(5000);
+           // Logger.Debug(deviceContextMenu.playlist_id);
+            await MusicManager.getDevicesAsync();
+            if (!string.IsNullOrEmpty(deviceContextMenu.playlist_id) || !string.IsNullOrEmpty(deviceContextMenu.track_id))
+            {
+                Logger.Debug(deviceContextMenu.playlist_id);
+                await MusicManager.SpotifyPlayPlaylistAsync(deviceContextMenu.playlist_id, deviceContextMenu.track_id);
+            }
+           
+        }
+
+        private static async void launchWebAndPlayTrack(object sender, RoutedEventArgs e)
+        {
+            DeviceContextMenu deviceContextMenu = sender as DeviceContextMenu;
+
+            await MusicController.LaunchPlayerAsync(new options(null, null, null));
+            await MusicManager.getDevicesAsync();
+            Thread.Sleep(5000);
+            if (!string.IsNullOrEmpty(deviceContextMenu.playlist_id) || !string.IsNullOrEmpty(deviceContextMenu.track_id))
+            {
+                Logger.Debug(deviceContextMenu.playlist_id);
+                await MusicManager.SpotifyPlayPlaylistAsync(deviceContextMenu.playlist_id, deviceContextMenu.track_id);
+            }
         }
 
         private static async Task<ContextMenu> GetContextMenuAsync(string playlist_Id)
@@ -963,12 +1210,12 @@
                 {
                     playlistID  = parent.PlayListId;
                     trackID     = item.PlayListId;
-                    Logger.Debug(playlistID +":" + trackID);
+                  //  Logger.Debug(playlistID +":" + trackID);
                 }
                 else
                 {
                     playlistID = item.PlayListId;
-                    Logger.Debug(playlistID + ":" + trackID);
+                    
                 }
 
                 
@@ -978,11 +1225,14 @@
                     }
                     else
                     {
-                     
-                        await MusicController.LaunchPlayerAsync(new options(null,playlistID,trackID));
-                       
-                      //  await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
-                    }
+
+                    //  DeviceLabel_ClickAsync(null, null);
+                    PlayTrackFromContext(playlistID, trackID);
+
+                   // await MusicController.LaunchPlayerAsync(new options(null,playlistID,trackID));
+
+                    // await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
+                }
                 
             }
             catch (Exception ex)

@@ -49,7 +49,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                     <Image x:Name="DeviceImage"  Width="15" Height="15"></Image>
-                <Label x:Name="DeviceLabel" Foreground="DarkCyan" ></Label>
+                <Button x:Name="DeviceLabel" Foreground="DarkCyan"  Background="Transparent" BorderBrush="Transparent" BorderThickness="0"></Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image x:Name="AnalyticImage" Width="15" Height="15"></Image>

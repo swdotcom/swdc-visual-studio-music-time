@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -113,13 +114,23 @@ namespace MusicTime
            
         }
 
+        public static async Task LaunchDesktopApp()
+        {
+            string userHomeDir = Environment.ExpandEnvironmentVariables("%APPDATA%");
+            string strCmdText = Path.Combine(userHomeDir, "Spotify\\Spotify.exe");
+            Process process = new Process();
+            process.StartInfo.FileName = strCmdText;
+            process.StartInfo.CreateNoWindow = false;
+            process.Start();
+           
+        }
         public static async Task LaunchPlayerAsync(options options)
         {
 
             LaunchWebPlayerAsync(new options());
 
-            Thread.Sleep(5000);
-         
+           // Thread.Sleep(5000);
+
             if (!string.IsNullOrEmpty(options.playlist_id))
             {
                await MusicManager.SpotifyPlayPlaylistAsync(options.playlist_id, options.track_id);

@@ -125,6 +125,9 @@ namespace MusicTime
             }
             return devices;
         }
+
+
+
         public static string getDeviceNames()
         {
             string deviceNames = "";
@@ -390,6 +393,36 @@ namespace MusicTime
            
         }
 
+        public static async Task SpotifyTransferDevice(string device_id )
+        {
+
+            HttpResponseMessage response = null;
+            JsonObject payload = new JsonObject();
+            string[] stringArray = new string[] { device_id };
+            payload.Add("device_ids", stringArray);
+            payload.Add("play", true);
+
+           string _payload = payload.ToString();
+            if (!string.IsNullOrEmpty(device_id))
+            {
+              string  api = "/v1/me/player";
+
+                response = await MusicClient.SpotifyApiPutAsync(api, _payload);
+
+                Logger.Debug(_payload);
+                if (response == null || !MusicClient.IsOk(response))
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiPutAsync(api, _payload);
+
+                }
+
+            }
+
+        }
+
         public static async Task SpotifyPlayPlaylistAsync(string PlaylistId,string trackid)
         {
             string payload      = string.Empty;
@@ -489,6 +522,10 @@ namespace MusicTime
             {
                 string responseBody = await response.Content.ReadAsStringAsync();
                 track = JsonConvert.DeserializeObject<TrackStatus>(responseBody);
+               
+            }
+            if(track.item!=null)
+            {
                 track.item.progress_ms = track.progress_ms;
             }
             if (track.item !=null)
