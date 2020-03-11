@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,6 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MusicTime
 {
@@ -116,21 +118,85 @@ namespace MusicTime
 
         public static async Task LaunchDesktopApp()
         {
-            try
+            bool flag = await checkInstalled("Spotify");
+            if ( flag )
             {
-                string userHomeDir = Environment.ExpandEnvironmentVariables("%APPDATA%");
-                string strCmdText = Path.Combine(userHomeDir, "Spotify\\Spotify.exe");
-                Process process = new Process();
-                process.StartInfo.FileName = strCmdText;
-                process.StartInfo.CreateNoWindow = false;
-                process.Start();
+                try
+                {
+                    string userHomeDir = Environment.ExpandEnvironmentVariables("%APPDATA%");
+                    string strCmdText = Path.Combine(userHomeDir, "Spotify\\Spotify.exe");
+                    Process process = new Process();
+                    process.StartInfo.FileName = strCmdText;
+                    process.StartInfo.CreateNoWindow = false;
+                    process.Start();
 
 
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
-            catch (Exception ex)
+            else
             {
+                string message  = "Spotify player is not installed , open web player instead ?";
+                string title    = "SPOTIFY";
+                MessageBoxButtons buttons = MessageBoxButtons.OKCancel;
+                DialogResult result = MessageBox.Show(message, title, buttons);
+                if (result == DialogResult.OK)
+                {
+                    LaunchWebPlayerAsync(new options());
+                }
+                
 
+               // DialogResult result =  MessageBox.Show("Spotify device is not installed ");
+                
+               
             }
+
+            
+        }
+
+        public static async void launchDevicePrompt()
+        {
+
+
+        }
+
+        public static async Task< bool> checkInstalled(string c_name)
+        {
+            string displayName;
+
+            string registryKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(registryKey);
+            if (key != null)
+            {
+                foreach (RegistryKey subkey in key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)))
+                {
+                    displayName = subkey.GetValue("DisplayName") as string;
+                    if (displayName != null && displayName.Contains(c_name))
+                    {
+                        return true;
+                    }
+                }
+                key.Close();
+            }
+
+            registryKey = @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall";
+            key = Registry.CurrentUser.OpenSubKey(registryKey);
+            if (key != null)
+            {
+                foreach (RegistryKey subkey in key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)))
+                {
+                    displayName = subkey.GetValue("DisplayName") as string;
+                    if (displayName != null && displayName.Contains(c_name))
+                    {
+                        return true;
+                    }
+                }
+                key.Close();
+            }
+            return false;
         }
         public static async Task LaunchPlayerAsync(options options)
         {
