@@ -281,8 +281,8 @@
                     {
                         WebDevices      = getWebDevices(devices);
                         ComputerDevices = getDesktopDevices(devices);
-                        DeviceImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
                         DeviceLabel.Content = " Spotify device";
+                        DeviceImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
                         DeviceLabel.Click += DeviceLabel_ClickAsync;
 
 
@@ -770,30 +770,12 @@
         private async void PlaylistTreeviewItem_MouseRightButtonDownAsync(object sender, MouseButtonEventArgs e)
         {
             PlaylistTreeviewItem item = sender as PlaylistTreeviewItem;
+            if(item!=null)
             item.ContextMenu = await GetContextMenuAsync(item.PlayListId);
 
         }
 
-        private static async Task<ContextMenu> getDeviceContextMenu()
-        {
-            ContextMenu contextMenu = new ContextMenu();
-            CustomMenu webPlayerMenu = new CustomMenu();
-            webPlayerMenu.Header = "Launch Web Player";
-
-            webPlayerMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
-            webPlayerMenu.Click += launchWebAndPlayTrack; ;
-
-            CustomMenu desktoPlayerMenu = new CustomMenu();
-            desktoPlayerMenu.Header = "Launch Desktop Player";
-
-            desktoPlayerMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
-            desktoPlayerMenu.Click += launchDesktopAndPlayTrack; ;
-
-            contextMenu.Items.Add(webPlayerMenu);
-            contextMenu.Items.Add(desktoPlayerMenu);
-            contextMenu.IsOpen = true;
-            return contextMenu;
-        }
+  
 
 
         private  async Task<ContextMenu> getDeveviceContext(List<Device> WebDevices ,List<Device> ComputerDevices, string playlist_id,string track_id)
@@ -1181,10 +1163,10 @@
                 }
                 else
                 {
-                    options.playlist_id = playlistID;
-                    await MusicController.LaunchPlayerAsync(options);
-                    
-                   // await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
+                    //options.playlist_id = playlistID;
+                    //await MusicController.LaunchPlayerAsync(options);
+                    PlayTrackFromContext(playlistID, trackID);
+                    // await MusicManager.SpotifyPlayPlaylistAsync(playlistID, trackID);
                 }
 
             }
@@ -1275,9 +1257,10 @@
                 }
                 else
                 {
-                   
-                    await MusicController.LaunchPlayerAsync(new options(null,playlistID,trackID));
-                    
+                    PlayTrackFromContext(playlistID, trackID);
+
+                    // await MusicController.LaunchPlayerAsync(new options(null,playlistID,trackID));
+
                 }
 
             }

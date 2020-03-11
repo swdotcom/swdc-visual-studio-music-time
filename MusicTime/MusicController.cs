@@ -116,13 +116,21 @@ namespace MusicTime
 
         public static async Task LaunchDesktopApp()
         {
-            string userHomeDir = Environment.ExpandEnvironmentVariables("%APPDATA%");
-            string strCmdText = Path.Combine(userHomeDir, "Spotify\\Spotify.exe");
-            Process process = new Process();
-            process.StartInfo.FileName = strCmdText;
-            process.StartInfo.CreateNoWindow = false;
-            process.Start();
-           
+            try
+            {
+                string userHomeDir = Environment.ExpandEnvironmentVariables("%APPDATA%");
+                string strCmdText = Path.Combine(userHomeDir, "Spotify\\Spotify.exe");
+                Process process = new Process();
+                process.StartInfo.FileName = strCmdText;
+                process.StartInfo.CreateNoWindow = false;
+                process.Start();
+
+
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
         public static async Task LaunchPlayerAsync(options options)
         {
