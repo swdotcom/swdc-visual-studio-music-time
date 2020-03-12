@@ -292,7 +292,7 @@
                 {
 
                     DeviceImage.Source      = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
-                    DeviceLabel.Content     = "Connect a spotify device";
+                    DeviceLabel.Content     = "Connect to a Spotify device";
                     WebDevices = new List<Device>();
                     ComputerDevices = new List<Device>();
                     DeviceLabel.Click       += DeviceLabel_ClickAsync; 
@@ -812,7 +812,7 @@
             else
             {
                 DeviceContextMenu webPlayerMenu     = new DeviceContextMenu();
-                webPlayerMenu.Header                = "Launch Web Player";
+                webPlayerMenu.Header                = "Launch Spotify web player";
                 webPlayerMenu.playlist_id           = playlist_id;
                 webPlayerMenu.track_id              = track_id;
                 webPlayerMenu.Foreground            = System.Windows.Media.Brushes.DarkCyan;
@@ -850,7 +850,7 @@
             else
             {
                 DeviceContextMenu desktoPlayerMenu  = new DeviceContextMenu();
-                desktoPlayerMenu.Header             = "Launch Desktop Player";
+                desktoPlayerMenu.Header             = "Launch Spotify desktop";
 
                 desktoPlayerMenu.Foreground         = System.Windows.Media.Brushes.DarkCyan;
                 desktoPlayerMenu.Click              += launchDesktopAndPlayTrack;
