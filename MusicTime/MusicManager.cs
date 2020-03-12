@@ -971,5 +971,27 @@ namespace MusicTime
 
             return _usersPlaylists;
         }
+
+
+        public static async Task<List<Track>> getRecommendationsForTracks(string value)
+        {
+            HttpResponseMessage response    = null;
+            string responseBody             = null;
+            string api                      = "https://api.spotify.com/v1/recommendations";
+
+            List<Track> tracks          = new List<Track>();
+            List <string> seed_tracks   = new List<string>();
+            List<string> seed_genres    = new List<string>();
+            List<string> seed_artists   = new List<string>();
+            int limit                   = 40;
+            string market               = "";
+            int min_popularity          = 20;
+            int target_popularity       = 90;
+
+          
+
+
+            return tracks;
+        }
     }
 }
