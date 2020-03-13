@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ namespace MusicTime
         public static CodyConfig codyConfig     = CodyConfig.getInstance;
         private static Device device            = Device.getInstance;
         private static TrackStatus trackStatus  = new TrackStatus();
+        public static List<Track> RecommendedTracks           = new List<Track>();
         private MusicManager()
         {
         }
@@ -245,12 +247,15 @@ namespace MusicTime
         public static string getActiveDeviceID()
         {
             string activeDevice = null;
-            if (device.devices != null)
+            if (device != null)
             {
-                foreach (Device item in device.devices)
+                if (device.devices != null)
                 {
-                    if (item.is_active == true || item.type == "Computer")
-                    { activeDevice = item.id; break; }
+                    foreach (Device item in device.devices)
+                    {
+                        if (item.is_active == true || item.type == "Computer")
+                        { activeDevice = item.id; break; }
+                    }
                 }
             }
             return activeDevice;
@@ -464,7 +469,7 @@ namespace MusicTime
 
                 response = await MusicClient.SpotifyApiPutAsync(api,payload);
               
-                if (response == null || !MusicClient.IsOk(response))
+                if (response == null || !MusicClient.IsOk(response) || response.StatusCode == HttpStatusCode.NoContent)
                 {
                     // refresh the tokens
                     await MusicClient.refreshSpotifyTokenAsync();
@@ -972,26 +977,145 @@ namespace MusicTime
             return _usersPlaylists;
         }
 
+        public static async Task saveToSpotifyLiked (string trackID)
+        {
+            HttpResponseMessage response    = null;
+            string responseBody             = null;
+            string api                      = "/v1/me/tracks";
+            JsonObject payload      = new JsonObject();
+            string[] stringArray    = new string[] { trackID };
+            payload.Add("ids", stringArray);
+            string _payload = payload.ToString();
+
+            response = await MusicClient.SpotifyApiPutAsync(api, _payload);
+            if (response == null || !MusicClient.IsOk(response))
+            {
+                // refresh the tokens
+                await MusicClient.refreshSpotifyTokenAsync();
+                // Try again
+                response = await MusicClient.SpotifyApiPutAsync(api, _payload);
+            }
+
+
+        }
+
+        public static async Task removeToSpotifyLiked(string trackID)
+        {
+            HttpResponseMessage response    = null;
+            string responseBody             = null;
+            string api                      = "/v1/me/tracks";
+            JsonObject payload              = new JsonObject();
+            string[] stringArray            = new string[] { trackID };
+            payload.Add("ids", stringArray);
+            string _payload = payload.ToString();
+
+            response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
+            if (response == null || !MusicClient.IsOk(response))
+            {
+                // refresh the tokens
+                await MusicClient.refreshSpotifyTokenAsync();
+                // Try again
+                response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
+            }
+
+
+        }
+
 
         public static async Task<List<Track>> getRecommendationsForTracks(string value)
         {
             HttpResponseMessage response    = null;
             string responseBody             = null;
-            string api                      = "https://api.spotify.com/v1/recommendations";
-
-            List<Track> tracks          = new List<Track>();
-            List <string> seed_tracks   = new List<string>();
-            List<string> seed_genres    = new List<string>();
-            List<string> seed_artists   = new List<string>();
+            string api                      = "/v1/recommendations";
+            string query = string.Empty;
+            List <string> seed_tracks_list  = new List<string>();
+            string seed_tracks = "";
+            List<string>  seed_genres    = new List<string>();
+            List<string>  seed_artists   = new List<string>();
             int limit                   = 40;
             string market               = "";
             int min_popularity          = 20;
             int target_popularity       = 90;
+            string mood                 = string.Empty;
+            JsonObject queryParams      = new JsonObject();
+            List<Track> likedTracks     = new List<Track>();
+            likedTracks                 = await Playlist.getSpotifyLikedSongsAsync();
+            TrackList trackList         = new TrackList();
+            List<string> trackIds       = new List<string>();
 
-          
+            if(likedTracks.Count==0)
+            {
 
+            }
+            else
+            {
+                foreach (Track item in likedTracks)
+                {
+                    trackIds.Add(item.id);
+                }
+            
+                seed_tracks = string.Join(",", trackIds.ToArray(),0,5);
+            }
 
-            return tracks;
+             switch (value)
+            {
+                case "Happy":
+                    mood = "&min_valence=0.6&target_valence=1";
+                    break;
+                case "Energetic":
+                    mood = "&min_danceability=0.6&target_danceability=1";
+                    break;
+                case "Danceable":
+                    mood = "&max_speechiness=0.4&target_speechiness=0";
+                    break;
+                case "Instrumental":
+                    mood = "&max_speechiness=0.4&target_speechiness=0";
+                    break;
+                case "Quiet music":
+                    mood =  "&max_loudness=0.4&target_loudness=0";
+                    break;
+                default:
+                    break;
+            }
+            
+            if(!string.IsNullOrEmpty(mood))
+            {
+                query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_tracks=" + seed_tracks + "" + mood;
+            }
+            else
+            {
+                 query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_genres==" + value.ToLower();
+            }
+
+            try
+            {
+                response = await MusicClient.SpotifyApiGetAsync(query);
+
+                if (response == null || !MusicClient.IsOk(response))
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiGetAsync(query);
+                }
+
+                if (MusicClient.IsOk(response))
+                {
+                    responseBody    = await response.Content.ReadAsStringAsync();
+                    trackList       = JsonConvert.DeserializeObject<TrackList>(responseBody);
+
+                    RecommendedTracks = trackList.tracks;
+                }
+
+            }
+            catch ( Exception ex)
+            {
+
+                
+            }
+           
+
+            return RecommendedTracks;
         }
     }
 }

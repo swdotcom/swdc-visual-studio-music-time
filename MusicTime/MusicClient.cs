@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace MusicTime
 {
@@ -34,7 +35,7 @@ namespace MusicTime
         }
         public static bool IsOk(HttpResponseMessage response)
         {
-            return (response != null &&( response.StatusCode == HttpStatusCode.OK||response.StatusCode ==HttpStatusCode.Created) );
+            return (response != null &&( response.StatusCode == HttpStatusCode.OK||response.StatusCode ==HttpStatusCode.Created  ) );
         }
 
         public static string QueryString(string api ,List<object> qsOptions)
@@ -197,7 +198,40 @@ namespace MusicTime
             return deviceList;
         }
 
-        
+        public static async Task<HttpResponseMessage> spotifyApiDeleteAsync(string api, string payload)
+        {
+            HttpResponseMessage response = null;
+            HttpClient client = new HttpClient();
+            try
+            {
+                if (payload == null)
+                { payload = ""; }
+                else
+                {
+                    api = api + "?" + payload;
+                }
+                client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", codyConfig.spotifyAccessToken);
+                
+                string endpoint = Constants.api_Spotifyendpoint + "" + api;
+            
+               response  =
+                client.SendAsync(
+                new HttpRequestMessage(HttpMethod.Delete, endpoint)
+                {
+                    Content = new StringContent(payload, Encoding.UTF8, "application/json")
+                })
+                .Result;
 
+                
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return response;
+        }
     }
 }

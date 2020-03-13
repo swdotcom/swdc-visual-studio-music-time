@@ -318,17 +318,21 @@ namespace MusicTime
                 if (MusicManager.isDeviceOpened())
                 {
                     trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
-                    if (trackStatus.is_playing == true && trackStatus.item != null)
+                    if (trackStatus != null)
                     {
-                        currentTrack = trackStatus.item.name;
-                        _musicStatus.SetTrackName(Pause + " " + currentTrack);
-                        isValidRunningOrPausedTrack = true;
-                    }
-                    if (trackStatus.is_playing == false && trackStatus.item != null)
-                    {
-                        currentTrack = trackStatus.item.name;
-                        _musicStatus.SetTrackName(Play + " " + currentTrack);
-                        isValidRunningOrPausedTrack = true;
+                        if (trackStatus.is_playing == true && trackStatus.item != null)
+                        {
+                            currentTrack = trackStatus.item.name;
+                            //MusicManager.removeToSpotifyLiked(trackStatus.item.id);
+                            _musicStatus.SetTrackName(Pause + " " + currentTrack);
+                            isValidRunningOrPausedTrack = true;
+                        }
+                        if (trackStatus.is_playing == false && trackStatus.item != null)
+                        {
+                            currentTrack = trackStatus.item.name;
+                            _musicStatus.SetTrackName(Play + " " + currentTrack);
+                            isValidRunningOrPausedTrack = true;
+                        }
                     }
                 }
                 else

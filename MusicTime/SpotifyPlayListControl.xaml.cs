@@ -347,25 +347,7 @@
             return desktopDevices;
         }
 
-        //private async void DeviceLabel_Click(object sender, RoutedEventArgs e)
-        //{
-           
-        //    e.Handled = true;
-        //    // DeviceLabel.ContextMenu = await getDeviceContextMenu();
-        //    DeviceLabel.ContextMenu = await getDeveviceContext(WebDevices, ComputerDevices);
-        //}
-
-        //private async void DeviceLabel_MouseDownAsync(object sender, MouseButtonEventArgs e)
-        //{
-        //    if (e.ChangedButton == MouseButton.Left)
-        //    {
-        //        Image image = sender as Image;
-        //        DeviceLabel.ContextMenu = await getDeviceContextMenu();
-        //        e.Handled = true;
-        //    }
-        //    // DeviceLabel.ContextMenu = await getDeviceContextMenu();
-        //}
-
+   
         private void SeperatorContent()
         {
             if (isConnected)
@@ -571,21 +553,24 @@
             {
                 TreeViewItem SwtopTreeItem = null;
                 TreeViewItem LikedTreeItem = null;
+                TreeViewItem RecommendedTreeItem = null;
                 if (isConnected)
                 {
                     List<PlaylistItem> playlistItems      = await Playlist.getPlaylistsAsync();
                     List<Track> Swtoptracks               = new List<Track>();
 
-                    SwtopTreeItem  = PlaylistTreeviewUtil.GetTreeView("Software top 40", "PAW.png", Constants.SOFTWARE_TOP_40_ID);
-                    LikedTreeItem  = PlaylistTreeviewUtil.GetTreeView("Liked Songs", "Heart_Red.png", "Liked Songs");
-
+                    SwtopTreeItem       = PlaylistTreeviewUtil.GetTreeView("Software top 40", "PAW.png", Constants.SOFTWARE_TOP_40_ID);
+                    LikedTreeItem       = PlaylistTreeviewUtil.GetTreeView("Liked Songs", "Heart_Red.png", "Liked Songs");
+                    RecommendedTreeItem = PlaylistTreeviewUtil.GetTreeView("Recommended Songs", "Heart_Red.png", "Recommended Songs");
                     SwtopTreeItem.MouseLeftButtonUp     += PlayPlaylist;
                     SwtopTreeItem.Expanded              += AddTracksAsync;
                     LikedTreeItem.MouseLeftButtonUp     += PlayPlaylist;
                     LikedTreeItem.Expanded              += AddTracksAsync;
 
+                    RecommendedTreeItem.MouseLeftButtonUp += PlayPlaylist;
+                    RecommendedTreeItem.Expanded += RecommendTreeItem_ExpandedAsync;
                     LikedTreeItem.Items.Add(null);
-
+                    RecommendedTreeItem.Items.Add(null);
                     SwtopTreeItem.Items.Add(null);
                     
                     if (SoftwarePlaylistTV.Items.Count > 0)
@@ -595,6 +580,7 @@
 
                     SoftwarePlaylistTV.Items.Add(SwtopTreeItem);
                     SoftwarePlaylistTV.Items.Add(LikedTreeItem);
+                    SoftwarePlaylistTV.Items.Add(RecommendedTreeItem);
                     isMusicTimePlaylistUpdated = true;
                     
                 }
@@ -612,6 +598,45 @@
 
 
         }
+
+        private async void RecommendTreeItem_ExpandedAsync(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                bool isLikedSongs = false;
+                List<Track> tracks = new List<Track>();
+                PlaylistTreeviewItem item = sender as PlaylistTreeviewItem;
+                item.Items.Clear();
+
+                tracks = await MusicManager.getRecommendationsForTracks("Happy");
+
+                if (tracks.Count < 1)
+                {
+                    TreeViewItem treeviewItem = PlaylistTreeviewUtil.GetTreeView("Your tracks will appear here", null, "EmptyPlaylist");
+                    item.Items.Add(treeviewItem);
+                }
+
+                foreach (Track items in tracks)
+                {
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView(items.name, "share.png", items.id);
+
+                    if (isLikedSongs)
+                        playlistTreeviewItem.MouseLeftButtonUp += PlayLikedSongs;
+                    else
+                        playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
+
+                    playlistTreeviewItem.MouseRightButtonDown += PlaylistTreeviewItem_MouseRightButtonDownAsync;
+
+                    item.Items.Add(playlistTreeviewItem);
+                }
+            }
+            catch (Exception ex)
+            {
+
+
+            }
+        }
+
         private async Task UsersPlaylistAsync()
         {
             try
@@ -646,6 +671,7 @@
                         treeItemList.Add(treeItem);
 
                     }
+
                     if (UsersPlaylistTV.Items.Count > 0)
                     {
                         UsersPlaylistTV.Items.Clear();
@@ -851,7 +877,8 @@
             {
                 DeviceContextMenu desktoPlayerMenu  = new DeviceContextMenu();
                 desktoPlayerMenu.Header             = "Launch Spotify desktop";
-
+                desktoPlayerMenu.playlist_id        = playlist_id;
+                desktoPlayerMenu.track_id           = track_id;
                 desktoPlayerMenu.Foreground         = System.Windows.Media.Brushes.DarkCyan;
                 desktoPlayerMenu.Click              += launchDesktopAndPlayTrack;
                 contextMenu.Items.Add(desktoPlayerMenu);

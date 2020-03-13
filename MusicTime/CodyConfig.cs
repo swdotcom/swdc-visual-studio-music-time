@@ -380,7 +380,21 @@ namespace MusicTime
         public int playlistTypeId { get; set; }
     }
 
-     
+    public class Seed
+    {
+        public int initialPoolSize { get; set; }
+        public int afterFilteringSize { get; set; }
+        public int afterRelinkingSize { get; set; }
+        public string id { get; set; }
+        public string type { get; set; }
+        public string href { get; set; }
+    }
+
+    public class TrackList
+    {
+        public List<Track> tracks { get; set; }
+        public List<Seed> seeds { get; set; }
+    }
 
     public partial class SpotifyAudioFeature
     {
