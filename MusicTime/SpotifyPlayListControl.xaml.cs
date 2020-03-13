@@ -775,9 +775,9 @@
                 {
                     TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView(items.name, "share.png", items.id);
 
-                    if(isLikedSongs)
-                        playlistTreeviewItem.MouseLeftButtonUp += PlayLikedSongs;
-                    else
+                    //if(isLikedSongs)
+                    //    playlistTreeviewItem.MouseLeftButtonUp += PlayLikedSongs;
+                    //else
                         playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
 
                     playlistTreeviewItem.MouseRightButtonDown += PlaylistTreeviewItem_MouseRightButtonDownAsync;
@@ -807,7 +807,7 @@
         private  async Task<ContextMenu> getDeveviceContext(List<Device> WebDevices ,List<Device> ComputerDevices, string playlist_id,string track_id)
         {
             ContextMenu contextMenu = new ContextMenu();
-
+           
             if (WebDevices.Count > 0)
             {
                 foreach (Device item in WebDevices)
@@ -910,6 +910,8 @@
             if (!string.IsNullOrEmpty(deviceContextMenu.playlist_id) || !string.IsNullOrEmpty(deviceContextMenu.track_id))
             {
                 Logger.Debug(deviceContextMenu.playlist_id);
+                if (deviceContextMenu.playlist_id == "Liked Songs") 
+                    deviceContextMenu.playlist_id = null;
                 await MusicManager.SpotifyPlayPlaylistAsync(deviceContextMenu.playlist_id, deviceContextMenu.track_id);
             }
            
@@ -925,6 +927,8 @@
             if (!string.IsNullOrEmpty(deviceContextMenu.playlist_id) || !string.IsNullOrEmpty(deviceContextMenu.track_id))
             {
                 Logger.Debug(deviceContextMenu.playlist_id);
+                if (deviceContextMenu.playlist_id == "Liked Songs")
+                    deviceContextMenu.playlist_id = null;
                 await MusicManager.SpotifyPlayPlaylistAsync(deviceContextMenu.playlist_id, deviceContextMenu.track_id);
             }
         }
@@ -982,13 +986,17 @@
 
             CustomMenu slackMenuItem =  await GetSlackMenuItemAsync(playlist_Id);
 
+
+            CustomMenu addMenuItem  = await getAddMenuItem(playlist_Id,"");
+            addMenuItem.Header = "Add Song";
+
             shareMenuItem.Items.Add(facebookMenu);
             shareMenuItem.Items.Add(twitterMenu);
             shareMenuItem.Items.Add(whatsAppMenu);
             shareMenuItem.Items.Add(tumblerMenu);
             shareMenuItem.Items.Add(slackMenuItem);
 
-            contextMenu.Items.Add(addMenu);
+            contextMenu.Items.Add(addMenuItem);
             contextMenu.Items.Add(removeMenu);
             contextMenu.Items.Add(copyToClipBoardMenu);
             contextMenu.Items.Add(shareMenuItem);
@@ -996,6 +1004,31 @@
             return contextMenu;
         }
 
+        private static async Task<CustomMenu> getAddMenuItem(string playlist_Id,string track_id)
+        {
+            CustomMenu addMenuItem = new CustomMenu();
+            addMenuItem.Foreground = System.Windows.Media.Brushes.DarkCyan;
+
+
+            CustomMenu createPlaylistMenu = new CustomMenu();
+            createPlaylistMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
+            createPlaylistMenu.Header = "Create new playlist";
+            createPlaylistMenu.PlaylistId = playlist_Id;
+
+            CustomMenu selectMenu = new CustomMenu();
+            selectMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
+            selectMenu.PlaylistId = playlist_Id;
+            selectMenu.Header = "Select playlist";
+
+            addMenuItem.Items.Add(createPlaylistMenu);
+            addMenuItem.Items.Add(selectMenu);
+
+            return addMenuItem;
+           
+
+        }
+
+      
         private static void CopyToClipBoardMenu_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1014,9 +1047,11 @@
 
         }
 
-        private static void AddMenu_Click(object sender, RoutedEventArgs e)
-        {
-           
+        private static async void AddMenu_Click(object sender, RoutedEventArgs e)
+        { 
+            
+          
+         
         }
 
         private static void RemoveMenu_Click(object sender, RoutedEventArgs e)
@@ -1217,9 +1252,11 @@
                 parent                      = PlaylistTreeviewUtil.GetSelectedTreeViewItemParent(item);
                 if(parent!= null)
                 {
+                    if(parent.PlayListId != "Liked Songs")
                     playlistID  = parent.PlayListId;
+
                     trackID     = item.PlayListId;
-                  //  Logger.Debug(playlistID +":" + trackID);
+                    Logger.Debug(playlistID +":" + trackID);
                 }
                 else
                 {

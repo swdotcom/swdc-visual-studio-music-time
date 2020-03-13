@@ -14,9 +14,31 @@ namespace MusicTime
 {
     class MusicController
     {
+       private MusicTimeCoPackage package;
        private static MusicManager musicManager = MusicManager.getInstance;
        private static Device device             = Device.getInstance;
-       private static MusicStateManager musicStateManager = MusicStateManager.getInstance; 
+       private static MusicStateManager musicStateManager = MusicStateManager.getInstance;
+        private static MusicController instance = null;
+        private MusicController()
+        {
+        }
+
+        public static MusicController getInstance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new MusicController();
+                }
+                return instance;
+            }
+        }
+        public void InjectAsyncPackage(MusicTimeCoPackage package)
+        {
+            this.package = package;
+        }
+
         public static async void PlayPauseTrackAsync()
         {
             try
@@ -58,8 +80,7 @@ namespace MusicTime
            
           
         }
-
-
+      
         public static async void PreviousTrackAsync()
         {
             try

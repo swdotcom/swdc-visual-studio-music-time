@@ -59,6 +59,9 @@
     <Compile Include="Constants.cs" />
     <Compile Include="CustomMenu.cs" />
     <Compile Include="Guids.cs" />
+    <Compile Include="LikeSongButton.xaml.cs">
+      <DependentUpon>LikeSongButton.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Logger.cs" />
     <Compile Include="MusicClient.cs" />
     <Compile Include="MusicController.cs" />
@@ -263,6 +266,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="LikeSongButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="SpotifyPlayListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

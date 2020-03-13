@@ -469,7 +469,7 @@ namespace MusicTime
 
                 response = await MusicClient.SpotifyApiPutAsync(api,payload);
               
-                if (response == null || !MusicClient.IsOk(response) || response.StatusCode == HttpStatusCode.NoContent)
+                if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) && !MusicClient.IsOk(response) )
                 {
                     // refresh the tokens
                     await MusicClient.refreshSpotifyTokenAsync();
@@ -996,7 +996,7 @@ namespace MusicTime
                 response = await MusicClient.SpotifyApiPutAsync(api, _payload);
             }
 
-
+            MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
         }
 
         public static async Task removeToSpotifyLiked(string trackID)
@@ -1018,6 +1018,7 @@ namespace MusicTime
                 response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
             }
 
+            MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
 
         }
 

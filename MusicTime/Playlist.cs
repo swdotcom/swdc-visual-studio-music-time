@@ -349,8 +349,34 @@ namespace MusicTime
 
             }
            
+           
             return LikedSongs;
         }
 
+
+        public static async void addTracksToPlaylist(string playlist_id,string track_id)
+        {
+            string api                      = "/v1/playlists/" + playlist_id + "/tracks";
+            HttpResponseMessage response    = null;
+            string _payload                 = null;
+            string trackUris                = MusicUtil.createUriFromTrackId(track_id);
+
+            JsonObject payload = new JsonObject();
+            payload.Add("uris", trackUris);
+            payload.Add("postion", 0);
+
+            _payload    = payload.ToString();
+             response   = await MusicClient.SpotifyApiPostAsync(api, _payload);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiPostAsync(api, _payload);
+                }
+            
+
+        }
     }
 }

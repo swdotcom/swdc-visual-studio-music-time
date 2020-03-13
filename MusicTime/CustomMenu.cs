@@ -10,6 +10,7 @@ namespace MusicTime
     public class CustomMenu : MenuItem
     {
         public string PlaylistId { get; set; }
+        public string trackId { get; set; }
         public string SlackChannelId { get; set; }
     }
     public class DeviceContextMenu : MenuItem
@@ -20,4 +21,11 @@ namespace MusicTime
         public string playlist_id { get; set; }
         public string track_id { get; set; }
     }
+
+    public class customCombo : ComboBoxItem
+    {
+        public string playlist_id { get; set; }
+        public string playlist_name { get; set; }
+    }
+
 }
