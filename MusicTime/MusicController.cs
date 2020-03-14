@@ -1,18 +1,43 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace MusicTime
 {
     class MusicController
     {
-       private static MusicManager musicManager = MusicManager.GetInstance;
+       private MusicTimeCoPackage package;
+       private static MusicManager musicManager = MusicManager.getInstance;
        private static Device device             = Device.getInstance;
+       private static MusicStateManager musicStateManager = MusicStateManager.getInstance;
+        private static MusicController instance = null;
+        private MusicController()
+        {
+        }
+
+        public static MusicController getInstance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new MusicController();
+                }
+                return instance;
+            }
+        }
+        public void InjectAsyncPackage(MusicTimeCoPackage package)
+        {
+            this.package = package;
+        }
 
         public static async void PlayPauseTrackAsync()
         {
@@ -24,12 +49,14 @@ namespace MusicTime
                     {
                         await MusicManager.SpotifyWebPauseAsync();
                         MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
+                        MusicStateManager.getInstance.GatherMusicInfo();
                     }
                     else
                     {
                       
                         await MusicManager.SpotifyWebPlayAsync();
                         MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
+                        MusicStateManager.getInstance.GatherMusicInfo();
                     }
 
                     if (!MusicManager.isDeviceOpened())
@@ -53,8 +80,7 @@ namespace MusicTime
            
           
         }
-
-
+      
         public static async void PreviousTrackAsync()
         {
             try
@@ -66,12 +92,13 @@ namespace MusicTime
                         await LaunchPlayerAsync(new options());
 
                         await MusicManager.getDevicesAsync();
+
                         
                     }
 
 
                     await MusicManager.SpotifyWebPlayPreviousAsync();
-                   
+                    MusicStateManager.getInstance.GatherMusicInfo();
 
                 }
 
@@ -99,7 +126,7 @@ namespace MusicTime
                     }
 
                      await MusicManager.SpotifyWebPlayNextAsync();
-                   
+                    MusicStateManager.getInstance.GatherMusicInfo();
                 }
             }
             catch (Exception ex)
@@ -110,13 +137,95 @@ namespace MusicTime
            
         }
 
+        public static async Task LaunchDesktopApp()
+        {
+            bool flag = await checkInstalled("Spotify");
+            if ( flag )
+            {
+                try
+                {
+                    string userHomeDir = Environment.ExpandEnvironmentVariables("%APPDATA%");
+                    string strCmdText = Path.Combine(userHomeDir, "Spotify\\Spotify.exe");
+                    Process process = new Process();
+                    process.StartInfo.FileName = strCmdText;
+                    process.StartInfo.CreateNoWindow = false;
+                    process.Start();
+
+
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+            else
+            {
+                string message  = "Spotify player is not installed , open web player instead ?";
+                string title    = "SPOTIFY";
+                MessageBoxButtons buttons = MessageBoxButtons.OKCancel;
+                DialogResult result = MessageBox.Show(message, title, buttons);
+                if (result == DialogResult.OK)
+                {
+                    LaunchWebPlayerAsync(new options());
+                }
+                
+
+               // DialogResult result =  MessageBox.Show("Spotify device is not installed ");
+                
+               
+            }
+
+            
+        }
+
+        public static async void launchDevicePrompt()
+        {
+
+
+        }
+
+        public static async Task< bool> checkInstalled(string c_name)
+        {
+            string displayName;
+
+            string registryKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(registryKey);
+            if (key != null)
+            {
+                foreach (RegistryKey subkey in key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)))
+                {
+                    displayName = subkey.GetValue("DisplayName") as string;
+                    if (displayName != null && displayName.Contains(c_name))
+                    {
+                        return true;
+                    }
+                }
+                key.Close();
+            }
+
+            registryKey = @"SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall";
+            key = Registry.CurrentUser.OpenSubKey(registryKey);
+            if (key != null)
+            {
+                foreach (RegistryKey subkey in key.GetSubKeyNames().Select(keyName => key.OpenSubKey(keyName)))
+                {
+                    displayName = subkey.GetValue("DisplayName") as string;
+                    if (displayName != null && displayName.Contains(c_name))
+                    {
+                        return true;
+                    }
+                }
+                key.Close();
+            }
+            return false;
+        }
         public static async Task LaunchPlayerAsync(options options)
         {
 
             LaunchWebPlayerAsync(new options());
 
-            Thread.Sleep(5000);
-         
+           // Thread.Sleep(5000);
+
             if (!string.IsNullOrEmpty(options.playlist_id))
             {
                await MusicManager.SpotifyPlayPlaylistAsync(options.playlist_id, options.track_id);

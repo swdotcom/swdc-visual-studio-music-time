@@ -18,15 +18,12 @@
                 <ColumnDefinition Width="1.5*"/>
                 <ColumnDefinition Width="1.5*"/>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent"  >
-                <StackPanel>
-                        <Image Source="Resources\refresh.png"></Image>
-                </StackPanel>
-            </Button>
-                <!--<Button x:Name="Sort" Grid.Column="2" Width="15" Height="15" Background="Transparent" Click="SortOptionClick" BorderBrush="Transparent" Margin="0,0,0,5">
-                   
-                </Button>-->
-                <DockPanel Grid.Column="2" Width="auto" Height="Auto" >
+                    <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" Visibility="Hidden"  >
+                        <StackPanel>
+                            <Image Source="Resources\refresh.png"></Image>
+                        </StackPanel>
+                    </Button>
+                    <DockPanel Grid.Column="2" Width="auto" Height="Auto" >
                     <Menu DockPanel.Dock="Top" Width="auto" Height="15" Background="Transparent" x:Name="SortDock" Visibility="Hidden" >
                         <MenuItem Margin="0,0,5,0" Width="25">
                             <MenuItem.Icon>
@@ -49,7 +46,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                     <Image x:Name="DeviceImage"  Width="15" Height="15"></Image>
-                <Label x:Name="DeviceLabel" Foreground="DarkCyan" ></Label>
+                <Button x:Name="DeviceLabel" Foreground="DarkCyan"  Background="Transparent" BorderBrush="Transparent" ></Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image x:Name="AnalyticImage" Width="15" Height="15"></Image>
@@ -60,12 +57,12 @@
             </ItemsControl>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image x:Name="GeneratePlaylistImage" Width="15" Height="15"></Image>
-                <Label x:Name="GeneratePlaylistLabel" Foreground="DarkCyan" MouseDown="GenerateAIPLaylist" ></Label>
+                    <Button x:Name="GeneratePlaylistLabel" Foreground="DarkCyan" Click="GenerateAIAsync"  BorderBrush="Transparent" Background="Transparent" ></Button>
             </StackPanel>
 
 
-                <StackPanel x:Name="AIPLaylistTreeview">
-                    <TreeView x:Name="LikePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                <StackPanel>
+                    <TreeView x:Name="AIPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
                       Color="Transparent" />
@@ -94,7 +91,7 @@
                     </TreeView>
                 </StackPanel>
                 <StackPanel >
-                    <TreeView x:Name="AIPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
+                    <TreeView x:Name="LikePlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled" >
                         <TreeView.Resources>
                             <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
                       Color="Transparent" />

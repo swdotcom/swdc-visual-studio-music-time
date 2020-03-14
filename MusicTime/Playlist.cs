@@ -201,7 +201,7 @@ namespace MusicTime
             return PlayListID;
         }
 
-      
+   
         public static async Task<List<Track>> getTopSpotifyTracksAsync()
         {
             string api                      = "/v1/me/top/tracks?time_range=medium_term&limit=40";
@@ -253,8 +253,7 @@ namespace MusicTime
             string Payload                  = null;
             tracks                          = MusicUtil.createUrisFromTrackId(trackUris);
 
-
-            JsonObject payload = new JsonObject();
+            JsonObject payload          = new JsonObject();
             payload.Add("uris",tracks);
             payload.Add("position", postion);
 
@@ -270,12 +269,42 @@ namespace MusicTime
                     await MusicClient.refreshSpotifyTokenAsync();
                     // Try again
                     response = await MusicClient.SpotifyApiPostAsync(api, Payload);
+                    Logger.Debug("Songs added to AI Playlist");
                 }
             }
 
            
 
         }
+        public static async Task ReplaceTrackToPlaylistsyncAsync(string playlist_id, List<string> trackUris)
+        {
+            string api                      = "/v1/playlists/" + playlist_id + "/tracks";
+            HttpResponseMessage response    = null;
+            string app_jwt                  = SoftwareUserSession.GetJwt();
+            List<string> tracks             = null;
+            string Payload                  = null;
+            tracks                          = MusicUtil.createUrisFromTrackId(trackUris);
+
+
+            JsonObject payload = new JsonObject();
+            payload.Add("uris", tracks);
+
+            Payload = payload.ToString();
+
+            if (!string.IsNullOrEmpty(app_jwt))
+            {
+                response = await MusicClient.SpotifyApiPutAsync(api, Payload);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiPutAsync(api, Payload);
+                }
+            }
+        }
+
         public static async Task<List<Track>> getSpotifyLikedSongsAsync()
         {
             string api = "/v1/me/tracks?limit=50&offset=0";
@@ -320,8 +349,61 @@ namespace MusicTime
 
             }
            
+           
             return LikedSongs;
         }
 
+
+        public static async void addTracksToPlaylist(string playlist_id,string track_id)
+        {
+            string api                      = "/v1/playlists/" + playlist_id + "/tracks";
+            HttpResponseMessage response    = null;
+            string _payload                 = null;
+            string trackUris                = MusicUtil.createUriFromTrackId(track_id);
+
+            JsonObject payload = new JsonObject();
+            payload.Add("uris", trackUris);
+            payload.Add("postion", 0);
+
+            _payload    = payload.ToString();
+             response   = await MusicClient.SpotifyApiPostAsync(api, _payload);
+
+                if (response == null || !response.IsSuccessStatusCode)
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiPostAsync(api, _payload);
+                }
+            
+
+        }
+
+        public static async void removeTracksToPlaylist(string playlist_id, string track_id)
+        {
+            string api = "/v1/playlists/" + playlist_id + "/tracks";
+            HttpResponseMessage response = null;
+            string _payload = null;
+            string trackUris = MusicUtil.createUriFromTrackId(track_id);
+
+
+
+            JsonObject payload = new JsonObject();
+            string[] stringArray = new string[] { trackUris };
+            payload.Add("ids", stringArray);
+
+            _payload = payload.ToString();
+            response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
+
+            if (response == null || !response.IsSuccessStatusCode)
+            {
+                // refresh the tokens
+                await MusicClient.refreshSpotifyTokenAsync();
+                // Try again
+                response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
+            }
+
+
+        }
     }
 }

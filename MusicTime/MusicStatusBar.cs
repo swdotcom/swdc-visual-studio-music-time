@@ -28,7 +28,7 @@ namespace MusicTime
 
                 if (connected)
                 {
-                    statusbar.SetText("Connected");
+                    statusbar.SetText("Spotify connected");
                 }
                 else
                 {

@@ -237,7 +237,7 @@ namespace MusicTime
 
         public static async Task<UserStatus> GetSpotifyUserStatusTokenAsync(bool online)
         {
-            bool softwareSessionFileExists  = SoftwareCoUtil.softwareSessionFileExists();
+            //bool softwareSessionFileExists  = SoftwareCoUtil.softwareSessionFileExists();
             bool jwtExists                  = SoftwareCoUtil.jwtExists();
             Auths auths                     = new Auths();
             UserStatus userStatus           = new UserStatus();
@@ -261,7 +261,7 @@ namespace MusicTime
                     }
                     else
                     {
-                        MusicManager.cleaclearSpotifyAccessInfo(spotifyTokens);
+                        MusicManager.clearSpotifyAccessInfo(spotifyTokens);
                     }
                     
                 }
@@ -275,7 +275,49 @@ namespace MusicTime
             return userStatus;
         }
 
-        
+        public static async Task<bool> GetSlackUserStatusTokenAsync(bool online)
+        {
+          
+            bool jwtExists          = SoftwareCoUtil.jwtExists();
+            Auths auths             = new Auths();
+            bool loginFlag = false;
+
+            if (!jwtExists || !online)
+            {
+                return loginFlag;
+            }
+            else
+            {
+
+                try
+                {
+                    auths = await SlackControlManager.GetSlackUserStatusAsync(online);
+
+                    if (auths.LoggedIn == true)
+                    {
+                        SoftwareDisconnectSlackCommand.UpdateEnabledState(true);
+                        SoftwareConnectSlackCommand.UpdateEnabledState(false);
+                        loginFlag = true;
+                    }
+                    else
+                    {
+                        await MusicManager.UpdateSlackAccesInfoAsync(null);
+                        SoftwareConnectSlackCommand.UpdateEnabledState(true);
+                        SoftwareDisconnectSlackCommand.UpdateEnabledState(false);
+                    }
+
+                   
+                }
+
+                catch (Exception e)
+                {
+
+
+                }
+            
+            }
+            return loginFlag;
+        }
 
         public static bool GetSpotifyUserStatus()
         { 

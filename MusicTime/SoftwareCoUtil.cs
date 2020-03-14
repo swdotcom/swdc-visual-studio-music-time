@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace MusicTime
 {
@@ -205,6 +206,10 @@ namespace MusicTime
         {
             return getSoftwareDataDir(true) + "\\data.json";
         }
+        public static string getMusicDataStoreFile()
+        {
+            return getSoftwareDataDir(true) + "\\musicData.json";
+        }
         public static bool isMac()
         {
             PlatformID platformID = Environment.OSVersion.Platform;
@@ -227,7 +232,13 @@ namespace MusicTime
         }
 
 
-       
+        public static System.Windows.Controls.Image CreateImage(string iconName)
+        {
+            // create Image
+            System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+            image.Source = new BitmapImage(new Uri("Resources/" + iconName, UriKind.Relative));
+            return image;
+        }
 
         public static NowTime GetNowTime()
         {
