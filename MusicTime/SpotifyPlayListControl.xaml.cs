@@ -281,7 +281,26 @@
                     {
                         WebDevices      = getWebDevices(devices);
                         ComputerDevices = getDesktopDevices(devices);
-                        DeviceLabel.Content = " Spotify device";
+                        string activeDevice = MusicManager.getActiveDeviceName();
+
+                        if(!string.IsNullOrEmpty(activeDevice))
+                        {
+                            DeviceLabel.Content = "Listening on "+activeDevice;
+                        }
+                        else
+                        {
+                            if(WebDevices.Count>0)
+                            {
+                                string deviceName =  WebDevices[0].name;
+                                DeviceLabel.Content = "Available on " + deviceName;
+                            }
+                            else if(ComputerDevices.Count>0)
+                            {
+                                string deviceName = ComputerDevices[0].name;
+                                DeviceLabel.Content = "Available on " + deviceName;
+                            }
+                        }
+                       
                         DeviceImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
                         DeviceLabel.Click += DeviceLabel_ClickAsync;
 
@@ -309,7 +328,16 @@
 
         public async void PlayTrackFromContext(string playlist_id ,string track_id)
         {
-            DeviceLabel.ContextMenu = await getDeveviceContext(WebDevices, ComputerDevices,playlist_id, track_id);
+            try
+            {
+                DeviceLabel.ContextMenu = await getDeveviceContext(WebDevices, ComputerDevices, playlist_id, track_id);
+            }
+            catch (Exception ex)
+            {
+
+               
+            }
+            
         }
 
         private async void DeviceLabel_ClickAsync(object sender, RoutedEventArgs e)
@@ -1009,11 +1037,11 @@
             CustomMenu addMenuItem = new CustomMenu();
             addMenuItem.Foreground = System.Windows.Media.Brushes.DarkCyan;
 
-
             CustomMenu createPlaylistMenu = new CustomMenu();
             createPlaylistMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
             createPlaylistMenu.Header = "Create new playlist";
             createPlaylistMenu.PlaylistId = playlist_Id;
+            createPlaylistMenu.Click += CreatePlaylistMenu_Click;
 
             CustomMenu selectMenu = new CustomMenu();
             selectMenu.Foreground = System.Windows.Media.Brushes.DarkCyan;
@@ -1028,7 +1056,12 @@
 
         }
 
-      
+        private static void CreatePlaylistMenu_Click(object sender, RoutedEventArgs e)
+        {
+           
+
+        }
+
         private static void CopyToClipBoardMenu_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1048,10 +1081,8 @@
         }
 
         private static async void AddMenu_Click(object sender, RoutedEventArgs e)
-        { 
+        {
             
-          
-         
         }
 
         private static void RemoveMenu_Click(object sender, RoutedEventArgs e)

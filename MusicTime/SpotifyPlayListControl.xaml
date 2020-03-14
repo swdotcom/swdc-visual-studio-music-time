@@ -18,15 +18,12 @@
                 <ColumnDefinition Width="1.5*"/>
                 <ColumnDefinition Width="1.5*"/>
                 </Grid.ColumnDefinitions>
-                <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" Visibility="Hidden"  >
-                <StackPanel>
-                        <Image Source="Resources\refresh.png"></Image>
-                </StackPanel>
-            </Button>
-                <!--<Button x:Name="Sort" Grid.Column="2" Width="15" Height="15" Background="Transparent" Click="SortOptionClick" BorderBrush="Transparent" Margin="0,0,0,5">
-                   
-                </Button>-->
-                <DockPanel Grid.Column="2" Width="auto" Height="Auto" >
+                    <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" Visibility="Hidden"  >
+                        <StackPanel>
+                            <Image Source="Resources\refresh.png"></Image>
+                        </StackPanel>
+                    </Button>
+                    <DockPanel Grid.Column="2" Width="auto" Height="Auto" >
                     <Menu DockPanel.Dock="Top" Width="auto" Height="15" Background="Transparent" x:Name="SortDock" Visibility="Hidden" >
                         <MenuItem Margin="0,0,5,0" Width="25">
                             <MenuItem.Icon>
