@@ -66,6 +66,7 @@ namespace MusicTime
         private System.Threading.Timer timer;
         private System.Threading.Timer DeviceTimer;
         private System.Threading.Timer TrackStatusBar;
+        private System.Threading.Timer LikeIconUpdate;
         private System.Threading.Timer getSlackChannelTimer;
         private System.Threading.Timer OnlineCheckerTimer;
         private System.Threading.Timer PlaylistUpdate;
@@ -90,7 +91,6 @@ namespace MusicTime
         private DateTime _lastPostTime = DateTime.UtcNow;
         public static bool slackConnected = false;
         public static List<Channel> SlackChannels = null;
-
         private MusicController musicControllerMgr;
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicTimeCoPackage"/> class.
@@ -139,7 +139,7 @@ namespace MusicTime
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             Logger.Debug("Initialization");
             await InitializeSoftwareStatusAsync();
-            _likeSongButton = new LikeSongButton();
+          //  _likeSongButton = new LikeSongButton();
             Events2 events = (Events2)ObjDte.Events;
             _textDocKeyEvent = events.TextDocumentKeyPressEvents;
             _docEvents = ObjDte.Events.DocumentEvents;
@@ -166,10 +166,8 @@ namespace MusicTime
             await PreviousTrackCommand.InitializeAsync(this);
             await PlayPauseCommand.InitializeAsync(this);
             await OpenSpotifyCommand.InitializeAsync(this);
-            musicControllerMgr = MusicController.getInstance;
-            musicControllerMgr.InjectAsyncPackage(this);
-
-            InitializeStatusBar();
+           
+           // InitializeStatusBar();
 
             var autoEvent = new AutoResetEvent(false);
 
@@ -194,23 +192,19 @@ namespace MusicTime
 
             getSlackChannelTimer = new Timer(getSlackChannelsAsync, null, ZERO_SECOND, ONE_MINUTE);
 
-
-
             this.InitializeUserInfoAsync();
 
 
 
         }
-
         private async void getSlackChannelsAsync(object state)
         {
             if (slackConnected)
             {
                 SlackChannels = await SlackControlManager.GetSalckChannels();
-                
+
             }
         }
-
         private async void InitializeUserInfoAsync()
         {           
             bool jwtExists  = SoftwareCoUtil.jwtExists();
@@ -320,7 +314,7 @@ namespace MusicTime
 
                     }
 
-                    public static async void GetDeviceIDLazilyAsync(object state)
+        public static async void GetDeviceIDLazilyAsync(object state)
         {
           
             if (SoftwareUserSession.GetSpotifyUserStatus())
@@ -335,6 +329,8 @@ namespace MusicTime
             _musicStatus.SetStatus(Connected);
             
         }
+
+      
 
         public static void UpdateEnableCommands(bool status)
         {
@@ -361,7 +357,7 @@ namespace MusicTime
             string Pause        = "⏸️";
             string Play         = "▶️";
             string Liked        = "";
-            string LikeIcon     = "";
+        
             
             string spotify_accessToken = "";
             List<Track> LikedSongs = new List<Track>();
@@ -401,7 +397,7 @@ namespace MusicTime
                                 currentTrack = trackStatus.item.name;
                                 _musicStatus.SetTrackName(Pause + " " + currentTrack + " " + Liked);
                                 isValidRunningOrPausedTrack = true;
-
+                               
                                
                             }
                             if (trackStatus.is_playing == false)
@@ -430,24 +426,14 @@ namespace MusicTime
             
         }
 
-        public async Task UpdateStatusBarButtonText(String text, String iconName = null)
-        {
-            await JoinableTaskFactory.SwitchToMainThreadAsync();
-            await InitializeStatusBar();
-            iconName = "Heart_Red.png";
-            //if (!EventManager.Instance.IsShowingStatusText())
-            //{
-            //    text = "";
-
-            //}
-
-            //if (iconName == null || iconName.Equals(""))
-            //{
-            //    iconName = "cpaw.png";
-            //}
-
-            _likeSongButton.UpdateDisplayAsync(text, iconName);
-        }
+        //public async Task UpdateStatusBarButtonText(String text, String iconName = null)
+        //{
+        //    await JoinableTaskFactory.SwitchToMainThreadAsync();
+        //    await InitializeStatusBar();
+        //    iconName = "Heart_Red.png";
+            
+        //    _likeSongButton.UpdateDisplayAsync(text, iconName);
+        //}
 
         public async Task InitializeStatusBar()
         {
@@ -461,6 +447,16 @@ namespace MusicTime
             {
                 statusBarObj.Children.Insert(0, _likeSongButton);
                 _addedStatusBarButton = true;
+            }
+        }
+
+        public async Task disposeStatusBar()
+        {
+            DockPanel statusBarObj = FindChildControl<DockPanel>(System.Windows.Application.Current.MainWindow, "StatusBarPanel");
+            if (statusBarObj != null)
+            {
+                statusBarObj.Children.Clear();
+                
             }
         }
 

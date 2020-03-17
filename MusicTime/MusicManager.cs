@@ -263,9 +263,14 @@ namespace MusicTime
         public static bool isDeviceOpened()
         {
             bool isDeviceOpened = false;
-            if (device.devices != null)
+            if (device.devices != null )
             {
-                isDeviceOpened = device.devices.Count > 0 ? true : false;
+                foreach (Device item in device.devices)
+                {
+                    if ( item.type == "Computer")
+                    { isDeviceOpened = true; }
+                }
+               // isDeviceOpened = device.devices.Count > 0 ? true : false;
             }
 
             return isDeviceOpened;
@@ -415,6 +420,7 @@ namespace MusicTime
                 response = await MusicClient.SpotifyApiPutAsync(api, _payload);
 
                 Logger.Debug(_payload);
+
                 if (response == null || !MusicClient.IsOk(response))
                 {
                     // refresh the tokens
@@ -488,11 +494,11 @@ namespace MusicTime
         {
             HttpResponseMessage response    = null;
 
-            string api  = "/v1/me/player/currently-playing?" + getActiveDeviceID();
+            string api  = "/v1/me/player/currently-playing" /*+ getActiveDeviceID()*/;
 
             response    = await MusicClient.SpotifyApiGetAsync(api);
             
-            if (response == null || !MusicClient.IsOk(response))
+            if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) || !MusicClient.IsOk(response))
             {
                 // refresh the tokens
                 await MusicClient.refreshSpotifyTokenAsync();
@@ -500,7 +506,7 @@ namespace MusicTime
                 response = await MusicClient.SpotifyApiGetAsync(api);
             }
 
-            if (MusicClient.IsOk(response))
+            if (MusicClient.IsOk(response) || response.StatusCode == HttpStatusCode.NoContent)
             {
                 string responseBody = await response.Content.ReadAsStringAsync();
                 trackStatus         = JsonConvert.DeserializeObject<TrackStatus>(responseBody);

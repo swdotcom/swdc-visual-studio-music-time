@@ -130,6 +130,7 @@
     <Content Include="Resources\heart-outlined.png" />
     <Content Include="Resources\heart-outlined_dark.png" />
     <Resource Include="Resources\Heart_Red.png" />
+    <Content Include="Resources\iconfinder_Heart.png" />
     <Content Include="Resources\loading.png" />
     <Content Include="Resources\loading_dark.png" />
     <Resource Include="Resources\menu.png" />
@@ -142,6 +143,7 @@
     </Resource>
     <Resource Include="Resources\open-menu.png" />
     <Content Include="Resources\paw_dark.png" />
+    <Resource Include="Resources\playlist.png" />
     <Content Include="Resources\PlayPauseCommand.png" />
     <Content Include="Resources\PreviousTrackCommand.png" />
     <Resource Include="Resources\settingss.png" />
@@ -159,6 +161,7 @@
     <Resource Include="Resources\spotify.png" />
     <Content Include="Resources\SpotifyPlayListCommand.png" />
     <Resource Include="Resources\spotify_dark.png" />
+    <Resource Include="Resources\track.png" />
     <Content Include="stylesheet.css" />
   </ItemGroup>
   <ItemGroup>

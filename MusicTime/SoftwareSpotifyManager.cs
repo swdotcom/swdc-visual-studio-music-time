@@ -6,6 +6,10 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using Microsoft.VisualStudio.Threading;
 using Newtonsoft.Json;
 namespace MusicTime
 {
@@ -15,6 +19,7 @@ namespace MusicTime
         private static int THIRTY_SECONDS = 1000 * 30;
         private static int ONE_MINUTE = THIRTY_SECONDS * 2;
         public static SpotifyTokens spotifyTokens;
+        
 
         public static async Task ConnectToSpotifyAsync()
         {
@@ -100,6 +105,7 @@ namespace MusicTime
                         Logger.Debug("AuthsLogeedIn");
                         MusicTimeCoPackage.UpdateMusicStatusBar(true);
                         MusicTimeCoPackage.UpdateEnableCommands(auths.LoggedIn);
+                     
                     }
                     
                 }
@@ -240,6 +246,8 @@ namespace MusicTime
                 }
             
         }
+
+
 
     }
     

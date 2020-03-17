@@ -41,11 +41,6 @@ namespace MusicTime
         public static List<Channel> SlackChannels = null;
      
 
-        //public delegate void SlackConnectionHandler(object source, EventArgs args);
-
-        //public  event SlackConnectionHandler eventSlackConnected;
-      
-
         public static async Task ConnectToSlackAsync()
         {
            string app_jwt = SoftwareUserSession.GetJwt();
@@ -134,8 +129,7 @@ namespace MusicTime
                                     await MusicManager.UpdateSlackAccesInfoAsync(auths);
                                     MusicTimeCoPackage.slackConnected = true;
                                     MusicTimeCoPackage.SlackChannels = await GetSalckChannels();
-                                    
-                                    Logger.Debug("Connected to slack");
+                                     Logger.Debug("Connected to slack");
                                     SoftwareDisconnectSlackCommand.UpdateEnabledState(true);
                                     SoftwareConnectSlackCommand.UpdateEnabledState(false);
 
@@ -170,7 +164,6 @@ namespace MusicTime
             {
                 return;
             }
-
             app_jwt = SoftwareUserSession.GetJwt();
             string api = "/auth/slack/disconnect";
 

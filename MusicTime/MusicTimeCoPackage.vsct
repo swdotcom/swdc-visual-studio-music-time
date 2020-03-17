@@ -165,9 +165,9 @@
         <CommandFlag>AllowVisibilityChangeOnToolBar</CommandFlag>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
-        <Icon guid="guidImages11" id="bmpOpen" />
+        <Icon guid="guidImages22" id="bmpPic1" />
         <Strings>
-          <ButtonText>Spotify</ButtonText>
+          <ButtonText>Like/Unlike</ButtonText>
         </Strings>
       </Button>
       
@@ -189,8 +189,9 @@
             must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
       <Bitmap guid="guidImages" href="Resources\MusicTimeCo.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
       <Bitmap guid="guidImages11" href="Resources\CommandOpenSpotify.png" usedList="bmpOpen, bmpPrevious, bmpNext, bmpPlay, bmpPicArrows, bmpPicStrikethrough" />
-    
       <Bitmap guid="guidImages2" href="Resources\SpotifyPlayListCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough" />
+        <Bitmap guid="guidImages22" href="Resources\iconfinder_Heart.png" usedList="bmpPic1" />
+   
     </Bitmaps>
   </Commands>
 
@@ -226,9 +227,11 @@
       <IDSymbol name="bmpPicArrows" value="5" />
       <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
+    
+    <GuidSymbol name="guidImages22" value="{41F4AF0A-C454-40CD-BABB-4B7A72625211}">
+      <IDSymbol name="bmpPic1" value="1" />
+    </GuidSymbol>
   
- 
-
     <GuidSymbol name="guidImages11" value="{4aa09eb4-dc93-4c65-a48f-b0116901c0e6}">
       <IDSymbol name="bmpOpen" value="1" />
       <IDSymbol name="bmpPrevious" value="2" />
@@ -237,6 +240,7 @@
       <IDSymbol name="bmpPicArrows" value="5" />
       <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
+    
   
    
   
@@ -257,6 +261,8 @@
       <IDSymbol name="bmpPicArrows" value="5" />
       <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
+
+  
   </Symbols>
 
   <VisibilityConstraints>

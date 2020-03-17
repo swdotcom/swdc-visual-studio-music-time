@@ -87,8 +87,9 @@ namespace MusicTime
            
             // Add into stack
             
+            
+            stack.Children.Add(image);
             stack.Children.Add(lbl);
-           // stack.Children.Add(image);
             // assign stack to header
             item.Header = stack;
             item.Background = System.Windows.Media.Brushes.Transparent;
@@ -100,7 +101,7 @@ namespace MusicTime
             string result = string.Empty;
             if (text.Length > 20)
             {
-                result = string.Concat(text.Substring(0, 20), "...");
+                result = string.Concat(text.Substring(0, 40), "...");
             }
             else
             {

@@ -384,15 +384,17 @@ namespace MusicTime
             string api = "/v1/playlists/" + playlist_id + "/tracks";
             HttpResponseMessage response = null;
             string _payload = null;
-            string trackUris = MusicUtil.createUriFromTrackId(track_id);
-
-
-
+            JsonObject trackPayload = new JsonObject();
             JsonObject payload = new JsonObject();
-            string[] stringArray = new string[] { trackUris };
-            payload.Add("ids", stringArray);
 
-            _payload = payload.ToString();
+            string trackUri = MusicUtil.createUriFromTrackId(track_id);
+            JsonArray jsonArray = new JsonArray();
+            payload.Add("uri", trackUri);
+            jsonArray.Add(payload);
+            trackPayload.Add("tracks", jsonArray);
+            
+            _payload = trackPayload.ToString();
+           
             response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
 
             if (response == null || !response.IsSuccessStatusCode)
