@@ -26,8 +26,26 @@ namespace MusicTime
         internal const string SOFTWARE_TOP_40_ID        = "6jCkTED0V5NEuM8sKbGG1Z";
         internal const string PERSONAL_TOP_SONGS_NAME   = "My AI Top 40";
         internal const int PERSONAL_TOP_SONGS_PLID      = 1;
-        internal static List<string> spotifyGenres = new List<string>() { "summer", "pop", "mood", "electronicdance", "edm", "decades", "hiphop", "rap", "hip-hop", "chill", "workout", "party", "focus", "sleep", "pride", "rock", "dinner", "jazz", "r&b", "rhythm", "romance", "soul", "indie", "gaming", "classical", "heavy metal", "latin", "kids&family", "reggae", "blues", "funk", "punk", "country", "folk", "acoustic", "desi", "arab", "afro","travel", "k-pop"};
-
+        internal static List<string> spotifyGenres = new List<string>() { "Acoustic", "Afrobeat", "Alt rock", "Alternative", "Ambient", "Anime",
+              "Black metal", "Bluegrass", "Blues", "Bossanova", "Brazil", "Breakbeat",
+              "British", "Cantopop", "Chicago house", "Children", "Chill", "Classical",
+              "Club", "Comedy", "Country", "Dance", "Dancehall", "Death metal", "Deep house",
+              "Detroit techno", "Disco", "Disney", "Drum and bass", "Dub", "Dubstep",
+              "Edm", "Electro", "Electronic", "Emo", "Folk", "Forro", "French", "Funk",
+              "Garage", "German", "Gospel", "Goth", "Grindcore", "Groove", "Grunge",
+              "Guitar", "Happy", "Hard rock", "Hardcore", "Hardstyle", "Heavy-metal",
+              "Hip-hop", "Hip hop", "Holidays", "Honky tonk", "House", "Idm", "Indian",
+              "Indie", "Indie pop", "Industrial", "Iranian", "J dance", "J idol", "J pop",
+              "J rock", "Jazz", "K pop", "Kids", "Latin", "Latino", "Malay", "Mandopop",
+              "Metal", "Metal misc", "Metalcore", "Minimal techno", "Movies", "Mpb",
+              "New age", "New release", "Opera", "Pagode", "Party", "Philippines opm",
+              "Piano", "Pop", "Pop film", "Post dubstep", "Power pop", "Progressive house",
+              "Psych rock", "Punk", "Punk-rock", "R n b", "Rainy day", "Reggae", "Reggaeton",
+              "Road trip", "Rock", "Rock n roll", "Rockabilly", "Romance", "Sad", "Salsa",
+              "Samba", "Sertanejo", "Show tunes", "Singer-songwriter", "Ska", "Sleep", "Songwriter",
+              "Soul", "Soundtracks", "Spanish", "Study", "Summer", "Swedish", "Synth-popv",
+              "Tango", "Techno", "Trance", "Trip hop", "Turkish", "Work out", "World-music"};
+        
 
         internal static string EditorVersion
         {

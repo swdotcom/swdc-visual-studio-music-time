@@ -18,14 +18,14 @@
                 <ColumnDefinition Width="1.5*"/>
                 <ColumnDefinition Width="1.5*"/>
                 </Grid.ColumnDefinitions>
-                    <Button x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" Visibility="Hidden"  >
+                    <Button ToolTip="reconcile"  x:Name="btnRefresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" Click="RefreshAsync" BorderBrush="Transparent" Visibility="Hidden"  >
                         <StackPanel>
                             <Image Source="Resources\refresh.png"></Image>
                         </StackPanel>
                     </Button>
                     <DockPanel Grid.Column="2" Width="auto" Height="Auto" >
                     <Menu DockPanel.Dock="Top" Width="auto" Height="15" Background="Transparent" x:Name="SortDock" Visibility="Hidden" >
-                        <MenuItem Margin="0,0,5,0" Width="25">
+                        <MenuItem ToolTip="sort" Margin="0,0,5,0" Width="25">
                             <MenuItem.Icon>
                                     <Image Source="Resources\open-menu.png"/>
                             </MenuItem.Icon>
@@ -46,7 +46,7 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                     <Image x:Name="DeviceImage"  Width="15" Height="15"></Image>
-                <Button x:Name="DeviceLabel" ToolTip="DeviceToolTip" Foreground="DarkCyan"  Background="Transparent" BorderBrush="Transparent" ></Button>
+                <Button x:Name="DeviceLabel" ToolTip="Connect to a Spotify device" Foreground="DarkCyan"  Background="Transparent" BorderBrush="Transparent" ></Button>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
                 <Image x:Name="AnalyticImage" Width="15" Height="15"></Image>
@@ -107,8 +107,53 @@
                 <ItemsControl>
                 <Separator x:Name="Seperator2" Visibility="Hidden" Margin="0,5,0,5"></Separator>
             </ItemsControl>
+
                
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="15*"/>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="1.5*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="5,0,0,0">
+                        <Image  x:Name="Img_recommend" Width="15" Height="15"></Image>
+                        <Label x:Name="Lbl_recommend" Foreground="DarkCyan" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
+                    </StackPanel>
+                    <Button x:Name="btn_category" Grid.Column="2" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent"  Visibility="Hidden" >
+                        <StackPanel>
+                            <Image Source="Resources\filter.png"></Image>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="btn_mood" Grid.Column="3" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
+                        <StackPanel>
+                            <Image Source="Resources\beaker.png"></Image>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="btn_refresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
+                        <StackPanel>
+                            <Image Source="Resources\refresh.png"></Image>
+                        </StackPanel>
+                    </Button>
+                </Grid>
                
+                <StackPanel x:Name="RecommendedTreeview">
+                        <TreeView x:Name="RecommendedPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto">
+                            <TreeView.Resources>
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                      Color="Transparent" />
+                                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                      Color="Transparent" />
+                                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}"
+                      Color="Transparent" />
+                                <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}"
+                      Color="Transparent" />
+                            </TreeView.Resources>
+                        </TreeView>
+                    </StackPanel>
+                <ItemsControl>
+                    <Separator x:Name="Seperator3" Visibility="Hidden" Margin="0,5,0,5"></Separator>
+                </ItemsControl>
                 <StackPanel x:Name="UsersPlaylistTreeview">
                     <TreeView x:Name="UsersPlaylistTV" Background="Transparent" BorderBrush="Transparent" Width="auto" Height="auto">
                         <TreeView.Resources>
@@ -123,10 +168,13 @@
                         </TreeView.Resources>
                     </TreeView>
                 </StackPanel>
+                
            
-           
-        </StackPanel>
+
+            </StackPanel>
        
     </StackPanel>
+        
     </ScrollViewer>
+  
 </UserControl>

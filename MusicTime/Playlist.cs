@@ -35,6 +35,8 @@ namespace MusicTime
         // public static List<PlaylistItem> _Playlists { get; set; }
         public static List<Track> Software_Playlists { get; set; }
         public static List<Track> Liked_Playlist { get; set; }
+       public static List<PlaylistItem> _UsersPlaylists = new List<PlaylistItem>();
+        public static int offset = 0;
         public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
 
         public static string PlayListID { get; set; }
@@ -44,20 +46,21 @@ namespace MusicTime
             List<PlaylistItem> _Playlists = new List<PlaylistItem>();
             if (codyConfig.spoftifyUserId!= null)
             {
-               _Playlists = await getPlaylistsForUserAsync(codyConfig.spoftifyUserId,50,0);     
+                offset = 0;
+                _UsersPlaylists.Clear();
+               _Playlists = await getPlaylistsForUserAsync(codyConfig.spoftifyUserId);     
             }
             return _Playlists;
         }
 
-        public static async Task<List<PlaylistItem>> getPlaylistsForUserAsync(string spotifyUserid,
-            int limit,int offset)
+        public static async Task<List<PlaylistItem>> getPlaylistsForUserAsync(string spotifyUserid)
         {
             HttpResponseMessage response    = null;
-
-            string api                      = "/v1/users/"+ spotifyUserid +"/playlists";
-
+            string api                      = "/v1/users/"+ spotifyUserid + "/playlists?offset="+offset+"&limit=50";
+            Logger.Debug("offset :" + offset);
+            int playlistCount               = 0;
             SpotifySongs PlaylistItems      = new SpotifySongs();
-            List<PlaylistItem>  _Playlists = new List<PlaylistItem>();
+           
 
 
             try
@@ -79,9 +82,15 @@ namespace MusicTime
 
                     foreach (PlaylistItem item in PlaylistItems.items)
                     {
-                        _Playlists.Add(item);
+                        _UsersPlaylists.Add(item);
+                        playlistCount++;
                     }
 
+                }
+                if(playlistCount==50)
+                {
+                    offset += 50;
+                    _UsersPlaylists = await getPlaylistsForUserAsync(codyConfig.spoftifyUserId);
                 }
 
             }
@@ -90,22 +99,22 @@ namespace MusicTime
 
 
             }
-            return _Playlists;
+            return _UsersPlaylists;
         }
 
-        public static async Task<List<string>> getPlaylistNamesAsync()
-        {
-            List<string> names                  = new List<string>();
-            List<PlaylistItem> playlistItems    = null;
-            playlistItems                       = await getPlaylistsAsync();
+        //public static async Task<List<string>> getPlaylistNamesAsync()
+        //{
+        //    List<string> names                  = new List<string>();
+        //    List<PlaylistItem> playlistItems    = null;
+        //    playlistItems                       = await getPlaylistsAsync();
 
-            foreach (PlaylistItem item in playlistItems)
-            {
-                names.Add(item.name);
-            }
+        //    foreach (PlaylistItem item in playlistItems)
+        //    {
+        //        names.Add(item.name);
+        //    }
 
-            return names;
-        }
+        //    return names;
+        //}
 
         public static async Task<List<Track>> getPlaylistTracksAsync(string playlistId)
         {

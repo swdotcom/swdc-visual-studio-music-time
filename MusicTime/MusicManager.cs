@@ -253,7 +253,7 @@ namespace MusicTime
                 {
                     foreach (Device item in device.devices)
                     {
-                        if (item.is_active == true || item.type == "Computer")
+                        if ((item.is_active == true && item.type == "Computer")|| (item.is_active==false &&item.type=="Computer"))
                         { activeDevice = item.id; break; }
                     }
                 }
@@ -433,6 +433,67 @@ namespace MusicTime
             }
 
         }
+        public static async Task SpotifyPlayPlaylist(string PlaylistId, string trackid,List<Track> tracklist)
+        {
+           
+            string api          = null;
+            List<string> track_ids = new List<string>();
+            JsonObject payload  = new JsonObject();
+
+            if (tracklist != null && tracklist.Count > 0)
+            {
+                if (trackid != null)
+                {
+                    JsonArray track_uris = new JsonArray();
+
+                    foreach (Track item in tracklist)
+                    {
+                        track_uris.Add(MusicUtil.createUriFromTrackId(item.id));
+                        track_ids.Add(item.id);
+                    }
+
+                    payload.Add("uris", track_uris);
+                    
+                    int index = track_ids.IndexOf(trackid);
+
+                    if (index >= 0)
+                    {
+                        JsonObject position = new JsonObject();
+                        position.Add("position", index);
+                        payload.Add("offset", position);
+                    }
+                }
+            }
+            string _payload = payload.ToString();
+
+            await getDevicesAsync();
+
+            HttpResponseMessage response = null;
+
+            if (!string.IsNullOrEmpty(getActiveDeviceID()))
+            {
+                api = "/v1/me/player/play?device_id=" + getActiveDeviceID();
+                Logger.Debug("Active device id" + getActiveDeviceID());
+
+                response = await MusicClient.SpotifyApiPutAsync(api, _payload);
+
+                if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) && !MusicClient.IsOk(response))
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiPutAsync(api, _payload);
+
+                }
+
+            }
+            MusicStateManager.getInstance.GatherMusicInfo();
+            
+
+        }
+
+      
+
 
         public static async Task SpotifyPlayPlaylistAsync(string PlaylistId,string trackid)
         {
@@ -472,6 +533,7 @@ namespace MusicTime
             if (!string.IsNullOrEmpty(getActiveDeviceID()))
             {
                api  = "/v1/me/player/play?device_id=" + getActiveDeviceID();
+                Logger.Debug("Active device id" + getActiveDeviceID());
 
                 response = await MusicClient.SpotifyApiPutAsync(api,payload);
               
@@ -976,12 +1038,12 @@ namespace MusicTime
 
         }
 
-        public  async Task<List<PlaylistItem>> GetAllPlaylistAsync()
-        {
-           _usersPlaylists  = await Playlist.getPlaylistsAsync();
+        //public  async Task<List<PlaylistItem>> GetAllPlaylistAsync()
+        //{
+        //   _usersPlaylists  = await Playlist.getPlaylistsAsync();
 
-            return _usersPlaylists;
-        }
+        //    return _usersPlaylists;
+        //}
 
         public static async Task saveToSpotifyLiked (string trackID)
         {
@@ -1039,7 +1101,7 @@ namespace MusicTime
             string seed_tracks = "";
             List<string>  seed_genres    = new List<string>();
             List<string>  seed_artists   = new List<string>();
-            int limit                   = 40;
+            int limit                   = 100;
             string market               = "";
             int min_popularity          = 20;
             int target_popularity       = 90;
@@ -1049,77 +1111,90 @@ namespace MusicTime
             likedTracks                 = await Playlist.getSpotifyLikedSongsAsync();
             TrackList trackList         = new TrackList();
             List<string> trackIds       = new List<string>();
-
-            if(likedTracks.Count==0)
-            {
-
-            }
-            else
-            {
-                foreach (Track item in likedTracks)
-                {
-                    trackIds.Add(item.id);
-                }
-            
-                seed_tracks = string.Join(",", trackIds.ToArray(),0,5);
-            }
-
-             switch (value)
-            {
-                case "Happy":
-                    mood = "&min_valence=0.6&target_valence=1";
-                    break;
-                case "Energetic":
-                    mood = "&min_danceability=0.6&target_danceability=1";
-                    break;
-                case "Danceable":
-                    mood = "&max_speechiness=0.4&target_speechiness=0";
-                    break;
-                case "Instrumental":
-                    mood = "&max_speechiness=0.4&target_speechiness=0";
-                    break;
-                case "Quiet music":
-                    mood =  "&max_loudness=0.4&target_loudness=0";
-                    break;
-                default:
-                    break;
-            }
-            
-            if(!string.IsNullOrEmpty(mood))
-            {
-                query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_tracks=" + seed_tracks + "" + mood;
-            }
-            else
-            {
-                 query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_genres==" + value.ToLower();
-            }
-
             try
             {
-                response = await MusicClient.SpotifyApiGetAsync(query);
-
-                if (response == null || !MusicClient.IsOk(response))
+                if (likedTracks.Count <= 5)
                 {
-                    // refresh the tokens
-                    await MusicClient.refreshSpotifyTokenAsync();
-                    // Try again
+                    likedTracks = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
+                }
+
+                if (likedTracks.Count > 0)
+                {
+                    foreach (Track item in likedTracks)
+                    {
+                        trackIds.Add(item.id);
+                    }
+
+                    seed_tracks = string.Join(",", trackIds.ToArray(), 0, 5);
+                }
+
+                switch (value)
+                {
+                    case "Happy":
+                        mood = "&min_valence=0.7&target_valence=1";
+                        break;
+                    case "Energetic":
+                        mood = "&min_energy=0.7&target_energy=1";
+                        break;
+                    case "Danceable":
+                        mood = "&min_danceability=0.7&target_danceability=1";
+                        break;
+                    case "Instrumental":
+                        mood = "&min_instrumentalness=0.0&target_instrumentalness=0.1";
+                        break;
+                    case "Quiet":
+                        mood = "&max_loudness=-5&target_loudness=-10";
+                        break;
+                    default:
+                        break;
+                }
+
+                if (!string.IsNullOrEmpty(mood))
+                {
+                    query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_tracks=" + seed_tracks + "" + mood;
+                }
+                else if (value == "Familiar")
+                {
+                    query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_tracks=" + seed_tracks;
+                }
+                else
+                {
+                    query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_genres=" + value.ToLower();
+                }
+
+                try
+                {
                     response = await MusicClient.SpotifyApiGetAsync(query);
-                }
 
-                if (MusicClient.IsOk(response))
+                    if (response == null || !MusicClient.IsOk(response))
+                    {
+                        // refresh the tokens
+                        await MusicClient.refreshSpotifyTokenAsync();
+                        // Try again
+                        response = await MusicClient.SpotifyApiGetAsync(query);
+                    }
+
+                    if (MusicClient.IsOk(response))
+                    {
+                        responseBody = await response.Content.ReadAsStringAsync();
+                        trackList = JsonConvert.DeserializeObject<TrackList>(responseBody);
+
+                        RecommendedTracks = trackList.tracks;
+                    }
+
+                }
+                catch (Exception ex)
                 {
-                    responseBody    = await response.Content.ReadAsStringAsync();
-                    trackList       = JsonConvert.DeserializeObject<TrackList>(responseBody);
 
-                    RecommendedTracks = trackList.tracks;
+
                 }
-
             }
-            catch ( Exception ex)
+            catch (Exception ex)
             {
 
                 
             }
+            
            
 
             return RecommendedTracks;

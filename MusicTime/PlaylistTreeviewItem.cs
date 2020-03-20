@@ -11,6 +11,7 @@ namespace MusicTime
     {
         
         public string PlayListId { get; set; }
+        public string value { get; set; }
         public PlaylistTreeviewItem(string PlaylistId)
         {
             PlayListId = PlaylistId;
