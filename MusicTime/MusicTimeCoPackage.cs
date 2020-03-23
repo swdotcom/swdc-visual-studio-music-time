@@ -211,20 +211,21 @@ namespace MusicTime
             UpdateMusicStatusBar(false);
             Logger.Debug("Onlinecheck");
             await isOnlineCheckAsync();
-            Logger.Debug("Online");
+            Logger.Debug(isOnline.ToString());
             bool online = isOnline;
             if (!jwtExists || !online)
             {
+                
                 return;
             }
             else
             {
                 UserStatus status = await GetSpotifyUserStatusTokenAsync(online);
                 UpdateMusicStatusBar(status.loggedIn);
-                if(status.loggedIn)
-                {
-                    slackConnected = await GetSlackUserStatusTokenAsync(online);
-                }
+                //if(status.loggedIn)
+                //{
+                //    slackConnected = await GetSlackUserStatusTokenAsync(online);
+                //}
             }
         }
         
@@ -361,67 +362,75 @@ namespace MusicTime
             
             string spotify_accessToken = "";
             List<Track> LikedSongs = new List<Track>();
- 
-            spotify_accessToken = (string)SoftwareCoUtil.getItem("spotify_access_token");
-           
-            if (String.IsNullOrEmpty(spotify_accessToken))
+            try
             {
-               
-                UpdateMusicStatusBar(false);
-                
-            }
-            else if(SoftwareUserSession.GetSpotifyUserStatus())
-            {
-                if (MusicManager.isDeviceOpened())
-                {
-                    trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
-                    if (trackStatus != null)
-                    {
-                        
-                        if (trackStatus.item != null)
-                        {
-                            LikedSongs = await Playlist.getSpotifyLikedSongsAsync();
+                spotify_accessToken = (string)SoftwareCoUtil.getItem("spotify_access_token");
 
-                            foreach (Track item in LikedSongs)
+                if (String.IsNullOrEmpty(spotify_accessToken))
+                {
+
+                    UpdateMusicStatusBar(false);
+
+                }
+                else if (SoftwareUserSession.GetSpotifyUserStatus())
+                {
+                    if (MusicManager.isDeviceOpened())
+                    {
+                        trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
+                        if (trackStatus != null)
+                        {
+
+                            if (trackStatus.item != null)
                             {
-                              if(item.id == trackStatus.item.id)
+                                LikedSongs = await Playlist.getSpotifyLikedSongsAsync();
+
+                                foreach (Track item in LikedSongs)
                                 {
-                                    Liked = "🧡";
-                                    break;
+                                    if (item.id == trackStatus.item.id)
+                                    {
+                                        Liked = "🧡";
+                                        break;
+                                    }
+
                                 }
 
-                            }
-                           
-                            if (trackStatus.is_playing == true)
-                            {
-                                currentTrack = trackStatus.item.name;
-                                _musicStatus.SetTrackName(Pause + " " + currentTrack + " " + Liked);
-                                isValidRunningOrPausedTrack = true;
-                               
-                               
-                            }
-                            if (trackStatus.is_playing == false)
-                            {
-                                currentTrack = trackStatus.item.name;
-                                _musicStatus.SetTrackName(Play + " " + currentTrack + " " + Liked);
-                                isValidRunningOrPausedTrack = true;
+                                if (trackStatus.is_playing == true)
+                                {
+                                    currentTrack = trackStatus.item.name;
+                                    _musicStatus.SetTrackName(Pause + " " + currentTrack + " " + Liked);
+                                    isValidRunningOrPausedTrack = true;
+
+
+                                }
+                                if (trackStatus.is_playing == false)
+                                {
+                                    currentTrack = trackStatus.item.name;
+                                    _musicStatus.SetTrackName(Play + " " + currentTrack + " " + Liked);
+                                    isValidRunningOrPausedTrack = true;
+                                }
                             }
                         }
+                    }
+                    else
+                    {
+
+                        UpdateMusicStatusBar(true);
+                        isValidRunningOrPausedTrack = false;
                     }
                 }
                 else
                 {
-                  
-                    UpdateMusicStatusBar(true);
+
                     isValidRunningOrPausedTrack = false;
+                    UpdateMusicStatusBar(false);
                 }
             }
-            else 
+            catch (Exception ex)
             {
 
-                isValidRunningOrPausedTrack = false;
-                UpdateMusicStatusBar(false);
+               
             }
+            
            
             
         }
@@ -437,18 +446,27 @@ namespace MusicTime
 
         public async Task InitializeStatusBar()
         {
-            if (_addedStatusBarButton)
+            try
             {
-                return;
+                if (_addedStatusBarButton)
+                {
+                    return;
+                }
+                await JoinableTaskFactory.SwitchToMainThreadAsync();
+                DockPanel statusBarObj = FindChildControl<DockPanel>(System.Windows.Application.Current.MainWindow, "StatusBarPanel");
+                if (statusBarObj != null)
+                {
+                    statusBarObj.Children.Insert(0, _likeSongButton);
+                    _addedStatusBarButton = true;
+                }
+
             }
-            await JoinableTaskFactory.SwitchToMainThreadAsync();
-            DockPanel statusBarObj = FindChildControl<DockPanel>(System.Windows.Application.Current.MainWindow, "StatusBarPanel");
-            if (statusBarObj != null)
+            catch (Exception ex)
             {
-                statusBarObj.Children.Insert(0, _likeSongButton);
-                _addedStatusBarButton = true;
+
+                
             }
-        }
+                    }
 
         public async Task disposeStatusBar()
         {

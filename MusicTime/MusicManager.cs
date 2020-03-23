@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MusicTime
 {
@@ -433,13 +434,13 @@ namespace MusicTime
             }
 
         }
-        public static async Task SpotifyPlayPlaylist(string PlaylistId, string trackid,List<Track> tracklist)
+        public static async Task SpotifyPlayPlaylistold(string PlaylistId, string trackid,List<Track> tracklist)
         {
            
-            string api          = null;
+            string api             = null;
             List<string> track_ids = new List<string>();
-            JsonObject payload  = new JsonObject();
-
+            JsonObject payload     = new JsonObject();
+            int index;
             if (tracklist != null && tracklist.Count > 0)
             {
                 if (trackid != null)
@@ -448,13 +449,34 @@ namespace MusicTime
 
                     foreach (Track item in tracklist)
                     {
-                        track_uris.Add(MusicUtil.createUriFromTrackId(item.id));
+                       // track_uris.Add(MusicUtil.createUriFromTrackId(item.id));
                         track_ids.Add(item.id);
                     }
+                   index = track_ids.IndexOf(trackid);
+
+
+                    if(index<=50)
+                    {
+                        tracklist = tracklist.GetRange(0,50);
+
+                    }
+
+                    else
+                    {
+                        tracklist = (List<Track>)tracklist.GetRange(50,50);
+                    }
+                    track_ids.Clear();
+                    foreach (Track item in tracklist)
+                    {
+                         track_uris.Add(MusicUtil.createUriFromTrackId(item.id));
+                       track_ids.Add(item.id);
+                    }
+                     index = track_ids.IndexOf(trackid);
 
                     payload.Add("uris", track_uris);
-                    
-                    int index = track_ids.IndexOf(trackid);
+
+                   
+
 
                     if (index >= 0)
                     {
@@ -487,14 +509,74 @@ namespace MusicTime
                 }
 
             }
+            MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
             MusicStateManager.getInstance.GatherMusicInfo();
             
 
         }
 
-      
 
 
+        public static async Task SpotifyPlayPlaylist(string PlaylistId, string trackid, List<Track> tracklist)
+        {
+
+            string api = null;
+            List<string> track_ids = new List<string>();
+            JsonObject payload = new JsonObject();
+           
+            if (tracklist != null && tracklist.Count > 0)
+            {
+                if (trackid != null)
+                {
+                    JsonArray track_uris = new JsonArray();
+
+                    foreach (Track item in tracklist)
+                    {
+                        track_uris.Add(MusicUtil.createUriFromTrackId(item.id));
+                        track_ids.Add(item.id);
+                    }
+
+
+                    int index = track_ids.IndexOf(trackid);
+
+                    payload.Add("uris", track_uris);
+                    
+                    if (index >= 0)
+                    {
+                        JsonObject position = new JsonObject();
+                        position.Add("position", index);
+                        payload.Add("offset", position);
+                    }
+                }
+            }
+            string _payload = payload.ToString();
+
+            await getDevicesAsync();
+
+            HttpResponseMessage response = null;
+
+            if (!string.IsNullOrEmpty(getActiveDeviceID()))
+            {
+                api = "/v1/me/player/play?device_id=" + getActiveDeviceID();
+                Logger.Debug("Active device id" + getActiveDeviceID());
+
+                response = await MusicClient.SpotifyApiPutAsync(api, _payload);
+
+                if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) && !MusicClient.IsOk(response))
+                {
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiPutAsync(api, _payload);
+
+                }
+
+            }
+            MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
+            MusicStateManager.getInstance.GatherMusicInfo();
+
+
+        }
         public static async Task SpotifyPlayPlaylistAsync(string PlaylistId,string trackid)
         {
             string payload      = string.Empty;
@@ -547,6 +629,7 @@ namespace MusicTime
                 }
                 
             }
+            MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
             MusicStateManager.getInstance.GatherMusicInfo();
             //SoftwareCoUtil.SetTimeout(5000, MusicStateManager.getInstance.GatherMusicInfo, true);
             
@@ -1086,13 +1169,21 @@ namespace MusicTime
                 response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
             }
 
+            if(MusicClient.IsOk(response))
+            {
+                string message = "Removed from your Liked Songs";
+                    MessageBox.Show(message,"Spotify"); 
+            }
+
+            
             MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
 
         }
 
-
-        public static async Task<List<Track>> getRecommendationsForTracks(string value)
+       
+        public static async Task<List<Track>> getRecommendationsForTracks(string value ,int offset )
         {
+            RecommendedTracks.Clear();
             HttpResponseMessage response    = null;
             string responseBody             = null;
             string api                      = "/v1/recommendations";
@@ -1101,25 +1192,41 @@ namespace MusicTime
             string seed_tracks = "";
             List<string>  seed_genres    = new List<string>();
             List<string>  seed_artists   = new List<string>();
-            int limit                   = 100;
+            int limit                   = 100    ;
             string market               = "";
             int min_popularity          = 20;
             int target_popularity       = 90;
             string mood                 = string.Empty;
             JsonObject queryParams      = new JsonObject();
             List<Track> likedTracks     = new List<Track>();
-            likedTracks                 = await Playlist.getSpotifyLikedSongsAsync();
+            
             TrackList trackList         = new TrackList();
             List<string> trackIds       = new List<string>();
             try
             {
+                if (Playlist.Liked_Tracks.Count <= 0)
+                {
+                    likedTracks = await Playlist.getSpotifyLikedSongsAsync();
+                }
+                else
+                    likedTracks = Playlist.Liked_Tracks;
+
+
+
                 if (likedTracks.Count <= 5)
                 {
-                    likedTracks = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
+                    if (Playlist.SoftwareTOP_Tracks.Count <= 0)
+                    {
+                        likedTracks = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
+                    }
+                    else
+                        likedTracks = Playlist.SoftwareTOP_Tracks;
                 }
 
                 if (likedTracks.Count > 0)
                 {
+                    likedTracks = likedTracks.GetRange(0, 5);
+
                     foreach (Track item in likedTracks)
                     {
                         trackIds.Add(item.id);
@@ -1164,6 +1271,7 @@ namespace MusicTime
 
                 try
                 {
+                    
                     response = await MusicClient.SpotifyApiGetAsync(query);
 
                     if (response == null || !MusicClient.IsOk(response))
@@ -1181,7 +1289,7 @@ namespace MusicTime
 
                         RecommendedTracks = trackList.tracks;
                     }
-
+                    
                 }
                 catch (Exception ex)
                 {
@@ -1195,6 +1303,15 @@ namespace MusicTime
                 
             }
             
+            if(offset ==0)
+            {
+                RecommendedTracks = RecommendedTracks.GetRange(0, 50);
+            }
+            else if(offset==50)
+            {
+                RecommendedTracks = RecommendedTracks.GetRange(50, 50);
+            }
+
            
 
             return RecommendedTracks;

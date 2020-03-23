@@ -224,18 +224,20 @@ namespace MusicTime
         }
         public static async Task DisConnectToSpotifyAsync()
         {
-            HttpResponseMessage response = null;
-            string app_jwt = "";
-            bool online = MusicTimeCoPackage.isOnline;
-            if (!online)
+            HttpResponseMessage response    = null;
+            string app_jwt                  = "";
+
+            if (!MusicTimeCoPackage.isOnline)
             {
-                return;
+                await SoftwareUserSession.isOnlineCheckAsync();
             }
-            
-                app_jwt     = SoftwareUserSession.GetJwt();
-                string api  = "/auth/spotify/disconnect";
-               
-                response = await SoftwareHttpManager.SendRequestPutAsync(api,null);
+            if (MusicTimeCoPackage.isOnline)
+            {
+
+                app_jwt = SoftwareUserSession.GetJwt();
+                string api = "/auth/spotify/disconnect";
+
+                response = await SoftwareHttpManager.SendRequestPutAsync(api, null);
                 if (SoftwareHttpManager.IsOk(response))
                 {
                     MusicManager.clearSpotifyAccessInfo(spotifyTokens);
@@ -244,7 +246,7 @@ namespace MusicTime
                     SoftwareDisconnectSlackCommand.UpdateEnabledState(false);
 
                 }
-            
+            }
         }
 
 

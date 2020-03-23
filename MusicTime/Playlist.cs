@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MusicTime
 {
@@ -33,8 +34,8 @@ namespace MusicTime
         }
 
         // public static List<PlaylistItem> _Playlists { get; set; }
-        public static List<Track> Software_Playlists { get; set; }
-        public static List<Track> Liked_Playlist { get; set; }
+        public static List<Track> SoftwareTOP_Tracks    = new List<Track>();
+        public static List<Track> Liked_Tracks        = new List<Track>();
        public static List<PlaylistItem> _UsersPlaylists = new List<PlaylistItem>();
         public static int offset = 0;
         public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
@@ -47,7 +48,7 @@ namespace MusicTime
             if (codyConfig.spoftifyUserId!= null)
             {
                 offset = 0;
-                _UsersPlaylists.Clear();
+               _UsersPlaylists.Clear();
                _Playlists = await getPlaylistsForUserAsync(codyConfig.spoftifyUserId);     
             }
             return _Playlists;
@@ -147,7 +148,10 @@ namespace MusicTime
                         tracks.Add(item.track);
                     }
                 }
-
+                if(playlistId ==  Constants.SOFTWARE_TOP_40_ID)
+                {
+                    SoftwareTOP_Tracks = tracks;
+                }
                 
             }
             catch (Exception ex)
@@ -349,7 +353,7 @@ namespace MusicTime
                     }
                 }
 
-
+                Liked_Tracks = LikedSongs;
 
             }
             catch (Exception ex)
@@ -413,7 +417,17 @@ namespace MusicTime
                 // Try again
                 response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
             }
+            if (MusicClient.IsOk(response))
+            {
+                string message = "Removed song from playlist";
+                MessageBox.Show(message,"Spotify");
+            }
+            else
+            {
+                string message = "Failed to remove song";
+                MessageBox.Show(message, "Spotify");
 
+            }
 
         }
     }

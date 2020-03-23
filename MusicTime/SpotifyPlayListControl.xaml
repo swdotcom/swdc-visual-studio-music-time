@@ -120,17 +120,17 @@
                         <Image  x:Name="Img_recommend" Width="15" Height="15"></Image>
                         <Label x:Name="Lbl_recommend" Foreground="DarkCyan" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
                     </StackPanel>
-                    <Button x:Name="btn_category" Grid.Column="2" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent"  Visibility="Hidden" >
+                    <Button x:Name="btn_category" Grid.Column="1" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent"  Visibility="Hidden" >
                         <StackPanel>
                             <Image Source="Resources\filter.png"></Image>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn_mood" Grid.Column="3" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
+                    <Button x:Name="btn_mood" Grid.Column="2" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
                         <StackPanel>
                             <Image Source="Resources\beaker.png"></Image>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn_refresh" Grid.Column="1" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
+                    <Button x:Name="btn_refresh" Grid.Column="3" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
                         <StackPanel>
                             <Image Source="Resources\refresh.png"></Image>
                         </StackPanel>
