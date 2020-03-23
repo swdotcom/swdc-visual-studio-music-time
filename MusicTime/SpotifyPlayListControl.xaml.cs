@@ -137,7 +137,7 @@
                        await SoftwareTop40PlaylistAsync();
                     }
                  
-                    if (!isUsersPlaylistUpdated) { UsersPlaylistAsync(); }
+                    if (!isUsersPlaylistUpdated) { await UsersPlaylistAsync(); }
                     SetRecommendContentAsync();
                 }
                 else
@@ -162,6 +162,7 @@
                 SoftwarePlaylistTV.Items.Clear();
                 LikePlaylistTV.Items.Clear();
                 AIPlaylistTV.Items.Clear();
+                RecommendedPlaylistTV.Items.Clear();
                 isUsersPlaylistUpdated  = false;
                 isAIPlaylistUpdated     = false;
                 isMusicTimePlaylistUpdated = false;
@@ -1615,6 +1616,7 @@
         {
             try
             {
+                e.Handled = true;
                 string playlistID   = string.Empty;
                 string trackID      = string.Empty;               
                 PlaylistTreeviewItem parent = null;
@@ -1659,6 +1661,7 @@
         {
             try
             {
+                e.Handled = true;
                 string playlistID = string.Empty;
                 string trackID = string.Empty;
                 PlaylistTreeviewItem parent = null;
