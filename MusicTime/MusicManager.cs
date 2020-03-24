@@ -1301,7 +1301,7 @@ namespace MusicTime
 
                     }
             }
-            if (MusicTimeCoPackage.RecommendedTracks.Count < 50)
+            if (MusicTimeCoPackage.RecommendedTracks.Count > 50)
             {
                 if (MusicTimeCoPackage.isOffsetChange == false)
                 {
