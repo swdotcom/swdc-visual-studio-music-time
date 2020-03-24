@@ -259,6 +259,7 @@
 
         private async void Btn_refresh_Click(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
             if(isOffsetChange)
             {
                 isOffsetChange = false;

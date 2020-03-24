@@ -382,6 +382,16 @@ namespace MusicTime
                         trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
                         if (trackStatus != null)
                         {
+                            //if(trackStatus.actions!=null)
+                            //{
+                            //    if (trackStatus.actions.disallows.skipping_prev == true)
+                            //    {
+                            //        PreviousTrackCommand.UpdateEnabledState(false);
+                            //    }
+                            //    else
+                            //        PreviousTrackCommand.UpdateEnabledState(true);
+                            //}
+                            
 
                             if (trackStatus.item != null)
                             {
