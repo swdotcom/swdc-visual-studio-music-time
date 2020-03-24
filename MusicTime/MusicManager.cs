@@ -19,7 +19,7 @@ namespace MusicTime
         public static CodyConfig codyConfig     = CodyConfig.getInstance;
         private static Device device            = Device.getInstance;
         private static TrackStatus trackStatus  = new TrackStatus();
-        public static List<Track> RecommendedTracks           = new List<Track>();
+      
         private MusicManager()
         {
         }
@@ -37,7 +37,8 @@ namespace MusicTime
         }
         public static SpotifyUser _spotifyUser { get; set; }
         public  List<PlaylistItem> _usersPlaylists { get; set; }
-
+       // public static List<Track> RecommendedTracks = new List<Track>();
+       
         public async Task UpdateSpotifyAccessInfoAsync(Auths auths, SpotifyTokens spotifyTokens)
         {
 
@@ -1121,12 +1122,7 @@ namespace MusicTime
 
         }
 
-        //public  async Task<List<PlaylistItem>> GetAllPlaylistAsync()
-        //{
-        //   _usersPlaylists  = await Playlist.getPlaylistsAsync();
-
-        //    return _usersPlaylists;
-        //}
+        
 
         public static async Task saveToSpotifyLiked (string trackID)
         {
@@ -1171,8 +1167,8 @@ namespace MusicTime
 
             if(MusicClient.IsOk(response))
             {
-                string message = "Removed from your Liked Songs";
-                    MessageBox.Show(message,"Spotify"); 
+                string message = "Removed song from your Liked Songs playlist";
+                MessageBox.Show(message,"Spotify"); 
             }
 
             
@@ -1181,9 +1177,10 @@ namespace MusicTime
         }
 
        
-        public static async Task<List<Track>> getRecommendationsForTracks(string value ,int offset )
+        public static async Task<List<Track>> getRecommendationsForTracks(string value ,bool offset_flag )
         {
-            RecommendedTracks.Clear();
+           
+           
             HttpResponseMessage response    = null;
             string responseBody             = null;
             string api                      = "/v1/recommendations";
@@ -1199,122 +1196,123 @@ namespace MusicTime
             string mood                 = string.Empty;
             JsonObject queryParams      = new JsonObject();
             List<Track> likedTracks     = new List<Track>();
-            
+            List<Track> Tracks          = new List<Track>();
             TrackList trackList         = new TrackList();
             List<string> trackIds       = new List<string>();
-            try
+
+            if (MusicTimeCoPackage.RecommendedType != value || MusicTimeCoPackage.isOffsetChange != offset_flag)
             {
-                if (Playlist.Liked_Tracks.Count <= 0)
+                MusicTimeCoPackage.RecommendedType = value;
+                MusicTimeCoPackage.RecommendedTracks.Clear();
+                MusicTimeCoPackage.isOffsetChange = offset_flag;
+                if (Constants.spotifyMoods.Contains(value))
                 {
-                    likedTracks = await Playlist.getSpotifyLikedSongsAsync();
-                }
-                else
-                    likedTracks = Playlist.Liked_Tracks;
+                    
+                        if (Playlist.Liked_Tracks.Count <= 0)
+                        {
+                            likedTracks = await Playlist.getSpotifyLikedSongsAsync();
+                        }
+                        else
+                            likedTracks = Playlist.Liked_Tracks;
 
 
 
-                if (likedTracks.Count <= 5)
-                {
-                    if (Playlist.SoftwareTOP_Tracks.Count <= 0)
+                        if (likedTracks.Count <= 5)
+                        {
+                            if (Playlist.SoftwareTOP_Tracks.Count <= 0)
+                            {
+                                likedTracks = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
+                            }
+                            else
+                                likedTracks = Playlist.SoftwareTOP_Tracks;
+                        }
+
+                        if (likedTracks.Count > 0)
+                        {
+                            likedTracks = likedTracks.GetRange(0, 5);
+
+                            foreach (Track item in likedTracks)
+                            {
+                                trackIds.Add(item.id);
+                            }
+
+                            seed_tracks = string.Join(",", trackIds.ToArray(), 0, 5);
+                        }
+
+                        switch (value)
+                        {
+                            case "Happy":
+                                mood = "&min_valence=0.7&target_valence=1";
+                                break;
+                            case "Energetic":
+                                mood = "&min_energy=0.7&target_energy=1";
+                                break;
+                            case "Danceable":
+                                mood = "&min_danceability=0.7&target_danceability=1";
+                                break;
+                            case "Instrumental":
+                                mood = "&min_instrumentalness=0.0&target_instrumentalness=0.1";
+                                break;
+                            case "Quiet":
+                                mood = "&max_loudness=-5&target_loudness=-10";
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(mood))
                     {
-                        likedTracks = await Playlist.getPlaylistTracksAsync(Constants.SOFTWARE_TOP_40_ID);
+                        query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_tracks=" + seed_tracks + "" + mood;
+                    }
+                    else if (value == "Familiar")
+                    {
+                        query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_tracks=" + seed_tracks;
                     }
                     else
-                        likedTracks = Playlist.SoftwareTOP_Tracks;
-                }
-
-                if (likedTracks.Count > 0)
-                {
-                    likedTracks = likedTracks.GetRange(0, 5);
-
-                    foreach (Track item in likedTracks)
                     {
-                        trackIds.Add(item.id);
+                        query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_genres=" + value.ToLower();
                     }
 
-                    seed_tracks = string.Join(",", trackIds.ToArray(), 0, 5);
-                }
-
-                switch (value)
-                {
-                    case "Happy":
-                        mood = "&min_valence=0.7&target_valence=1";
-                        break;
-                    case "Energetic":
-                        mood = "&min_energy=0.7&target_energy=1";
-                        break;
-                    case "Danceable":
-                        mood = "&min_danceability=0.7&target_danceability=1";
-                        break;
-                    case "Instrumental":
-                        mood = "&min_instrumentalness=0.0&target_instrumentalness=0.1";
-                        break;
-                    case "Quiet":
-                        mood = "&max_loudness=-5&target_loudness=-10";
-                        break;
-                    default:
-                        break;
-                }
-
-                if (!string.IsNullOrEmpty(mood))
-                {
-                    query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_tracks=" + seed_tracks + "" + mood;
-                }
-                else if (value == "Familiar")
-                {
-                    query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_tracks=" + seed_tracks;
-                }
-                else
-                {
-                    query = api + "?limit=" + limit + "&min_popularity=" + min_popularity + "&target_popularity=" + target_popularity + "&seed_genres=" + value.ToLower();
-                }
-
-                try
-                {
-                    
-                    response = await MusicClient.SpotifyApiGetAsync(query);
-
-                    if (response == null || !MusicClient.IsOk(response))
+                    try
                     {
-                        // refresh the tokens
-                        await MusicClient.refreshSpotifyTokenAsync();
-                        // Try again
+
                         response = await MusicClient.SpotifyApiGetAsync(query);
-                    }
 
-                    if (MusicClient.IsOk(response))
+                        if (response == null || !MusicClient.IsOk(response))
+                        {
+                            // refresh the tokens
+                            await MusicClient.refreshSpotifyTokenAsync();
+                            // Try again
+                            response = await MusicClient.SpotifyApiGetAsync(query);
+                        }
+
+                        if (MusicClient.IsOk(response))
+                        {
+                            responseBody = await response.Content.ReadAsStringAsync();
+                            trackList = JsonConvert.DeserializeObject<TrackList>(responseBody);
+
+                            MusicTimeCoPackage.RecommendedTracks = trackList.tracks;
+                        }
+
+                    }
+                    catch (Exception ex)
                     {
-                        responseBody = await response.Content.ReadAsStringAsync();
-                        trackList = JsonConvert.DeserializeObject<TrackList>(responseBody);
 
-                        RecommendedTracks = trackList.tracks;
+
                     }
-                    
-                }
-                catch (Exception ex)
-                {
-
-
-                }
             }
-            catch (Exception ex)
+            if(MusicTimeCoPackage.isOffsetChange == false)
             {
-
-                
+                Tracks = MusicTimeCoPackage.RecommendedTracks.GetRange(0, 50);
             }
-            
-            if(offset ==0)
+            else if(MusicTimeCoPackage.isOffsetChange == true)
             {
-                RecommendedTracks = RecommendedTracks.GetRange(0, 50);
-            }
-            else if(offset==50)
-            {
-                RecommendedTracks = RecommendedTracks.GetRange(50, 50);
+                Tracks = MusicTimeCoPackage.RecommendedTracks.GetRange(50, 50);
             }
 
-           
 
-            return RecommendedTracks;
+
+            return Tracks;
         }
     }
 }

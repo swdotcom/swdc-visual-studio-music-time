@@ -45,7 +45,7 @@ namespace MusicTime
               "Samba", "Sertanejo", "Show tunes", "Singer-songwriter", "Ska", "Sleep", "Songwriter",
               "Soul", "Soundtracks", "Spanish", "Study", "Summer", "Swedish", "Synth-popv",
               "Tango", "Techno", "Trance", "Trip hop", "Turkish", "Work out", "World-music"};
-        
+        internal static List<string> spotifyMoods = new List<string>() { "Happy", "Energetic", "Danceable", "Instrumental", "Quiet", "Familiar" };
 
         internal static string EditorVersion
         {

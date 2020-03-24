@@ -92,6 +92,9 @@ namespace MusicTime
         public static bool slackConnected = false;
         public static List<Channel> SlackChannels = null;
         private MusicController musicControllerMgr;
+        public static List<Track> RecommendedTracks = new List<Track>();
+        public static string RecommendedType        = "";
+        public static bool isOffsetChange = false;
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicTimeCoPackage"/> class.
         /// </summary>
@@ -791,7 +794,7 @@ namespace MusicTime
                 string softwareDataContent = _softwareData.GetAsJson();
                 Logger.Info("Code Time: sending: " + softwareDataContent);
 
-                if (SoftwareCoUtil.isTelemetryOn())
+                if (SoftwareCoUtil.isTelemetryOn() && MusicManager.hasSpotifyPlaybackAccess())
                 {
                     StorePayload(_softwareData);
                 }

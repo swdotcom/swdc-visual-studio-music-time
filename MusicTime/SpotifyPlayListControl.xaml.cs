@@ -38,8 +38,8 @@
         public static List<Device> WebDevices       = new List<Device>();
         public static List<Device> ComputerDevices  = new List<Device>();
         public static PlaylistItem AIPlaylistItem       = null;
-
-        public static int offset                    = 0;
+        public string recommendedType = "Familiar";
+        public static bool isOffsetChange           = false;
      
         enum SortOrder
         {
@@ -259,16 +259,17 @@
 
         private async void Btn_refresh_Click(object sender, RoutedEventArgs e)
         {
-            if (offset == 0)
+            if(isOffsetChange)
             {
-                offset = 50;
-            }
+                isOffsetChange = false;
+            } 
             else
             {
-                offset = 0;
+                isOffsetChange = true;
             }
+
             isRecommendPlaylistUpdated = false;
-            await RecommendPlaylistAsync();
+            await RecommendPlaylistAsync(recommendedType);
 
         }
 
@@ -303,6 +304,7 @@
             {
                 isRecommendPlaylistUpdated = false;
                 await RecommendPlaylistAsync(cbi);
+                recommendedType = cbi;
             }
         }
        
@@ -358,6 +360,7 @@
             {
                 isRecommendPlaylistUpdated = false;
                 await RecommendPlaylistAsync(item.moodValue);
+                recommendedType = item.moodValue;
             }
          }
 
@@ -968,7 +971,7 @@
                 else if (item.PlayListId == "Recommended Songs")
                 {
                    
-                    tracks = await MusicManager.getRecommendationsForTracks(item.value,offset);
+                    tracks = await MusicManager.getRecommendationsForTracks(item.value,isOffsetChange);
                     recommendedSongs = tracks;
                     isrecommendedSong = true;
                     
@@ -1026,8 +1029,8 @@
             if (parent != null)
             {
                 
-                    playlistID = parent.PlayListId;
-                    trackID = item.PlayListId;
+                    playlistID  = parent.PlayListId;
+                    trackID     = item.PlayListId;
                 
                
             }
