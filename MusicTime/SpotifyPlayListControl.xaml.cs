@@ -222,7 +222,7 @@
             {
 
                 AnalyticLabel.Content   = "See web analytics";
-                AnalyticImage.Source    = new BitmapImage(new Uri("Resources/PAW.png", UriKind.Relative));
+                AnalyticImage.Source    = new BitmapImage(new Uri("Resources/PAW_Purple.png", UriKind.Relative));
             }
             else
             {

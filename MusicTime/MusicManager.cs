@@ -1199,12 +1199,12 @@ namespace MusicTime
             List<Track> Tracks          = new List<Track>();
             TrackList trackList         = new TrackList();
             List<string> trackIds       = new List<string>();
-
-            if (MusicTimeCoPackage.RecommendedType != value || MusicTimeCoPackage.isOffsetChange != offset_flag)
+            MusicTimeCoPackage.isOffsetChange = offset_flag;
+            if (MusicTimeCoPackage.RecommendedType != value  )
             {
                 MusicTimeCoPackage.RecommendedType = value;
                 MusicTimeCoPackage.RecommendedTracks.Clear();
-                MusicTimeCoPackage.isOffsetChange = offset_flag;
+                
                 if (Constants.spotifyMoods.Contains(value))
                 {
                     
@@ -1301,16 +1301,22 @@ namespace MusicTime
 
                     }
             }
-            if(MusicTimeCoPackage.isOffsetChange == false)
+            if (MusicTimeCoPackage.RecommendedTracks.Count < 50)
             {
-                Tracks = MusicTimeCoPackage.RecommendedTracks.GetRange(0, 50);
+                if (MusicTimeCoPackage.isOffsetChange == false)
+                {
+                    Tracks = MusicTimeCoPackage.RecommendedTracks.GetRange(0, 50);
+                }
+                else if (MusicTimeCoPackage.isOffsetChange == true)
+                {
+                    Tracks = MusicTimeCoPackage.RecommendedTracks.GetRange(50, 50);
+                }
+
             }
-            else if(MusicTimeCoPackage.isOffsetChange == true)
+            else
             {
-                Tracks = MusicTimeCoPackage.RecommendedTracks.GetRange(50, 50);
+                Tracks = MusicTimeCoPackage.RecommendedTracks;
             }
-
-
 
             return Tracks;
         }
