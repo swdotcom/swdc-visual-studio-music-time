@@ -562,7 +562,7 @@ namespace MusicTime
                 Logger.Debug("Active device id" + getActiveDeviceID());
 
                 response = await MusicClient.SpotifyApiPutAsync(api, _payload);
-
+                
                 if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) && !MusicClient.IsOk(response))
                 {
                     // refresh the tokens
@@ -570,6 +570,11 @@ namespace MusicTime
                     // Try again
                     response = await MusicClient.SpotifyApiPutAsync(api, _payload);
 
+                }
+                if(response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    string message = "We were unable to play the selected track because it is unavailable in your market.";
+                    MessageBox.Show(message, "Spotify");
                 }
 
             }
@@ -628,7 +633,12 @@ namespace MusicTime
                     response = await MusicClient.SpotifyApiPutAsync(api, payload);
                     
                 }
-                
+                if (response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    string message = "We were unable to play the selected track because it is unavailable in your market.";
+                    MessageBox.Show(message, "Spotify");
+                }
+
             }
             MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
             MusicStateManager.getInstance.GatherMusicInfo();

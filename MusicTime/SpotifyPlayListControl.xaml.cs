@@ -55,12 +55,12 @@
         
         private void Init()
         {
-            if(isMusicTimeConnected())
+            if (isMusicTimeConnected())
             {
                 setLoading();
             }
             else
-            SetConnectContent();
+                SetConnectContent();
 
             System.Windows.Forms.Timer UpdateCallBackTimer = new System.Windows.Forms.Timer();
             UpdateCallBackTimer.Interval = 5000;//5 seconds
@@ -159,7 +159,7 @@
             {
                 await CheckUserStatusAsync();
 
-                if (isConnected && MusicTimeCoPackage.isOnline)
+                if (isConnected )
                 {
                     btnRefresh.Visibility = Visibility.Visible;
                     SetConnectContent();
@@ -241,7 +241,7 @@
         {
             try
             {
-                if (isConnected && MusicTimeCoPackage.isOnline)
+                if (isConnected)
                 {
                     ConnectLabel.Content = "Spotify Connected";
                     ConnectImage.Source = new BitmapImage(new Uri("Resources/Connected.png", UriKind.Relative));
@@ -268,7 +268,7 @@
         }
         private void SetWebAnalyticsContent()
         {
-            if (isConnected && MusicTimeCoPackage.isOnline)
+            if (isConnected )
             {
 
                 AnalyticLabel.Content   = "See web analytics";
@@ -284,7 +284,7 @@
 
         private async void SetRecommendContentAsync()
         {
-            if (isConnected && MusicTimeCoPackage.isOnline)
+            if (isConnected )
             {
 
                 Lbl_recommend.Content   = "RECOMMENDATIONS";
@@ -467,7 +467,7 @@
 
         private async void SetDeviceDetectionContentAsync()
         {
-            if (isConnected && MusicTimeCoPackage.isOnline)
+            if (isConnected)
             {
 
                 if (MusicManager.isDeviceOpened())
@@ -590,7 +590,7 @@
    
         private void SeperatorContent()
         {
-            if (isConnected && MusicTimeCoPackage.isOnline)
+            if (isConnected )
             {
                 Seperator1.Visibility = Visibility.Visible;
                 Seperator2.Visibility = Visibility.Visible;
@@ -606,7 +606,7 @@
         private void GenerateAIContent()
         {
 
-            if (isConnected && MusicTimeCoPackage.isOnline)
+            if (isConnected )
             {
                 //chcek if AI playlits is present or not
                 //if not
@@ -640,7 +640,7 @@
         {
             try
             {
-                if (isConnected && MusicTimeCoPackage.isOnline)
+                if (isConnected )
                 {
                     SortDock.Visibility = Visibility.Visible;
 
@@ -1041,7 +1041,7 @@
                
                 foreach (Track items in tracks)
                 {
-                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView(items.name, "track_w.png", items.id);
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView(items.name, "track.png", items.id);
 
                     if (isLikedSongs)
                     {
