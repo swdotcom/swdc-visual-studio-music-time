@@ -1146,7 +1146,7 @@ namespace MusicTime
             MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
         }
 
-        public static async Task removeToSpotifyLiked(string trackID)
+        public static async Task removeToSpotifyLiked(string trackID , bool isUnlike = false)
         {
             HttpResponseMessage response    = null;
             string responseBody             = null;
@@ -1165,7 +1165,7 @@ namespace MusicTime
                 response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
             }
 
-            if(MusicClient.IsOk(response))
+            if(MusicClient.IsOk(response) && !isUnlike)
             {
                 string message = "Removed song from your Liked Songs playlist";
                 MessageBox.Show(message,"Spotify"); 

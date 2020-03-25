@@ -93,6 +93,7 @@ namespace MusicTime
 
 
                     await MusicManager.SpotifyWebPlayPreviousAsync();
+                    MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
                     MusicStateManager.getInstance.GatherMusicInfo();
 
                 }
@@ -121,6 +122,7 @@ namespace MusicTime
                     }
 
                      await MusicManager.SpotifyWebPlayNextAsync();
+                    MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
                     MusicStateManager.getInstance.GatherMusicInfo();
                 }
             }

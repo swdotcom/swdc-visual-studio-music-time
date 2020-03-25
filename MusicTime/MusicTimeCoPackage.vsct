@@ -134,6 +134,7 @@
         <CommandFlag>AllowVisibilityChangeOnToolBar</CommandFlag>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>DefaultDisabled</CommandFlag>
         <Icon guid="guidImages11" id="bmpNext" />
         <Strings>
           <ButtonText>Next</ButtonText>
@@ -144,6 +145,7 @@
         <CommandFlag>AllowVisibilityChangeOnToolBar</CommandFlag>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>DefaultDisabled</CommandFlag>
         <Icon guid="guidImages11" id="bmpPrevious" />
         <Strings>
           <ButtonText>Previous</ButtonText>
@@ -154,6 +156,7 @@
          <CommandFlag>AllowVisibilityChangeOnToolBar</CommandFlag>
          <CommandFlag>DynamicVisibility</CommandFlag>
          <CommandFlag>DefaultInvisible</CommandFlag>
+         <CommandFlag>DefaultDisabled</CommandFlag>
         <Icon guid="guidImages11" id="bmpPlay" />
         <Strings>
           <ButtonText>Play/Pause</ButtonText>
@@ -165,6 +168,7 @@
         <CommandFlag>AllowVisibilityChangeOnToolBar</CommandFlag>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>DefaultDisabled</CommandFlag>
         <Icon guid="guidImages22" id="bmpPic1" />
         <Strings>
           <ButtonText>Like/Unlike</ButtonText>

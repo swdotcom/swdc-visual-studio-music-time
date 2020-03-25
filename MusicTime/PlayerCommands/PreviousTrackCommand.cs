@@ -43,6 +43,7 @@ namespace MusicTime
             var menuCommandID = new CommandID(CommandSet, CommandId);
             menuItem = new MenuCommand(this.Execute, menuCommandID);
             menuItem.Visible = false;
+            menuItem.Enabled = false;
             commandService.AddCommand(menuItem);
         }
 
@@ -92,6 +93,21 @@ namespace MusicTime
             MusicController.PreviousTrackAsync();
         }
 
+        public static async void UpdateDisabeledState(bool Connected)
+        {
+            if (menuItem != null)
+            {
+                if (Connected)
+                {
+                    menuItem.Visible = true;
+                    menuItem.Enabled = true;
+                }
+                else
+                {
+                    menuItem.Enabled = false;
+                }
+            }
+        }
         public static async void UpdateEnabledState(bool Connected)
         {
             if (menuItem != null)

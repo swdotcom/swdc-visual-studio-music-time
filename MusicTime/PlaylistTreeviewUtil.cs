@@ -48,6 +48,8 @@ namespace MusicTime
             {
                 // create Image
                 System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+                image.Height = 15;
+                image.Width = 15;
                 image.Source = new BitmapImage(new Uri("Resources/" + imagePath, UriKind.Relative));
                 stack.Children.Add(image);
             }
@@ -76,6 +78,8 @@ namespace MusicTime
 
             // create Image
             System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+            image.Height = 15;
+            image.Width = 15;
             image.Source = new BitmapImage(new Uri("Resources/" + imagePath, UriKind.Relative));
 
             // Label

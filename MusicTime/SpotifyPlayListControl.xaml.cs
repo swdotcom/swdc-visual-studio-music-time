@@ -55,14 +55,57 @@
         
         private void Init()
         {
-           
+            if(isMusicTimeConnected())
+            {
+                setLoading();
+            }
+            else
             SetConnectContent();
+
             System.Windows.Forms.Timer UpdateCallBackTimer = new System.Windows.Forms.Timer();
             UpdateCallBackTimer.Interval = 5000;//5 seconds
             UpdateCallBackTimer.Tick += new System.EventHandler(UpdateCallBack);
             UpdateCallBackTimer.Start();
             
         }
+
+        private void setLoading()
+        {
+            try
+            {
+                
+                    ConnectLabel.Content = "Loading";
+                    ConnectImage.Source = new BitmapImage(new Uri("Resources/loading_blue.png", UriKind.Relative));
+                
+
+            }
+            catch (Exception e)
+            {
+
+
+            }
+        }
+
+        private bool isMusicTimeConnected()
+        {
+            bool flag = false;
+            try
+            {
+                string accestoken =(string)SoftwareCoUtil.getItem("spotify_access_token");
+                if (!string.IsNullOrEmpty(accestoken))
+                {
+                    flag = true;
+                }
+            }
+            catch (Exception ex)
+            {
+
+                Logger.Debug(ex.Message);
+            }
+
+            return flag;
+        }
+
         private void UpdateCallBack(object sender, EventArgs e)
         {
             UpdateTreeviewAsync();
@@ -116,7 +159,7 @@
             {
                 await CheckUserStatusAsync();
 
-                if (isConnected)
+                if (isConnected && MusicTimeCoPackage.isOnline)
                 {
                     btnRefresh.Visibility = Visibility.Visible;
                     SetConnectContent();
@@ -190,7 +233,7 @@
 
         }
 
-       
+
 
 
         //UI Setters for button /label /icons
@@ -198,17 +241,24 @@
         {
             try
             {
-                if (isConnected)
+                if (isConnected && MusicTimeCoPackage.isOnline)
                 {
-                    ConnectLabel.Content    = "Spotify Connected";
-                    ConnectImage.Source     = new BitmapImage(new Uri("Resources/Connected.png", UriKind.Relative));
+                    ConnectLabel.Content = "Spotify Connected";
+                    ConnectImage.Source = new BitmapImage(new Uri("Resources/Connected.png", UriKind.Relative));
                 }
                 else
                 {
-                    ConnectLabel.Content    = "Connect Spotify";
-                    ConnectImage.Source     = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
-                }
+                    if (isMusicTimeConnected())
+                    {
+                        setLoading();
+                    }
+                    else
+                    {
+                        ConnectLabel.Content = "Connect Spotify";
+                        ConnectImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
+                    }
 
+                }
             }
             catch (Exception e)
             {
@@ -218,11 +268,11 @@
         }
         private void SetWebAnalyticsContent()
         {
-            if (isConnected)
+            if (isConnected && MusicTimeCoPackage.isOnline)
             {
 
                 AnalyticLabel.Content   = "See web analytics";
-                AnalyticImage.Source    = new BitmapImage(new Uri("Resources/PAW_Purple.png", UriKind.Relative));
+                AnalyticImage.Source    = new BitmapImage(new Uri("Resources/PAW_Circle_purple.png", UriKind.Relative));
             }
             else
             {
@@ -234,7 +284,7 @@
 
         private async void SetRecommendContentAsync()
         {
-            if (isConnected)
+            if (isConnected && MusicTimeCoPackage.isOnline)
             {
 
                 Lbl_recommend.Content   = "RECOMMENDATIONS";
@@ -417,7 +467,7 @@
 
         private async void SetDeviceDetectionContentAsync()
         {
-            if (isConnected)
+            if (isConnected && MusicTimeCoPackage.isOnline)
             {
 
                 if (MusicManager.isDeviceOpened())
@@ -540,7 +590,7 @@
    
         private void SeperatorContent()
         {
-            if (isConnected)
+            if (isConnected && MusicTimeCoPackage.isOnline)
             {
                 Seperator1.Visibility = Visibility.Visible;
                 Seperator2.Visibility = Visibility.Visible;
@@ -556,7 +606,7 @@
         private void GenerateAIContent()
         {
 
-            if (isConnected)
+            if (isConnected && MusicTimeCoPackage.isOnline)
             {
                 //chcek if AI playlits is present or not
                 //if not
@@ -590,7 +640,7 @@
         {
             try
             {
-                if (isConnected)
+                if (isConnected && MusicTimeCoPackage.isOnline)
                 {
                     SortDock.Visibility = Visibility.Visible;
 
@@ -863,7 +913,7 @@
                         }
                         
                         TreeViewItem treeItem           = null;
-                        treeItem                        = PlaylistTreeviewUtil.GetTreeView(playlists.name, "playlist.png", playlists.id);
+                        treeItem                        = PlaylistTreeviewUtil.GetTreeView(playlists.name, "playlist_w.png", playlists.id);
                         treeItem.MouseLeftButtonUp      += PlayPlaylist;
                         treeItem.Expanded               += AddTracksAsync;
                         treeItem.Items.Add(null);
@@ -991,7 +1041,7 @@
                
                 foreach (Track items in tracks)
                 {
-                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView(items.name, "track.png", items.id);
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView(items.name, "track_w.png", items.id);
 
                     if (isLikedSongs)
                     {

@@ -225,10 +225,7 @@ namespace MusicTime
             {
                 UserStatus status = await GetSpotifyUserStatusTokenAsync(online);
                 UpdateMusicStatusBar(status.loggedIn);
-                //if(status.loggedIn)
-                //{
-                //    slackConnected = await GetSlackUserStatusTokenAsync(online);
-                //}
+                
             }
         }
         
@@ -298,7 +295,7 @@ namespace MusicTime
 
                         if(isSongLiked)
                         {
-                            MusicManager.removeToSpotifyLiked(trackStatus.item.id);
+                            MusicManager.removeToSpotifyLiked(trackStatus.item.id ,isSongLiked);
 
                         }
                         else
@@ -338,12 +335,20 @@ namespace MusicTime
 
         public static void UpdateEnableCommands(bool status)
         {
-            
+            try
+            {
                 SoftwareConnectSpotifyCommand.UpdateEnabledState(status);
                 SoftwareDisconnectSpotifyCommand.UpdateEnabledState(status);
                 SoftwareMusicTimeDashBoardCommand.UpdateEnabledState(status);
                 OpenSpotifyCommand.UpdateEnabledState(status);
                 UpdateEnablePlayercontrol(status);
+            }
+            catch (Exception ex)
+            {
+
+               
+            }
+               
 
         }
 
@@ -382,16 +387,16 @@ namespace MusicTime
                         trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
                         if (trackStatus != null)
                         {
-                            //if(trackStatus.actions!=null)
-                            //{
-                            //    if (trackStatus.actions.disallows.skipping_prev == true)
-                            //    {
-                            //        PreviousTrackCommand.UpdateEnabledState(false);
-                            //    }
-                            //    else
-                            //        PreviousTrackCommand.UpdateEnabledState(true);
-                            //}
-                            
+                            if (trackStatus.actions != null)
+                            {
+                                if (trackStatus.actions.disallows.skipping_prev == true)
+                                {
+                                    PreviousTrackCommand.UpdateDisabeledState(false);
+                                }
+                                else
+                                    PreviousTrackCommand.UpdateDisabeledState(true);
+                            }
+
 
                             if (trackStatus.item != null)
                             {

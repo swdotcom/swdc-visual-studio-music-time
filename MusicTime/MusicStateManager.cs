@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net.Http;
+using Newtonsoft.Json.Converters;
 
 namespace MusicTime
 {
@@ -187,9 +188,10 @@ namespace MusicTime
             if (payloads.Count > 0)
             {
                 List<SoftwareData> softwareData = new List<SoftwareData>();
-
+                
                 foreach (string item in payloads)
                 {
+                  
                     SoftwareData datas = new SoftwareData();
                     datas = JsonConvert.DeserializeObject<SoftwareData>(item);
                     softwareData.Add(datas);
@@ -278,20 +280,16 @@ namespace MusicTime
               
                 foreach (KeyValuePair<string, object> entry in item.source)
                 {
-                    //Jobj =(JsonObject)entry;
-                  
+                                      
                     SourceData datas    = new SourceData();
-                    datas = SimpleJson.DeserializeObject<SourceData>(entry.Value.ToString()); 
-                    //datas               = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
+                   
+                    datas               = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
                     sourceData.Add(datas);
                    
                 }
                 songSession.source = item.source;
             }
            
-
-            
-            
             if(sourceData.Count>0)
             {
                 foreach (SourceData item in sourceData)

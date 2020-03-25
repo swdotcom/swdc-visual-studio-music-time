@@ -41,6 +41,7 @@ namespace MusicTime
                     if (app_jwt != null)
                     {
                         SoftwareCoUtil.setItem("jwt", app_jwt);
+                        
                     }
                 }
                 else
