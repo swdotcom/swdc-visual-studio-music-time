@@ -44,14 +44,14 @@ namespace MusicTime
                     {
                         await MusicManager.SpotifyWebPauseAsync();
                         MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-                        MusicStateManager.getInstance.GatherMusicInfo();
+                        //MusicStateManager.getInstance.GatherMusicInfo();
                     }
                     else
                     {
                       
                         await MusicManager.SpotifyWebPlayAsync();
                         MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-                        MusicStateManager.getInstance.GatherMusicInfo();
+                       // MusicStateManager.getInstance.GatherMusicInfo();
                     }
 
                     if (!MusicManager.isDeviceOpened())
@@ -94,7 +94,7 @@ namespace MusicTime
 
                     await MusicManager.SpotifyWebPlayPreviousAsync();
                     MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-                    MusicStateManager.getInstance.GatherMusicInfo();
+                   // MusicStateManager.getInstance.GatherMusicInfo();
 
                 }
 
@@ -123,7 +123,7 @@ namespace MusicTime
 
                      await MusicManager.SpotifyWebPlayNextAsync();
                     MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-                    MusicStateManager.getInstance.GatherMusicInfo();
+                   // MusicStateManager.getInstance.GatherMusicInfo();
                 }
             }
             catch (Exception ex)

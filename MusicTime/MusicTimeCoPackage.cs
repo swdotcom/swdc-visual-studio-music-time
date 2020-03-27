@@ -142,17 +142,16 @@ namespace MusicTime
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             Logger.Debug("Initialization");
             await InitializeSoftwareStatusAsync();
-          //  _likeSongButton = new LikeSongButton();
-            Events2 events = (Events2)ObjDte.Events;
-            _textDocKeyEvent = events.TextDocumentKeyPressEvents;
-            _docEvents = ObjDte.Events.DocumentEvents;
+            Events2 events      = (Events2)ObjDte.Events;
+            _textDocKeyEvent    = events.TextDocumentKeyPressEvents;
+            _docEvents          = ObjDte.Events.DocumentEvents;
 
             // setup event handlers
-            _textDocKeyEvent.AfterKeyPress += AfterKeyPressedAsync;
-            _docEvents.DocumentOpened += DocEventsOnDocumentOpenedAsync;
-            _docEvents.DocumentClosing += DocEventsOnDocumentClosedAsync;
-            _docEvents.DocumentSaved += DocEventsOnDocumentSaved;
-            _docEvents.DocumentOpening += DocEventsOnDocumentOpeningAsync;
+            _textDocKeyEvent.AfterKeyPress  += AfterKeyPressedAsync;
+            _docEvents.DocumentOpened       += DocEventsOnDocumentOpenedAsync;
+            _docEvents.DocumentClosing      += DocEventsOnDocumentClosedAsync;
+            _docEvents.DocumentSaved        += DocEventsOnDocumentSaved;
+            _docEvents.DocumentOpening      += DocEventsOnDocumentOpeningAsync;
 
             //Music Commands
             await SoftwareConnectSpotifyCommand.InitializeAsync(this);
@@ -191,7 +190,7 @@ namespace MusicTime
                      UpdateCurrentTrackOnStatusAsync,
                      null,
                      ZERO_SECOND,
-                     ONE_SECOND*10);
+                     ONE_SECOND*8);
 
             getSlackChannelTimer = new Timer(getSlackChannelsAsync, null, ZERO_SECOND, ONE_MINUTE);
 
@@ -228,8 +227,9 @@ namespace MusicTime
                 
             }
         }
-        
-        public static async void UpdateUserStatusAsync(object state)
+       
+
+    public static async void UpdateUserStatusAsync(object state)
         {
             try
             {
@@ -384,23 +384,24 @@ namespace MusicTime
                 {
                     if (MusicManager.isDeviceOpened())
                     {
-                        trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
-                        if (trackStatus != null)
-                        {
-                            if (trackStatus.actions != null)
-                            {
-                                if (trackStatus.actions.disallows.skipping_prev == true)
-                                {
-                                    PreviousTrackCommand.UpdateDisabeledState(false);
-                                }
-                                else
-                                    PreviousTrackCommand.UpdateDisabeledState(true);
-                            }
-
-
+                        trackStatus = await MusicManager.GetCurrentTrackAsync();
+                        
+                          
                             if (trackStatus.item != null)
                             {
-                                LikedSongs = await Playlist.getSpotifyLikedSongsAsync();
+                                if (trackStatus.actions != null)
+                                {
+                                    if (trackStatus.actions.disallows.skipping_prev == true)
+                                    {
+                                      PreviousTrackCommand.UpdateDisabeledState(false);
+                                    }
+                                    else
+                                        PreviousTrackCommand.UpdateDisabeledState(true);
+                                }
+
+                            MusicStateManager.getInstance.GatherMusicInfo(trackStatus.item);
+
+                            LikedSongs = await Playlist.getSpotifyLikedSongsAsync();
 
                                 foreach (Track item in LikedSongs)
                                 {
@@ -427,7 +428,7 @@ namespace MusicTime
                                     isValidRunningOrPausedTrack = true;
                                 }
                             }
-                        }
+                                                
                     }
                     else
                     {
@@ -453,14 +454,7 @@ namespace MusicTime
             
         }
 
-        //public async Task UpdateStatusBarButtonText(String text, String iconName = null)
-        //{
-        //    await JoinableTaskFactory.SwitchToMainThreadAsync();
-        //    await InitializeStatusBar();
-        //    iconName = "Heart_Red.png";
-            
-        //    _likeSongButton.UpdateDisplayAsync(text, iconName);
-        //}
+        
 
         public async Task InitializeStatusBar()
         {

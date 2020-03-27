@@ -511,7 +511,7 @@ namespace MusicTime
 
             }
             MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-            MusicStateManager.getInstance.GatherMusicInfo();
+           // MusicStateManager.getInstance.GatherMusicInfo();
             
 
         }
@@ -579,7 +579,7 @@ namespace MusicTime
 
             }
             MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-            MusicStateManager.getInstance.GatherMusicInfo();
+           // MusicStateManager.getInstance.GatherMusicInfo();
 
 
         }
@@ -641,7 +641,7 @@ namespace MusicTime
 
             }
             MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-            MusicStateManager.getInstance.GatherMusicInfo();
+           // MusicStateManager.getInstance.GatherMusicInfo();
             //SoftwareCoUtil.SetTimeout(5000, MusicStateManager.getInstance.GatherMusicInfo, true);
             
         }
@@ -669,7 +669,7 @@ namespace MusicTime
             }
             return trackStatus;
         }
-        public  async Task<Track> GetCurrentTrackAsync()
+        public static async Task<TrackStatus> GetCurrentTrackAsync()
         {
             HttpResponseMessage response = null;
             TrackStatus track = new TrackStatus();
@@ -728,10 +728,10 @@ namespace MusicTime
                 track.item.available_markets = null;
             }
 
-            return track.item;
+            return track;
         }
 
-        private async Task<TrackStatus> getSpotifyPlayerContextAsync()
+        private static async Task<TrackStatus> getSpotifyPlayerContextAsync()
         {
             TrackStatus playerContext   = new TrackStatus();
 
@@ -792,80 +792,90 @@ namespace MusicTime
         }
         public static async Task<Track> GetSpotifyTrackByIdAsync(string trackId, bool includeFullArtist, bool includeAudioFeatures, bool includeGenre)
         {
-            Track track =  new Track();
-            HttpResponseMessage response = null;
-            string id  = MusicUtil.CreateSpotifyIdFromUri(trackId);
-            string api = "/v1/tracks/"+id;
-
-            response = await MusicClient.SpotifyApiGetAsync(api);
-
-            if (response == null || !MusicClient.IsOk(response))
+            Track track = new Track();
+            try
             {
-                // refresh the tokens
-                await MusicClient.refreshSpotifyTokenAsync();
-                // Try again
+              
+                HttpResponseMessage response = null;
+                string id = MusicUtil.CreateSpotifyIdFromUri(trackId);
+                string api = "/v1/tracks/" + id;
+
                 response = await MusicClient.SpotifyApiGetAsync(api);
-            }
 
-            if (MusicClient.IsOk(response))
-            {
-                string responseBody = await response.Content.ReadAsStringAsync();
-                track = JsonConvert.DeserializeObject<Track>(responseBody);
-                track = copySpotifyTrackToCodyTrack(track);
-            }
-          
-            if(includeFullArtist && track.artists!=null)
-            {
-                List<Artist> artists = new List<Artist>();
-
-                for (int i = 0; i < track.artists.Count; i++)
+                if (response == null || !MusicClient.IsOk(response))
                 {
-                    Artist artist = await getSpotifyArtistByIdAsync(track.artists[i].id);
-                    if (artist != null)
+                    // refresh the tokens
+                    await MusicClient.refreshSpotifyTokenAsync();
+                    // Try again
+                    response = await MusicClient.SpotifyApiGetAsync(api);
+                }
+
+                if (MusicClient.IsOk(response))
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    track = JsonConvert.DeserializeObject<Track>(responseBody);
+                    track = copySpotifyTrackToCodyTrack(track);
+                }
+
+                if (includeFullArtist && track.artists != null)
+                {
+                    List<Artist> artists = new List<Artist>();
+
+                    for (int i = 0; i < track.artists.Count; i++)
                     {
-                        artists.Add(artist);
+                        Artist artist = await getSpotifyArtistByIdAsync(track.artists[i].id);
+                        if (artist != null)
+                        {
+                            artists.Add(artist);
+                        }
+                    }
+
+                    if (artists.Count > 0)
+                    {
+                        track.artists = artists;
+                    }
+                    else
+                        track.artists = artists;
+
+
+
+                }
+                if (includeGenre && track.genre == null)
+                {
+
+                    string genre = null;
+                    if (track.artists != null &&
+                        track.artists.Count > 0)
+                    {
+                        // make sure we use the highest frequency genre
+                        //    genre = await getHighestFrequencySpotifyGenre(track.artists[0].genres);
+
+                    }
+                    if (genre == null)
+                    {
+                        // get the genre
+                        //  genre = await getGenre(track.artist,track.name);
+
+                    }
+                    if (genre != null)
+                    {
+                        track.genre = genre;
                     }
                 }
-
-                if (artists.Count > 0)
+                if (includeAudioFeatures)
                 {
-                    track.artists = artists;
-                }
-                else
-                    track.artists = artists;
+                    SpotifyAudioFeature spotifyAudioFeatures = await getSpotifyAudioFeaturesAsync(trackId);
 
-                     
+                    track.features = spotifyAudioFeatures.AudioFeatures[0];
+                }
 
             }
-            if(includeGenre && track.genre==null)
+            catch (Exception ex)
             {
 
-                string genre = null;
-                if (track.artists !=null  &&
-                    track.artists.Count > 0)
-                {
-                    // make sure we use the highest frequency genre
-                //    genre = await getHighestFrequencySpotifyGenre(track.artists[0].genres);
-                    
-                }
-                if (genre ==null)
-                {
-                    // get the genre
-                  //  genre = await getGenre(track.artist,track.name);
-                    
-                }
-                if (genre != null)
-                {
-                    track.genre = genre;
-                }
+                
             }
-            if(includeAudioFeatures)
-            {
-                SpotifyAudioFeature spotifyAudioFeatures = await getSpotifyAudioFeaturesAsync(trackId);
-              
-                track.features = spotifyAudioFeatures.AudioFeatures[0] ;
-            }
-
+            
             return track;
         }
 

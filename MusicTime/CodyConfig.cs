@@ -290,6 +290,13 @@ namespace MusicTime
         public DateTime added_at { get; set; }
         public Track track { get; set; }
     }
+
+    public class sourceKey
+    {
+        public string key { get; set; }
+        public SourceData SourceData { get; set; }
+    }
+
     public partial class SourceData
     {
         [JsonProperty("paste")]
