@@ -57,6 +57,7 @@ namespace MusicTime
 
             Label lbl = new Label();
             lbl.Content = text;
+            lbl.ToolTip = text;
             lbl.Foreground = System.Windows.Media.Brushes.DarkCyan;
 
             // Add into stack

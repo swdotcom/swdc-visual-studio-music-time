@@ -125,7 +125,11 @@
     <Resource Include="Resources\Connected.png" />
     <Resource Include="Resources\beaker.png" />
     <Resource Include="Resources\filter.png" />
-    <Content Include="Resources\dashboard.png" />
+    <Resource Include="Resources\dashboard.png" />
+    <Resource Include="Resources\dashboard_new.png" />
+    <Content Include="Readme.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\headphones.png" />
     <Content Include="Resources\headphones_dark.png" />
     <Content Include="Resources\heart-filled.png" />
@@ -159,7 +163,8 @@
     <Resource Include="Resources\share.png" />
     <Resource Include="Resources\refresh.png" />
     <Resource Include="Resources\settings.png" />
-    <Content Include="Resources\readme.png" />
+    <Resource Include="Resources\readme.png" />
+    <Resource Include="Resources\readme_old.png" />
     <Content Include="Resources\SoftwareConnectSlackCommand.png" />
     <Content Include="Resources\SoftwareConnectSpotifyCommand.png" />
     <Content Include="Resources\SoftwareDisconnectSlackCommand.png" />

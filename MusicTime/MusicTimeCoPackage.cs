@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -66,10 +67,11 @@ namespace MusicTime
         private System.Threading.Timer timer;
         private System.Threading.Timer DeviceTimer;
         private System.Threading.Timer TrackStatusBar;
-        private System.Threading.Timer LikeIconUpdate;
         private System.Threading.Timer getSlackChannelTimer;
         private System.Threading.Timer OnlineCheckerTimer;
-        private System.Threading.Timer PlaylistUpdate;
+        private System.Threading.Timer offlineDataTimer;
+
+
         public LikeSongButton _likeSongButton;
         private bool _addedStatusBarButton = false;
         private static int ONE_SECOND = 1000;
@@ -77,24 +79,21 @@ namespace MusicTime
         private static int ONE_MINUTE = THIRTY_SECONDS * 2;
         private static int ONE_HOUR = ONE_MINUTE * 60;
         private static int THIRTY_MINUTES = ONE_MINUTE * 30;
-        private static long lastDashboardFetchTime = 0;
-        private static long day_in_sec = 60 * 60 * 24;
         private static int ZERO_SECOND = 1;
-        private bool connected = false;
+        
         public static bool isValidRunningOrPausedTrack = false;
         public static bool isOnline = false;
-        // public static UserStatus spotifyUser = new UserStatus();
+       
         private static MusicStatusBar _musicStatus ;
-        private static TrackStatus trackStatus = new TrackStatus();
+        private static TrackStatus trackStatus  = new TrackStatus();
         private SoftwareData _softwareData;
-        public static JsonObject KeystrokeData = new JsonObject();
-        private DateTime _lastPostTime = DateTime.UtcNow;
-        public static bool slackConnected = false;
-        public static List<Channel> SlackChannels = null;
-        private MusicController musicControllerMgr;
+        public static JsonObject KeystrokeData  = new JsonObject();
+        private DateTime _lastPostTime          = DateTime.UtcNow;
+        public static bool slackConnected           = false;
+        public static List<Channel> SlackChannels   = null;
         public static List<Track> RecommendedTracks = new List<Track>();
         public static string RecommendedType        = "";
-        public static bool isOffsetChange = false;
+        public static bool isOffsetChange           = false;
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicTimeCoPackage"/> class.
         /// </summary>
@@ -179,7 +178,12 @@ namespace MusicTime
                      ONE_MINUTE,
                      ONE_MINUTE );
 
-           
+            offlineDataTimer = new System.Threading.Timer(
+                      SendOfflineData,
+                      null,
+                      THIRTY_MINUTES,
+                      THIRTY_MINUTES);
+
             DeviceTimer = new System.Threading.Timer(
                      GetDeviceIDLazilyAsync,
                      null,
@@ -207,8 +211,51 @@ namespace MusicTime
 
             }
         }
+        public static async void SendOfflineData(object stateinfo)
+        {
+          
+            Logger.Info(DateTime.Now.ToString());
+            bool online = isOnline;
+
+            if (!online)
+            {
+                return;
+            }
+
+            string datastoreFile = SoftwareCoUtil.getSoftwareDataStoreFile();
+            if (File.Exists(datastoreFile))
+            {
+                // get the content
+                string[] lines = File.ReadAllLines(datastoreFile, System.Text.Encoding.UTF8);
+
+                if (lines != null && lines.Length > 0)
+                {
+                    List<String> jsonLines = new List<string>();
+                    foreach (string line in lines)
+                    {
+                        if (line != null && line.Trim().Length > 0)
+                        {
+                            jsonLines.Add(line);
+                        }
+                    }
+                    string jsonContent = "[" + string.Join(",", jsonLines) + "]";
+                    HttpResponseMessage response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Post, "/data/batch", jsonContent);
+                    if (SoftwareHttpManager.IsOk(response))
+                    {
+                        // delete the file
+                        File.Delete(datastoreFile);
+                    }
+                }
+            }
+        }
         private async void InitializeUserInfoAsync()
-        {           
+        {
+            string readmefile = (string) SoftwareCoUtil.getItem("displayedReadmefile");
+            if(string.IsNullOrEmpty (readmefile) || readmefile != "true")
+            {
+                await  LaunchReadmeFile();
+                
+            }
             bool jwtExists  = SoftwareCoUtil.jwtExists();
             UpdateMusicStatusBar(false);
             Logger.Debug("Onlinecheck");
@@ -227,9 +274,20 @@ namespace MusicTime
                 
             }
         }
-       
 
-    public static async void UpdateUserStatusAsync(object state)
+        public static async Task LaunchReadmeFile()
+        {
+            //await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            ////   await MusicManager.GetMusicTimeDashboardFileAsync();
+
+            //string dashboardFile = SoftwareCoUtil.getReadmeFile();
+            //if (File.Exists(dashboardFile))
+            //    ObjDte.ItemOperations.OpenFile(dashboardFile);
+
+            //SoftwareCoUtil.setItem("displayedReadmefile", "true");
+        }
+
+        public static async void UpdateUserStatusAsync(object state)
         {
             try
             {

@@ -143,7 +143,11 @@ namespace MusicTime
         {
             return getSoftwareDataDir(true) + "\\MusicTime.txt";
         }
-        
+
+        public static String getReadmeFile()
+        {
+            return  "\\Resources\\Readme.txt";
+        }
 
         public static String getSoftwareDataDir(bool autoCreate)
         {

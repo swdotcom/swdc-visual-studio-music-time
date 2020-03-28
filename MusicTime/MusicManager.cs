@@ -879,16 +879,7 @@ namespace MusicTime
             return track;
         }
 
-        //public static Task<string> getHighestFrequencySpotifyGenre(List<string> genres)
-        //{
-        //    string selectedGenre = "";
-
-        //    if(genres.Count==0)
-        //    {
-        //        return selectedGenre;
-        //    }
-
-        //}
+       
 
         private static Task<string> getGenre(string artist, string name)
         {

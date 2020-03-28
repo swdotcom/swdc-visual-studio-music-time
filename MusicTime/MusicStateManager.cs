@@ -37,78 +37,89 @@ namespace MusicTime
 
         public async void GatherMusicInfo(Track PlayingTrack)
         {
-            if (MusicManager.hasSpotifyPlaybackAccess())
+            try
             {
-              //  Track playingTrack      = new Track();
-                Track playingTrack      = new Track();
-                playingTrack            = PlayingTrack;//await MusicManager.GetCurrentTrackAsync();
-                NowTime nowTime         = SoftwareCoUtil.GetNowTime();
-
-                if (playingTrack != null)
+                if (MusicManager.hasSpotifyPlaybackAccess())
                 {
-                    
-                    if (playingTrack.uri == null && playingTrack.id != null)
+
+
+                    Track playingTrack = new Track();
+                    playingTrack = PlayingTrack;
+                    NowTime nowTime = SoftwareCoUtil.GetNowTime();
+
+                    if (playingTrack != null)
                     {
-                        playingTrack.uri = MusicUtil.createUriFromTrackId(playingTrack.id);
-                    }
-                    else
-                        playingTrack.id = MusicUtil.CreateSpotifyIdFromUri(playingTrack.id);
 
-
-
-                    changeStatus = await getChangeStatus(playingTrack, nowTime);
-
-                    if (changeStatus.isNewSong)
-                    {
-                       
-
-                    }
-
-
-                    if (changeStatus.sendSongSession)
-                    {
-                        ExsitingTrack.state = trackState.Playing;
-                        NowTime Loacal_nowTime = SoftwareCoUtil.GetNowTime();
-                        if (ExsitingTrack.end == 0)
+                        if (playingTrack.uri == null && playingTrack.id != null)
                         {
-                            ExsitingTrack.end       = Loacal_nowTime.now;
-                            ExsitingTrack.local_end = Loacal_nowTime.local_now;
+                            playingTrack.uri = MusicUtil.createUriFromTrackId(playingTrack.id);
+                        }
+                        else
+                            playingTrack.id = MusicUtil.CreateSpotifyIdFromUri(playingTrack.id);
+
+
+
+                        changeStatus = await getChangeStatus(playingTrack, nowTime);
+
+                        if (changeStatus.isNewSong)
+                        {
+
+
                         }
 
-                        Track SongSession = ExsitingTrack;
 
-                        gatherCodingDataAndSendSongSessionAsync(SongSession);
-
-                        ExsitingTrack       = null;
-                        if (playingTrack    != null)
+                        if (changeStatus.sendSongSession)
                         {
-                            ExsitingTrack = new Track();
+                            ExsitingTrack.state = trackState.Playing;
+                            NowTime Loacal_nowTime = SoftwareCoUtil.GetNowTime();
+                            if (ExsitingTrack.end == 0)
+                            {
+                                ExsitingTrack.end = Loacal_nowTime.now;
+                                ExsitingTrack.local_end = Loacal_nowTime.local_now;
+                            }
+
+                            Track SongSession = ExsitingTrack;
+
+                            gatherCodingDataAndSendSongSessionAsync(SongSession);
+
+                            ExsitingTrack = null;
+                            if (playingTrack != null)
+                            {
+                                ExsitingTrack = new Track();
+                            }
+
+
+                            ExsitingTrack.start = nowTime.now;
+                            ExsitingTrack.local_start = nowTime.local_now;
+
+                            resetTrackProgressInfo(playingTrack);
                         }
-                        
 
-                        ExsitingTrack.start         = nowTime.now;
-                        ExsitingTrack.local_start   = nowTime.local_now;
+                        if (ExsitingTrack.id != playingTrack.id)
+                        {
+                            ExsitingTrack = playingTrack;
+                        }
+                        if (ExsitingTrack.state != playingTrack.state)
+                        {
+                            ExsitingTrack.state = playingTrack.state;
+                        }
+                        if (ExsitingTrack.start == 0)
+                        {
+                            ExsitingTrack.start = nowTime.now;
+                            ExsitingTrack.local_start = nowTime.local_now;
+                        }
+                        ExsitingTrack.end = 0;
 
-                        resetTrackProgressInfo(playingTrack);
                     }
-
-                    if(ExsitingTrack.id != playingTrack.id)
-                    {
-                        ExsitingTrack = playingTrack;
-                    }
-                    if(ExsitingTrack.state !=playingTrack.state)
-                    {
-                        ExsitingTrack.state = playingTrack.state;
-                    }
-                    if (ExsitingTrack.start == 0)
-                    {
-                        ExsitingTrack.start = nowTime.now;
-                        ExsitingTrack.local_start = nowTime.local_now;
-                    }
-                    ExsitingTrack.end = 0;
-
                 }
+
             }
+            catch (Exception ex)
+            {
+
+                
+            }
+           
         }
 
         private void resetTrackProgressInfo(Track playingTrack)
@@ -275,36 +286,40 @@ namespace MusicTime
             }
 
             #endregion
-            List<SourceData> sourceData = new List<SourceData>();
-            List<sourceKey> sourceKeyData = new List<sourceKey>();
+            List<SourceData> sourceData     = new List<SourceData>();
+            List<sourceKey> sourceKeyData   = new List<sourceKey>();
+
             foreach (SoftwareData item in softwareData)
             {
                
                
                 TotalKeystroke  = TotalKeystroke + item.keystrokes;
-                //List<JsonObject> keyValuePairs = new List<JsonObject>();
+              
                 foreach (KeyValuePair<string, object> entry in item.source)
                 {
-                    //sourceKey key       = new sourceKey();          
-                    SourceData datas    = new SourceData();
-                  //  JsonObject pair     = new JsonObject();
-                    //key.key             = entry.Key;
-                    datas               = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
-                    //key.SourceData      = datas;
-                  //  pair.Add(entry.Key, datas);
-                    //keyValuePairs.Add(pair);
-                    songSession.source.Add(entry.Key, datas);
                     
-                    sourceData.Add(datas);
+                    SourceData datas      = new SourceData();
+                
+                    datas                 = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
+                    
+                     
+                    if (songSession.source.ContainsKey(entry.Key))
+                    {
+                        aggregateSource(item, songSession, entry.Key, datas);
+                    }
+                    else
+                    {
+                        songSession.source.Add(entry.Key, datas);
+                    }
+
+                    sourceData.Add(datas);     
                    
                 }
 
-                //songSession.source.Add(keyValuePairs);
+               
             }
 
             
-
-            //songSession.source = item.source;
 
             if (sourceData.Count>0)
             {
@@ -333,6 +348,36 @@ namespace MusicTime
             return songSession;
 
         }
+
+        private void aggregateSource(SoftwareData softwareData, TrackData songSession,  string key, SourceData datas)
+        {
+            foreach (KeyValuePair<string, object> entry in softwareData.source)
+            {
+
+                if (entry.Key == key)
+                {
+                    SourceData sourceData   = new SourceData();
+                    sourceData              = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
+                    sourceData.Add          = sourceData.Add + datas.Add;
+                    sourceData.Delete       = sourceData.Delete + datas.Delete;
+                    sourceData.Close        = sourceData.Close + datas.Close;
+                    sourceData.Paste        = sourceData.Paste + datas.Paste;
+                    sourceData.Open         = sourceData.Open + datas.Open;
+                    sourceData.LinesRemoved = sourceData.LinesRemoved + datas.LinesRemoved;
+                    sourceData.LinesAdded   = sourceData.LinesAdded + datas.LinesAdded;
+                    sourceData.Lines        = sourceData.Lines + datas.Lines;
+                    sourceData.Length       = sourceData.Length + datas.Length;
+                    sourceData.Netkeys      = sourceData.Netkeys + datas.Netkeys;
+                    
+                    songSession.source[entry.Key] = sourceData;
+                    break;
+                }
+            }
+
+
+        }
+
+           
 
         private async void sendMusicDataAsync(TrackData songSessionPayload)
         {
@@ -399,7 +444,7 @@ namespace MusicTime
 
 
           //  long lastUpdatedUtc = playingTrack.state == trackState.Playing ? LocalUTC.now : trackProgressInfo.lastUpdateUtc;
-            //changeStatus.trackIsDone     = isTrackDone(playingTrack);
+          //  changeStatus.trackIsDone     = isTrackDone(playingTrack);
             changeStatus.isLongPaused    = isTrackLongPaused(playingTrack);
             Logger.Debug("isLongPaused " + changeStatus.isLongPaused.ToString());
 
