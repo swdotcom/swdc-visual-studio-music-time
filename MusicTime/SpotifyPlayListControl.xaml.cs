@@ -1013,7 +1013,6 @@
                     }
 
                     treeItem = PlaylistTreeviewUtil.GetTreeView(AIPlaylistItem.name, "PAW_Circle.png", AIPlaylistItem.id);
-                    treeItem.ToolTip    = "AI playlist";
                     treeItem.MouseLeftButtonUp  += PlayPlaylist;
                     treeItem.Expanded           += AddTracksAsync;
                     treeItem.Items.Add(null);

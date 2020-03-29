@@ -194,9 +194,10 @@ namespace MusicTime
                      UpdateCurrentTrackOnStatusAsync,
                      null,
                      ZERO_SECOND,
-                     ONE_SECOND*8);
+                     ONE_SECOND*5);
 
             getSlackChannelTimer = new Timer(getSlackChannelsAsync, null, ZERO_SECOND, ONE_MINUTE);
+          //  Logger.Debug(GetExtensionInstallationDirectoryOrNull());
 
             this.InitializeUserInfoAsync();
 
@@ -280,12 +281,17 @@ namespace MusicTime
             //await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             ////   await MusicManager.GetMusicTimeDashboardFileAsync();
 
-            //string dashboardFile = SoftwareCoUtil.getReadmeFile();
-            //if (File.Exists(dashboardFile))
-            //    ObjDte.ItemOperations.OpenFile(dashboardFile);
+            string dashboardFile = SoftwareCoUtil.getReadmeFile();
+            if (File.Exists(dashboardFile))
+            {
+                Logger.Debug("opening readme file");
+                ObjDte.ItemOperations.OpenFile(dashboardFile);
 
-            //SoftwareCoUtil.setItem("displayedReadmefile", "true");
+                SoftwareCoUtil.setItem("displayedReadmefile", "true");
+            }
         }
+
+       
 
         public static async void UpdateUserStatusAsync(object state)
         {

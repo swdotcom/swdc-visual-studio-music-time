@@ -146,8 +146,37 @@ namespace MusicTime
 
         public static String getReadmeFile()
         {
-            return  "\\Resources\\Readme.txt";
+            Logger.Debug(GetExtensionInstallationDirectoryOrNull());
+
+            return  GetExtensionInstallationDirectoryOrNull()+ "\\Readme.txt";
         }
+
+        public static string GetExtensionInstallationDirectoryOrNull()
+        {
+            try
+            {
+                var uri = new Uri(typeof(MusicTimeCoPackage).Assembly.CodeBase, UriKind.Absolute);
+                return Path.GetDirectoryName(uri.LocalPath);
+            }
+            catch
+            {
+                return " "; ;
+            }
+        }
+
+        //public static string GetExtensionInstallationDirectory()
+        //{
+        //    try
+        //    {
+        //        var uri = new Uri(typeof(So) .Assembly.CodeBase, UriKind.Absolute);
+        //        return Path.GetDirectoryName(uri.LocalPath);
+        //    }
+        //    catch
+        //    {
+        //        return " "; ;
+        //    }
+        //}
+
 
         public static String getSoftwareDataDir(bool autoCreate)
         {

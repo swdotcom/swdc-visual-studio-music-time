@@ -307,7 +307,7 @@ namespace MusicTime
         {
             string track_url = "https://open.spotify.com/track/";
             string trackUrl = track_url + Track_Id;
-            string api = "https://twitter.com/intent/tweet?text=Check+out+this+track+I’m+listening+to+using&url=" + trackUrl + "&hashtags=MusicTime&via=Software(www.software.com)";
+            string api = "https://twitter.com/intent/tweet?text=Check+out+this+track+I’m+listening+to+using&url=" + trackUrl + "&hashtags=MusicTime&via=@software_hq";
             launchWebUrl(api);
             
         }

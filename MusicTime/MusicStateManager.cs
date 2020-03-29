@@ -43,9 +43,9 @@ namespace MusicTime
                 {
 
 
-                    Track playingTrack = new Track();
-                    playingTrack = PlayingTrack;
-                    NowTime nowTime = SoftwareCoUtil.GetNowTime();
+                    Track playingTrack  = new Track();
+                    playingTrack        = PlayingTrack;
+                    NowTime nowTime     = SoftwareCoUtil.GetNowTime();
 
                     if (playingTrack != null)
                     {
@@ -60,13 +60,7 @@ namespace MusicTime
 
 
                         changeStatus = await getChangeStatus(playingTrack, nowTime);
-
-                        if (changeStatus.isNewSong)
-                        {
-
-
-                        }
-
+                        
 
                         if (changeStatus.sendSongSession)
                         {
@@ -287,13 +281,11 @@ namespace MusicTime
 
             #endregion
             List<SourceData> sourceData     = new List<SourceData>();
-            List<sourceKey> sourceKeyData   = new List<sourceKey>();
-
+            
             foreach (SoftwareData item in softwareData)
             {
-               
-               
-                TotalKeystroke  = TotalKeystroke + item.keystrokes;
+
+               // TotalKeystroke  = TotalKeystroke + item.keystrokes;
               
                 foreach (KeyValuePair<string, object> entry in item.source)
                 {
@@ -301,34 +293,56 @@ namespace MusicTime
                     SourceData datas      = new SourceData();
                 
                     datas                 = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
-                    
-                     
+                   // sourceData.Add(datas);
+
                     if (songSession.source.ContainsKey(entry.Key))
                     {
-                        aggregateSource(item, songSession, entry.Key, datas);
+                        SourceData data = new SourceData();
+                        data            = datas;
+                        aggregateSource(songSession, entry.Key, data);
+                        Logger.Debug(data.Add.ToString());
+                        Logger.Debug(datas.Add.ToString());
                     }
                     else
                     {
                         songSession.source.Add(entry.Key, datas);
                     }
 
-                    sourceData.Add(datas);     
-                   
                 }
 
                
             }
 
-            
+
+
+            foreach (SoftwareData item in softwareData)
+            {
+
+                TotalKeystroke = TotalKeystroke + item.keystrokes;
+
+                foreach (KeyValuePair<string, object> entry in item.source)
+                {
+
+                    SourceData datas = new SourceData();
+
+                    datas = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
+                    sourceData.Add(datas);
+
+
+                }
+
+
+            }
+
 
             if (sourceData.Count>0)
             {
                 foreach (SourceData item in sourceData)
                 {
-                    add     = add + item.Add;
-                    delete  = delete + item.Delete;
-                    open    = open + item.Open;
-                    close   = close + item.Close;
+                    add             = add + item.Add;
+                    delete          = delete + item.Delete;
+                    open            = open + item.Open;
+                    close           = close + item.Close;
                     linesAdded      = linesAdded + item.LinesAdded;
                     linesRemoved    = linesRemoved + item.LinesRemoved;
                     netkeys         = netkeys + item.Netkeys;
@@ -349,27 +363,28 @@ namespace MusicTime
 
         }
 
-        private void aggregateSource(SoftwareData softwareData, TrackData songSession,  string key, SourceData datas)
+        private void aggregateSource( TrackData songSession,  string key, SourceData datas)
         {
-            foreach (KeyValuePair<string, object> entry in softwareData.source)
+            foreach (KeyValuePair<string, object> entry in songSession.source)
             {
 
                 if (entry.Key == key)
                 {
-                    SourceData sourceData   = new SourceData();
-                    sourceData              = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
-                    sourceData.Add          = sourceData.Add + datas.Add;
-                    sourceData.Delete       = sourceData.Delete + datas.Delete;
-                    sourceData.Close        = sourceData.Close + datas.Close;
-                    sourceData.Paste        = sourceData.Paste + datas.Paste;
-                    sourceData.Open         = sourceData.Open + datas.Open;
-                    sourceData.LinesRemoved = sourceData.LinesRemoved + datas.LinesRemoved;
-                    sourceData.LinesAdded   = sourceData.LinesAdded + datas.LinesAdded;
-                    sourceData.Lines        = sourceData.Lines + datas.Lines;
-                    sourceData.Length       = sourceData.Length + datas.Length;
-                    sourceData.Netkeys      = sourceData.Netkeys + datas.Netkeys;
-                    
-                    songSession.source[entry.Key] = sourceData;
+                   SourceData fileInfoData = null;
+
+                    fileInfoData =  (SourceData) songSession.source[entry.Key];
+
+                    fileInfoData.Add = fileInfoData.Add + datas.Add;
+                    fileInfoData.Close = fileInfoData.Close + datas.Close;
+                    fileInfoData.Delete = fileInfoData.Delete + datas.Delete;
+                    fileInfoData.Paste = fileInfoData.Paste + datas.Paste;
+                    fileInfoData.Open = fileInfoData.Open + datas.Open;
+                    fileInfoData.Length = fileInfoData.Length + datas.Length;
+                    fileInfoData.Lines = fileInfoData.Lines + datas.Lines ;
+                    fileInfoData.LinesAdded = fileInfoData.LinesAdded + datas.LinesAdded;
+                    fileInfoData.LinesRemoved = fileInfoData.LinesRemoved + datas.LinesRemoved;
+                    fileInfoData.Netkeys = fileInfoData.Netkeys + datas.Netkeys; 
+                    songSession.source[entry.Key] = fileInfoData;
                     break;
                 }
             }
@@ -446,10 +461,10 @@ namespace MusicTime
           //  long lastUpdatedUtc = playingTrack.state == trackState.Playing ? LocalUTC.now : trackProgressInfo.lastUpdateUtc;
           //  changeStatus.trackIsDone     = isTrackDone(playingTrack);
             changeStatus.isLongPaused    = isTrackLongPaused(playingTrack);
-            Logger.Debug("isLongPaused " + changeStatus.isLongPaused.ToString());
+            
 
             changeStatus.sendSongSession = isValidExistingTrack && (changeStatus.isNewSong || changeStatus.isLongPaused) ? true : false;
-            Logger.Debug("sendsongSession " +changeStatus.sendSongSession.ToString());
+            
             if (changeStatus.isLongPaused)
             {
                 if (changeStatus.sendSongSession)
