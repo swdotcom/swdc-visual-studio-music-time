@@ -164,18 +164,7 @@ namespace MusicTime
             }
         }
 
-        //public static string GetExtensionInstallationDirectory()
-        //{
-        //    try
-        //    {
-        //        var uri = new Uri(typeof(So) .Assembly.CodeBase, UriKind.Absolute);
-        //        return Path.GetDirectoryName(uri.LocalPath);
-        //    }
-        //    catch
-        //    {
-        //        return " "; ;
-        //    }
-        //}
+        
 
 
         public static String getSoftwareDataDir(bool autoCreate)
@@ -363,9 +352,12 @@ namespace MusicTime
             timer.Elapsed += (sender, e) => functionCopy();
             timer.Start();
         }
-       
 
 
+        public static String getVSReadmeFile()
+        {
+            return getSoftwareDataDir(true) + "\\VS_MTREADME.txt";
+        }
     }
 
     struct Date

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -23,6 +24,7 @@ using Microsoft.Win32;
 using MusicTime.PlayerCommands;
 using static MusicTime.SoftwareUserSession;
 using Task = System.Threading.Tasks.Task;
+
 
 namespace MusicTime
 {
@@ -212,7 +214,7 @@ namespace MusicTime
 
             }
         }
-        public static async void SendOfflineData(object stateinfo)
+        public  async void SendOfflineData(object stateinfo)
         {
           
             Logger.Info(DateTime.Now.ToString());
@@ -224,7 +226,7 @@ namespace MusicTime
             }
 
             string datastoreFile = SoftwareCoUtil.getSoftwareDataStoreFile();
-            if (File.Exists(datastoreFile))
+            if (File.Exists(datastoreFile) && isCodetimeInstalled() == false)
             {
                 // get the content
                 string[] lines = File.ReadAllLines(datastoreFile, System.Text.Encoding.UTF8);
@@ -249,6 +251,49 @@ namespace MusicTime
                 }
             }
         }
+
+        public async void LaunchReadmeFileAsync()
+        {
+            try
+            {
+                string vsReadmeFile = SoftwareCoUtil.getVSReadmeFile();
+                if (File.Exists(vsReadmeFile))
+                {
+                    MusicTimeCoPackage.ObjDte.ItemOperations.OpenFile(vsReadmeFile);
+                }
+                else
+                {
+                    Assembly _assembly = Assembly.GetExecutingAssembly();
+                    string[] resourceNames = _assembly.GetManifestResourceNames();
+                    string fileName = "READMEMT.txt";
+                    string readmeFile = resourceNames.Single(n => n.EndsWith(fileName, StringComparison.InvariantCultureIgnoreCase));
+                    if (readmeFile == null && resourceNames != null && resourceNames.Length > 0)
+                    {
+                        foreach (string name in resourceNames)
+                        {
+                            if (name.IndexOf("READMEMT") != -1)
+                            {
+                                readmeFile = fileName;
+                                break;
+                            }
+                        }
+                    }
+                    if (readmeFile != null)
+                    {
+                        // SoftwareCoPackage.ObjDte.ItemOperations.OpenFile(readmeFile);
+                        StreamReader _textStreamReader = new StreamReader(_assembly.GetManifestResourceStream(readmeFile));
+                        string readmeContents = _textStreamReader.ReadToEnd();
+                        File.WriteAllText(vsReadmeFile, readmeContents, System.Text.Encoding.UTF8);
+                        MusicTimeCoPackage.ObjDte.ItemOperations.OpenFile(vsReadmeFile);
+                    }
+                }
+            }
+            catch
+            {
+                //
+            }
+        }
+
         private async void InitializeUserInfoAsync()
         {
             string readmefile = (string) SoftwareCoUtil.getItem("displayedReadmefile");
@@ -278,13 +323,10 @@ namespace MusicTime
 
         public static async Task LaunchReadmeFile()
         {
-            //await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            ////   await MusicManager.GetMusicTimeDashboardFileAsync();
-
+           
             string dashboardFile = SoftwareCoUtil.getReadmeFile();
             if (File.Exists(dashboardFile))
             {
-                Logger.Debug("opening readme file");
                 ObjDte.ItemOperations.OpenFile(dashboardFile);
 
                 SoftwareCoUtil.setItem("displayedReadmefile", "true");
@@ -885,7 +927,7 @@ namespace MusicTime
 
         private void StorePayload(SoftwareData _softwareData)
         {
-            if (_softwareData != null)
+            if (_softwareData != null && isCodetimeInstalled() == false)
             {
                 
                 string softwareDataContent  = _softwareData.GetAsJson();
@@ -900,6 +942,19 @@ namespace MusicTime
                 string musicDataFile = SoftwareCoUtil.getMusicDataStoreFile();
                 File.AppendAllText(musicDataFile, _softwareData.GetAsJson() + Environment.NewLine);
             }
+        }
+
+        public bool isCodetimeInstalled()
+        {
+            bool isCodetimeInstalled = false;
+            string visualstudio_CtInit = (string)SoftwareCoUtil.getItem("visualstudio_CtInit");
+
+            if(string.IsNullOrEmpty(visualstudio_CtInit))
+            {
+                isCodetimeInstalled = true;
+            }
+
+            return isCodetimeInstalled;
         }
 
         private void OnOnStartupComplete()
