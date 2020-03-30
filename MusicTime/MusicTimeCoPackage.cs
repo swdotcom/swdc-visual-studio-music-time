@@ -265,13 +265,13 @@ namespace MusicTime
                 {
                     Assembly _assembly = Assembly.GetExecutingAssembly();
                     string[] resourceNames = _assembly.GetManifestResourceNames();
-                    string fileName = "READMEMT.txt";
+                    string fileName = "README.txt";
                     string readmeFile = resourceNames.Single(n => n.EndsWith(fileName, StringComparison.InvariantCultureIgnoreCase));
                     if (readmeFile == null && resourceNames != null && resourceNames.Length > 0)
                     {
                         foreach (string name in resourceNames)
                         {
-                            if (name.IndexOf("READMEMT") != -1)
+                            if (name.IndexOf("README") != -1)
                             {
                                 readmeFile = fileName;
                                 break;
@@ -288,7 +288,7 @@ namespace MusicTime
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 //
             }
@@ -299,7 +299,7 @@ namespace MusicTime
             string readmefile = (string) SoftwareCoUtil.getItem("displayedReadmefile");
             if(string.IsNullOrEmpty (readmefile) || readmefile != "true")
             {
-                await  LaunchReadmeFile();
+                LaunchReadmeFile();
                 
             }
             bool jwtExists  = SoftwareCoUtil.jwtExists();
@@ -947,12 +947,22 @@ namespace MusicTime
         public bool isCodetimeInstalled()
         {
             bool isCodetimeInstalled = false;
-            string visualstudio_CtInit = (string)SoftwareCoUtil.getItem("visualstudio_CtInit");
 
-            if(string.IsNullOrEmpty(visualstudio_CtInit))
+            try
             {
-                isCodetimeInstalled = true;
+                isCodetimeInstalled = (bool)SoftwareCoUtil.getItem("visualstudio_CtInit");
             }
+            catch (Exception ex)
+            {
+
+                
+            }
+            
+
+            //if(string.IsNullOrEmpty(visualstudio_CtInit))
+            //{
+            //    isCodetimeInstalled = true;
+            //}
 
             return isCodetimeInstalled;
         }

@@ -356,7 +356,7 @@ namespace MusicTime
 
         public static String getVSReadmeFile()
         {
-            return getSoftwareDataDir(true) + "\\VS_MTREADME.txt";
+            return getSoftwareDataDir(true) + "\\VS_READMEMT.txt";
         }
     }
 

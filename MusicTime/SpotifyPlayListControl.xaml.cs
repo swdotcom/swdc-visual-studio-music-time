@@ -265,7 +265,7 @@
                         ConnectLabel.Visibility = Visibility.Visible;
                         ConnectImage.Visibility = Visibility.Visible;
                         ConnectLabel.Content = "Connect Spotify";
-                        ConnectImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
+                        ConnectImage.Source = new BitmapImage(new Uri("Resources/spotify_ct.png", UriKind.Relative));
                     }
 
                 }
@@ -297,7 +297,7 @@
             {
 
                 DashboardLabel.Content  = "Open dashboard";
-                DashboardImage.Source   = new BitmapImage(new Uri("Resources/dashboard_new.png", UriKind.Relative));
+                DashboardImage.Source   = new BitmapImage(new Uri("Resources/dashboard_ct.png", UriKind.Relative));
             }
             else
             {
@@ -312,7 +312,7 @@
             {
 
                 LearnMoreLabel.Content = "Learn more";
-                LearnMoreImage.Source = new BitmapImage(new Uri("Resources/readme.png", UriKind.Relative));
+                LearnMoreImage.Source = new BitmapImage(new Uri("Resources/readme_ct.png", UriKind.Relative));
             }
             else
             {
@@ -328,7 +328,9 @@
             {
 
                 Lbl_recommend.Content   = "RECOMMENDATIONS";
-                Img_recommend.Source    = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
+                //Img_recommend.Width = 13;
+                //Img_recommend.Height = 13;
+                //Img_recommend.Source    = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
                 btn_category.Visibility = Visibility.Visible;
                 btn_mood.Visibility     = Visibility.Visible;
                 btn_refresh.Visibility  = Visibility.Visible;
@@ -339,7 +341,7 @@
             else
             {       
                 Lbl_recommend.Content = null;
-                Img_recommend.Source = null;
+               // Img_recommend.Source = null;
                 btn_category.Visibility = Visibility.Hidden;
                 btn_mood.Visibility = Visibility.Hidden;
                 btn_refresh.Visibility = Visibility.Hidden;
@@ -525,17 +527,17 @@
                         if(!string.IsNullOrEmpty(activeDevice))
                         {
                             DeviceLabel.Background = System.Windows.Media.Brushes.Transparent;
-                            DeviceLabel.Content = "Listening on "+activeDevice;
-                            DeviceLabel.ToolTip = "Listening on a Spotify device" ;
+                            DeviceLabel.Content = " Listening on "+activeDevice;
+                            DeviceLabel.ToolTip = " Listening on a Spotify device" ;
                         }
                         else
                         {
                             if(WebDevices.Count>0)
                             {
                                 string deviceName =  WebDevices[0].name;
-                                DeviceLabel.Content = "Available on " + deviceName;
+                                DeviceLabel.Content = " Available on " + deviceName;
                                 DeviceLabel.Background = System.Windows.Media.Brushes.Transparent;
-                                DeviceLabel.ToolTip = "Available on a Spotify device" ;
+                                DeviceLabel.ToolTip = " Available on a Spotify device" ;
                             }
                             else if(ComputerDevices.Count>0)
                             {
@@ -543,17 +545,17 @@
                                 
                                  DeviceLabel.Background = System.Windows.Media.Brushes.Transparent;
 
-                                DeviceLabel.Content = "Available on " + deviceName;
+                                DeviceLabel.Content = " Available on " + deviceName;
                             }
                             else
                             {
                                 DeviceLabel.Background = System.Windows.Media.Brushes.Transparent;
-                                DeviceLabel.Content = "Connect to a Spotify device";
+                                DeviceLabel.Content = "  Connect to a Spotify device";
                                 DeviceLabel.ToolTip = "Click to launch web or desktop player";
                             }
                         }
                         DeviceLabel.Background = System.Windows.Media.Brushes.Transparent;
-                        DeviceImage.Source = new BitmapImage(new Uri("Resources/spotify.png", UriKind.Relative));
+                        DeviceImage.Source = new BitmapImage(new Uri("Resources/spotify_ct.png", UriKind.Relative));
                         DeviceLabel.Click += DeviceLabel_ClickAsync;
 
 
@@ -650,7 +652,7 @@
             {
                 //chcek if AI playlits is present or not
                 //if not
-                GeneratePlaylistLabel.Content = "Generate my AI playlist";
+                GeneratePlaylistLabel.Content = " Generate my AI playlist";
                 GeneratePlaylistImage.Source = new BitmapImage(new Uri("Resources/settings.png", UriKind.Relative));
                 GeneratePlaylistLabel.ToolTip = "Generate your personalized playlist ( My AI Top 40)";
                 // if yes
@@ -669,7 +671,7 @@
         {
             if (isConnected)
             {
-                GeneratePlaylistLabel.Content = "Refresh my AI playlist";
+                GeneratePlaylistLabel.Content = " Refresh my AI playlist";
                 GeneratePlaylistImage.Source = new BitmapImage(new Uri("Resources/settings.png", UriKind.Relative));
                 GeneratePlaylistLabel.ToolTip = "Refresh your personalized playlist ( My AI Top 40)";
             }
@@ -958,7 +960,7 @@
                         }
                         
                         TreeViewItem treeItem           = null;
-                        treeItem                        = PlaylistTreeviewUtil.GetTreeView(playlists.name, "playlist_w.png", playlists.id);
+                        treeItem                        = PlaylistTreeviewUtil.GetTreeView(playlists.name, "playlistblue_mt.png", playlists.id);
                       
                         treeItem.MouseLeftButtonUp      += PlayPlaylist;
                         treeItem.Expanded               += AddTracksAsync;
@@ -1943,7 +1945,7 @@
 
         public async void LearnMoreLabel_MouseDown(object sender, MouseButtonEventArgs e)
         {
-          await  MusicTimeCoPackage.LaunchReadmeFile();
+            MusicTimeCoPackage.LaunchReadmeFile();
         }
     }
 }

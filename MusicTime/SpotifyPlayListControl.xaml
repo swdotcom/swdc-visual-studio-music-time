@@ -41,7 +41,7 @@
             <StackPanel>
 
                 <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
-                    <Image  x:Name="ConnectImage" Width="15" Height="15"></Image>
+                    <Image  x:Name="ConnectImage" Width="13" Height="13"></Image>
                     <Label x:Name="ConnectLabel" Foreground="DarkCyan" MouseDown ="ConnectStatusClick" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
@@ -57,14 +57,14 @@
                     <Label x:Name="DashboardLabel" ToolTip="View your latest music right there in your editor" Foreground="DarkCyan" MouseDown ="DashboardLabel_MouseDown"  Background="Transparent" BorderBrush="Transparent" BorderThickness="0"></Label>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
-                    <Image x:Name="DeviceImage"  Width="15" Height="15"></Image>
-                    <Button x:Name="DeviceLabel" ToolTip="Connect to a Spotify device" Foreground="DarkCyan"  Background="Transparent" BorderBrush="Transparent" ></Button>
+                    <Image x:Name="DeviceImage"  Width="13" Height="13"></Image>
+                    <Button x:Name="DeviceLabel" ToolTip="Click to launch spotiyf web or desktop player" Foreground="DarkCyan"  Background="Transparent" BorderBrush="Transparent" Margin="2,0,0,0" ></Button>
                 </StackPanel>
                 <ItemsControl>
                 <Separator x:Name="Seperator1" Visibility="Hidden" Margin="0,5,0,5"></Separator>
             </ItemsControl>
             <StackPanel Orientation="Horizontal" Margin="5,0,0,0">
-                <Image x:Name="GeneratePlaylistImage" Width="15" Height="15"></Image>
+                <Image x:Name="GeneratePlaylistImage" Width="13" Height="13"></Image>
                     <Button x:Name="GeneratePlaylistLabel" Foreground="DarkCyan" Click="GenerateAIAsync"  BorderBrush="Transparent" Background="Transparent" ></Button>
             </StackPanel>
 
@@ -125,17 +125,17 @@
                         <ColumnDefinition Width="1.5*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="5,0,0,0">
-                        <Image  x:Name="Img_recommend" Width="15" Height="15"></Image>
+                        <!--<Image  x:Name="Img_recommend" Width="13" Height="13"></Image>-->
                         <Label x:Name="Lbl_recommend" ToolTip="Reccomendations" Foreground="DarkCyan" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
                     </StackPanel>
                     <Button x:Name="btn_category" ToolTip="Geners selections" Grid.Column="1" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent"  Visibility="Hidden" >
                         <StackPanel>
-                            <Image Source="Resources\filter.png"></Image>
+                            <Image Source="Resources\filter_ct.png"></Image>
                         </StackPanel>
                     </Button>
                     <Button x:Name="btn_mood" ToolTip="Moods selection" Grid.Column="2" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
                         <StackPanel>
-                            <Image Source="Resources\beaker.png"></Image>
+                            <Image Source="Resources\beaker_ct.png"></Image>
                         </StackPanel>
                     </Button>
                     <Button x:Name="btn_refresh" ToolTip="Refresh recommendations" Grid.Column="3" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
