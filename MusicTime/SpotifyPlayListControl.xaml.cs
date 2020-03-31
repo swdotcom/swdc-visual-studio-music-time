@@ -1084,7 +1084,7 @@
                 //}
                 if (tracks.Count < 1)
                 {
-                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here", null, "EmptyPlaylist");
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here.", null, "EmptyPlaylist");
                     playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
                     item.Items.Add(playlistTreeviewItem);
                 }
@@ -1132,7 +1132,7 @@
 
                 if (tracks.Count < 1)
                 {
-                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here", null, "EmptyPlaylist");
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here.", null, "EmptyPlaylist");
                     playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
                     item.Items.Add(playlistTreeviewItem);
                 }
@@ -1178,7 +1178,7 @@
                 }
                 if (tracks.Count < 1)
                 {
-                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here", null, "EmptyPlaylist");
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here.", null, "EmptyPlaylist");
                     playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
                     item.Items.Add(playlistTreeviewItem);
                 }

@@ -87,7 +87,7 @@ namespace MusicTime
             Label lbl = new Label();
             lbl.Content = ResizeSongName(text);
             // lbl.Content = text;
-            lbl.Width = 150;
+            lbl.Width = 165;
 
             lbl.Foreground = System.Windows.Media.Brushes.DarkCyan;
            
