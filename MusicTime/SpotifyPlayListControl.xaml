@@ -128,12 +128,12 @@
                         <!--<Image  x:Name="Img_recommend" Width="13" Height="13"></Image>-->
                         <Label x:Name="Lbl_recommend" ToolTip="Reccomendations" Foreground="DarkCyan" Background="Transparent" BorderBrush="Transparent" BorderThickness="0" ></Label>
                     </StackPanel>
-                    <Button x:Name="btn_category" ToolTip="Geners selections" Grid.Column="1" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent"  Visibility="Hidden" >
+                    <Button x:Name="btn_category" ToolTip="Geners selections" Grid.Column="2" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent"  Visibility="Hidden" >
                         <StackPanel>
                             <Image Source="Resources\filter_ct.png"></Image>
                         </StackPanel>
                     </Button>
-                    <Button x:Name="btn_mood" ToolTip="Moods selection" Grid.Column="2" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
+                    <Button x:Name="btn_mood" ToolTip="Moods selection" Grid.Column="1" Width="15" Height="15" Background="Transparent" BorderBrush="Transparent" Visibility="Hidden"  >
                         <StackPanel>
                             <Image Source="Resources\beaker_ct.png"></Image>
                         </StackPanel>

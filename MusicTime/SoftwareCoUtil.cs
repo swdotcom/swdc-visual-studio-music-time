@@ -146,7 +146,7 @@ namespace MusicTime
 
         public static String getReadmeFile()
         {
-            Logger.Debug(GetExtensionInstallationDirectoryOrNull());
+            
 
             return  GetExtensionInstallationDirectoryOrNull()+ "\\Readme.txt";
         }

@@ -524,61 +524,63 @@ namespace MusicTime
             string api = null;
             List<string> track_ids = new List<string>();
             JsonObject payload = new JsonObject();
-           
-            if (tracklist != null && tracklist.Count > 0)
+            if (PlaylistId != "EmptyPlaylist")
             {
-                if (trackid != null)
+                if (tracklist != null && tracklist.Count > 0)
                 {
-                    JsonArray track_uris = new JsonArray();
-
-                    foreach (Track item in tracklist)
+                    if (trackid != null)
                     {
-                        track_uris.Add(MusicUtil.createUriFromTrackId(item.id));
-                        track_ids.Add(item.id);
-                    }
+                        JsonArray track_uris = new JsonArray();
+
+                        foreach (Track item in tracklist)
+                        {
+                            track_uris.Add(MusicUtil.createUriFromTrackId(item.id));
+                            track_ids.Add(item.id);
+                        }
 
 
-                    int index = track_ids.IndexOf(trackid);
+                        int index = track_ids.IndexOf(trackid);
 
-                    payload.Add("uris", track_uris);
-                    
-                    if (index >= 0)
-                    {
-                        JsonObject position = new JsonObject();
-                        position.Add("position", index);
-                        payload.Add("offset", position);
+                        payload.Add("uris", track_uris);
+
+                        if (index >= 0)
+                        {
+                            JsonObject position = new JsonObject();
+                            position.Add("position", index);
+                            payload.Add("offset", position);
+                        }
                     }
                 }
-            }
-            string _payload = payload.ToString();
+                string _payload = payload.ToString();
 
-            await getDevicesAsync();
+                await getDevicesAsync();
 
-            HttpResponseMessage response = null;
+                HttpResponseMessage response = null;
 
-            if (!string.IsNullOrEmpty(getActiveDeviceID()))
-            {
-                api = "/v1/me/player/play?device_id=" + getActiveDeviceID();
-                Logger.Debug("Active device id" + getActiveDeviceID());
-
-                response = await MusicClient.SpotifyApiPutAsync(api, _payload);
-                
-                if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) && !MusicClient.IsOk(response))
+                if (!string.IsNullOrEmpty(getActiveDeviceID()))
                 {
-                    // refresh the tokens
-                    await MusicClient.refreshSpotifyTokenAsync();
-                    // Try again
+                    api = "/v1/me/player/play?device_id=" + getActiveDeviceID();
+                    Logger.Debug("Active device id" + getActiveDeviceID());
+
                     response = await MusicClient.SpotifyApiPutAsync(api, _payload);
 
-                }
-                if(response.StatusCode == HttpStatusCode.Forbidden)
-                {
-                    string message = "We were unable to play the selected track because it is unavailable in your market.";
-                    MessageBox.Show(message, "Spotify");
-                }
+                    if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) && !MusicClient.IsOk(response))
+                    {
+                        // refresh the tokens
+                        await MusicClient.refreshSpotifyTokenAsync();
+                        // Try again
+                        response = await MusicClient.SpotifyApiPutAsync(api, _payload);
 
+                    }
+                    if (response.StatusCode == HttpStatusCode.Forbidden)
+                    {
+                        string message = "We were unable to play the selected track because it is unavailable in your market.";
+                        MessageBox.Show(message, "Spotify");
+                    }
+
+                }
+                MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
             }
-            MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
            // MusicStateManager.getInstance.GatherMusicInfo();
 
 
@@ -589,61 +591,64 @@ namespace MusicTime
             Payload _payload    = new Payload();
             TrackUris trackUris = new TrackUris();
             string api = null;
-            if (!string.IsNullOrEmpty(PlaylistId))
+
+            if (PlaylistId != "EmptyPlaylist")
             {
-               
-                _payload.ContextUri = "spotify:playlist:" + PlaylistId;
-                
-                if (!string.IsNullOrEmpty(trackid))
+                if (!string.IsNullOrEmpty(PlaylistId))
                 {
-                    Offset offset = new Offset();
-                    offset.Uri = "spotify:track:" + trackid;
-                    _payload.Offset = offset;
+
+                    _payload.ContextUri = "spotify:playlist:" + PlaylistId;
+
+                    if (!string.IsNullOrEmpty(trackid))
+                    {
+                        Offset offset = new Offset();
+                        offset.Uri = "spotify:track:" + trackid;
+                        _payload.Offset = offset;
+                    }
+                    payload = _payload.ToJson();
                 }
-                payload = _payload.ToJson();
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(trackid))
+                else
                 {
-                    string trackID = "spotify:track:" + trackid;
-                    string[] stringArray = new string[] { trackID };
-                    trackUris.Uris = stringArray;
-                    payload = trackUris.ToJson();
+                    if (!string.IsNullOrEmpty(trackid))
+                    {
+                        string trackID = "spotify:track:" + trackid;
+                        string[] stringArray = new string[] { trackID };
+                        trackUris.Uris = stringArray;
+                        payload = trackUris.ToJson();
+                    }
                 }
-            }
 
 
-            await getDevicesAsync();
+                await getDevicesAsync();
 
-            HttpResponseMessage response = null;
-           
-            if (!string.IsNullOrEmpty(getActiveDeviceID()))
-            {
-               api  = "/v1/me/player/play?device_id=" + getActiveDeviceID();
-                Logger.Debug("Active device id" + getActiveDeviceID());
+                HttpResponseMessage response = null;
 
-                response = await MusicClient.SpotifyApiPutAsync(api,payload);
-              
-                if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) && !MusicClient.IsOk(response) )
+                if (!string.IsNullOrEmpty(getActiveDeviceID()))
                 {
-                    // refresh the tokens
-                    await MusicClient.refreshSpotifyTokenAsync();
-                    // Try again
+                    api = "/v1/me/player/play?device_id=" + getActiveDeviceID();
+                    Logger.Debug("Active device id" + getActiveDeviceID());
+
                     response = await MusicClient.SpotifyApiPutAsync(api, payload);
-                    
-                }
-                if (response.StatusCode == HttpStatusCode.Forbidden)
-                {
-                    string message = "We were unable to play the selected track because it is unavailable in your market.";
-                    MessageBox.Show(message, "Spotify");
-                }
 
+                    if (response == null || !(response.StatusCode == HttpStatusCode.NoContent) && !MusicClient.IsOk(response))
+                    {
+                        // refresh the tokens
+                        await MusicClient.refreshSpotifyTokenAsync();
+                        // Try again
+                        response = await MusicClient.SpotifyApiPutAsync(api, payload);
+
+                    }
+                    if (response.StatusCode == HttpStatusCode.Forbidden)
+                    {
+                        string message = "We were unable to play the selected track because it is unavailable in your market.";
+                        MessageBox.Show(message, "Spotify");
+                    }
+
+                }
+                MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
+                // MusicStateManager.getInstance.GatherMusicInfo();
+                //SoftwareCoUtil.SetTimeout(5000, MusicStateManager.getInstance.GatherMusicInfo, true);
             }
-            MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-           // MusicStateManager.getInstance.GatherMusicInfo();
-            //SoftwareCoUtil.SetTimeout(5000, MusicStateManager.getInstance.GatherMusicInfo, true);
-            
         }
 
         public static async Task<TrackStatus> SpotifyCurrentTrackAsync()

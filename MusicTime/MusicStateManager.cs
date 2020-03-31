@@ -80,6 +80,7 @@ namespace MusicTime
                             if (playingTrack != null)
                             {
                                 ExsitingTrack = new Track();
+                              
                             }
 
 
@@ -140,7 +141,7 @@ namespace MusicTime
             
             bool isValidSession     = songSession.end - songSession.start > 5;
 
-            Logger.Debug("isvalidSession " + isValidSession.ToString());
+           // Logger.Debug("isvalidSession " + isValidSession.ToString());
             if (!isValidSession)
             {
                 return;
@@ -300,8 +301,7 @@ namespace MusicTime
                         SourceData data = new SourceData();
                         data            = datas;
                         aggregateSource(songSession, entry.Key, data);
-                        Logger.Debug(data.Add.ToString());
-                        Logger.Debug(datas.Add.ToString());
+                       
                     }
                     else
                     {
@@ -438,6 +438,7 @@ namespace MusicTime
 
             bool isValidExistingTrack   = ExsitingTrack != null ? true : false;
 
+         //   Logger.Debug(isValidExistingTrack.ToString());
             if (ExsitingTrack!=null)
             {
                  changeStatus.isNewSong = ExsitingTrack.id != playingTrack.id ? true : false;
@@ -448,6 +449,8 @@ namespace MusicTime
             }
 
             bool endInRange = isEndInRange(playingTrack);
+
+
 
             long lastUpdatedUtc;
             if (playingTrack.state == trackState.Playing)
@@ -463,7 +466,7 @@ namespace MusicTime
             changeStatus.isLongPaused    = isTrackLongPaused(playingTrack);
             
 
-            changeStatus.sendSongSession = isValidExistingTrack && (changeStatus.isNewSong || changeStatus.isLongPaused) ? true : false;
+            changeStatus.sendSongSession = isValidExistingTrack && (changeStatus.isNewSong || changeStatus.isLongPaused /*|| endInRange*/) ? true : false;
             
             if (changeStatus.isLongPaused)
             {
@@ -496,8 +499,26 @@ namespace MusicTime
 
         private bool isEndInRange(Track playingTrack)
         {
+            //double duration_ms = playingTrack.duration_ms;
+
+
+
+            //double progress_ms = trackProgressInfo.progress_ms;
+
+
+
+            //double endInRange = duration_ms - progress_ms;
+
+            //if(endInRange <=5000)
+            //{
+            //    Logger.Debug(true.ToString());
+            //    return true; 
+            //}
+
+            //return false;
             double buffer = playingTrack.duration_ms * 0.07;
             return playingTrack.progress_ms >= playingTrack.duration_ms - buffer;
+
 
         }
 
@@ -510,8 +531,8 @@ namespace MusicTime
 
             double diff = nowTime.now - trackProgressInfo.lastUpdateUtc;
 
-            Logger.Debug(trackProgressInfo.lastUpdateUtc.ToString());
-            Logger.Debug(playingTrack.state.ToString());
+            //Logger.Debug(trackProgressInfo.lastUpdateUtc.ToString());
+            //Logger.Debug(playingTrack.state.ToString());
             if (hasProgress && trackProgressInfo.lastUpdateUtc > 0 && diff > pauseThreshold )
             {
                 return true;

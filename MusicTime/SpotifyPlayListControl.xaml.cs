@@ -807,7 +807,7 @@
                     List<Track> LikedTracks             = new List<Track>();
                    // LikedTracks                         = await Playlist.getSpotifyLikedSongsAsync();
                     treeItem                            = PlaylistTreeviewUtil.GetTreeView("Liked Songs", "Heart_Red.png", "Liked Songs");
-                    treeItem.MouseLeftButtonUp          += PlayPlaylist;
+                   // treeItem.MouseLeftButtonUp          += PlayPlaylist;
                     treeItem.Expanded                   += AddLikedTracks;
 
                     treeItem.Items.Add(null);
@@ -851,7 +851,7 @@
                     RecommendedTreeItem = PlaylistTreeviewUtil.GetTreeView(playlistName , "PAW.png", "Recommended Songs", value);
                     
 
-                    RecommendedTreeItem.MouseLeftButtonUp += PlayPlaylist;
+                  //  RecommendedTreeItem.MouseLeftButtonUp += PlayPlaylist;
                     RecommendedTreeItem.Expanded          += AddRecommendedTracks;
 
                     RecommendedTreeItem.Items.Add(null);
@@ -897,9 +897,9 @@
                  
                     LikedTreeItem       = PlaylistTreeviewUtil.GetTreeView("Liked Songs", "Heart_Red.png", "Liked Songs");
                   
-                    SwtopTreeItem.MouseLeftButtonUp     += PlayPlaylist;
+                 //   SwtopTreeItem.MouseLeftButtonUp     += PlayPlaylist;
                     SwtopTreeItem.Expanded              += AddTracksAsync;
-                    LikedTreeItem.MouseLeftButtonUp     += PlayPlaylist;
+                  //  LikedTreeItem.MouseLeftButtonUp     += PlayPlaylist;
                     LikedTreeItem.Expanded += AddLikedTracks;
 
                     
@@ -962,7 +962,7 @@
                         TreeViewItem treeItem           = null;
                         treeItem                        = PlaylistTreeviewUtil.GetTreeView(playlists.name, "playlistblue_mt.png", playlists.id);
                       
-                        treeItem.MouseLeftButtonUp      += PlayPlaylist;
+                       // treeItem.MouseLeftButtonUp      += PlayPlaylist;
                         treeItem.Expanded               += AddTracksAsync;
                         treeItem.Items.Add(null);
                        
@@ -1015,12 +1015,13 @@
                     }
 
                     treeItem = PlaylistTreeviewUtil.GetTreeView(AIPlaylistItem.name, "PAW_Circle.png", AIPlaylistItem.id);
-                    treeItem.MouseLeftButtonUp  += PlayPlaylist;
+                  //  treeItem.MouseLeftButtonUp  += PlayPlaylist;
                     treeItem.Expanded           += AddTracksAsync;
                     treeItem.Items.Add(null);
 
                     treeItemList.Add(treeItem);
 
+                    
                     if (AIPlaylistTV.Items.Count > 0)
                     {
                         AIPlaylistTV.Items.Clear();
@@ -1082,24 +1083,16 @@
                 //}
                 if (tracks.Count < 1)
                 {
-                    TreeViewItem treeviewItem = PlaylistTreeviewUtil.GetTreeView("Your tracks will appear here", null, "EmptyPlaylist");
-                    item.Items.Add(treeviewItem);
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here", null, "EmptyPlaylist");
+                    playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
+                    item.Items.Add(playlistTreeviewItem);
                 }
 
                 foreach (Track items in tracks)
                 {
                     TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView(items.name, "track.png", items.id);
-
-                    //if (isLikedSongs)
-                    //{
-                    //    playlistTreeviewItem.MouseLeftButtonUp += PlayLikedSongs;
-                    //}
-                    //else if (isrecommendedSong)
-                    //{
-                    //    playlistTreeviewItem.MouseLeftButtonUp += PlayRecommendedSongs;
-                    //}
-                    //else
-                        playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
+                    
+                    playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
 
                     playlistTreeviewItem.MouseRightButtonDown += PlaylistTreeviewItem_MouseRightButtonDownAsync;
 
@@ -1135,11 +1128,12 @@
                     likedSongs = tracks;
 
                 }
-          
+
                 if (tracks.Count < 1)
                 {
-                    TreeViewItem treeviewItem = PlaylistTreeviewUtil.GetTreeView("Your tracks will appear here", null, "EmptyPlaylist");
-                    item.Items.Add(treeviewItem);
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here", null, "EmptyPlaylist");
+                    playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
+                    item.Items.Add(playlistTreeviewItem);
                 }
 
                 foreach (Track items in tracks)
@@ -1181,12 +1175,13 @@
                     
                     
                 }
-                if (tracks.Count<1)
+                if (tracks.Count < 1)
                 {
-                    TreeViewItem treeviewItem = PlaylistTreeviewUtil.GetTreeView("Your tracks will appear here", null, "EmptyPlaylist");
-                    item.Items.Add(treeviewItem);
+                    TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView("Your tracks will appear here", null, "EmptyPlaylist");
+                    playlistTreeviewItem.MouseLeftButtonUp += PlaySelectedSongAsync;
+                    item.Items.Add(playlistTreeviewItem);
                 }
-               
+
                 foreach (Track items in tracks)
                 {
                     TreeViewItem playlistTreeviewItem = PlaylistTreeviewUtil.GetTrackTreeView(items.name, "track.png", items.id);

@@ -128,7 +128,7 @@
     <Resource Include="Resources\filter.png" />
     <Resource Include="Resources\dashboard.png" />
     <Resource Include="Resources\dashboard_new.png" />
-    <Content Include="Readme.txt">
+    <Content Include="README.txt">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Resources\app-icon-blue-ct.png" />
