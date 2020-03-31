@@ -488,7 +488,7 @@ namespace MusicTime
                 }
                 else if (SoftwareUserSession.GetSpotifyUserStatus())
                 {
-                    if (MusicManager.isDeviceOpened())
+                    if (MusicManager.isDeviceOpened()&& MusicManager.isDeviceActive())
                     {
                         trackStatus = await MusicManager.GetCurrentTrackAsync();
                         
