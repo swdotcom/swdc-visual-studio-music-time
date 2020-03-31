@@ -130,11 +130,13 @@
 
         private async void RefreshAsync(object sender, RoutedEventArgs e)
         {
+            e.Handled = true;
+
             if (isConnected)
             {
                 try
                 {
-                    e.Handled = true;
+                   
                     btnRefresh.IsEnabled = false;
                    
                     SetGenerateAIContent();
