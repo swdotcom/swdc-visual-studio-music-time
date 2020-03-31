@@ -262,6 +262,22 @@ namespace MusicTime
             }
             return activeDevice;
         }
+        public static bool isDeviceActive()
+        {
+            bool isActive = false;
+            if (device != null)
+            {
+                if (device.devices != null)
+                {
+                    foreach (Device item in device.devices)
+                    {
+                        if ((item.is_active == true && item.type == "Computer") )
+                        { isActive = true; }
+                    }
+                }
+            }
+            return isActive;
+        }
         public static bool isDeviceOpened()
         {
             bool isDeviceOpened = false;
