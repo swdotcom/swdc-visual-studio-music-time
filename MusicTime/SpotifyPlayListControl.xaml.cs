@@ -131,19 +131,17 @@
         private async void RefreshAsync(object sender, RoutedEventArgs e)
         {
             e.Handled = true;
-
+            btnRefresh.IsEnabled = false;
             if (isConnected)
             {
                 try
                 {
                    
-                    btnRefresh.IsEnabled = false;
-                   
                     SetGenerateAIContent();
                     await SoftwareTop40PlaylistAsync();
                     
                     await  UsersPlaylistAsync();
-                    btnRefresh.IsEnabled = true;
+                   
                 }
                 finally
                 {
@@ -151,6 +149,7 @@
                 }
 
             }
+            btnRefresh.IsEnabled = true;
         }
 
         
