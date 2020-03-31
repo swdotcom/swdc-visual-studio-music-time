@@ -105,9 +105,9 @@ namespace MusicTime
         public static string ResizeSongName(string text)
         {
             string result = string.Empty;
-            if (text.Length > 50)
+            if (text.Length > 60)
             {
-                result = string.Concat(text.Substring(0, 50), "...");
+                result = string.Concat(text.Substring(0, 60), "...");
             }
             else
             {
