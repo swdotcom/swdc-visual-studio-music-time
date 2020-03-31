@@ -41,11 +41,6 @@ namespace MusicTime
         public static List<Channel> SlackChannels = null;
      
 
-        //public delegate void SlackConnectionHandler(object source, EventArgs args);
-
-        //public  event SlackConnectionHandler eventSlackConnected;
-      
-
         public static async Task ConnectToSlackAsync()
         {
            string app_jwt = SoftwareUserSession.GetJwt();
@@ -134,8 +129,7 @@ namespace MusicTime
                                     await MusicManager.UpdateSlackAccesInfoAsync(auths);
                                     MusicTimeCoPackage.slackConnected = true;
                                     MusicTimeCoPackage.SlackChannels = await GetSalckChannels();
-                                    
-                                    Logger.Debug("Connected to slack");
+                                     Logger.Debug("Connected to slack");
                                     SoftwareDisconnectSlackCommand.UpdateEnabledState(true);
                                     SoftwareConnectSlackCommand.UpdateEnabledState(false);
 
@@ -170,7 +164,6 @@ namespace MusicTime
             {
                 return;
             }
-
             app_jwt = SoftwareUserSession.GetJwt();
             string api = "/auth/slack/disconnect";
 
@@ -314,7 +307,7 @@ namespace MusicTime
         {
             string track_url = "https://open.spotify.com/track/";
             string trackUrl = track_url + Track_Id;
-            string api = "https://twitter.com/intent/tweet?text=Check+out+this+track+I’m+listening+to+using&url=" + trackUrl + "&hashtags=MusicTime&via=Software(www.software.com)";
+            string api = "https://twitter.com/intent/tweet?text=Check+out+this+track+I’m+listening+to+using&url=" + trackUrl + "&hashtags=MusicTime&via=@software_hq";
             launchWebUrl(api);
             
         }

@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -22,6 +24,7 @@ using Microsoft.Win32;
 using MusicTime.PlayerCommands;
 using static MusicTime.SoftwareUserSession;
 using Task = System.Threading.Tasks.Task;
+
 
 namespace MusicTime
 {
@@ -68,7 +71,9 @@ namespace MusicTime
         private System.Threading.Timer TrackStatusBar;
         private System.Threading.Timer getSlackChannelTimer;
         private System.Threading.Timer OnlineCheckerTimer;
-        private System.Threading.Timer PlaylistUpdate;
+        private System.Threading.Timer offlineDataTimer;
+
+
         public LikeSongButton _likeSongButton;
         private bool _addedStatusBarButton = false;
         private static int ONE_SECOND = 1000;
@@ -76,22 +81,21 @@ namespace MusicTime
         private static int ONE_MINUTE = THIRTY_SECONDS * 2;
         private static int ONE_HOUR = ONE_MINUTE * 60;
         private static int THIRTY_MINUTES = ONE_MINUTE * 30;
-        private static long lastDashboardFetchTime = 0;
-        private static long day_in_sec = 60 * 60 * 24;
         private static int ZERO_SECOND = 1;
-        private bool connected = false;
+        
         public static bool isValidRunningOrPausedTrack = false;
         public static bool isOnline = false;
-        // public static UserStatus spotifyUser = new UserStatus();
+       
         private static MusicStatusBar _musicStatus ;
-        private static TrackStatus trackStatus = new TrackStatus();
+        private static TrackStatus trackStatus  = new TrackStatus();
         private SoftwareData _softwareData;
-        public static JsonObject KeystrokeData = new JsonObject();
-        private DateTime _lastPostTime = DateTime.UtcNow;
-        public static bool slackConnected = false;
-        public static List<Channel> SlackChannels = null;
-
-        private MusicController musicControllerMgr;
+        public static JsonObject KeystrokeData  = new JsonObject();
+        private DateTime _lastPostTime          = DateTime.UtcNow;
+        public static bool slackConnected           = false;
+        public static List<Channel> SlackChannels   = null;
+        public static List<Track> RecommendedTracks = new List<Track>();
+        public static string RecommendedType        = "";
+        public static bool isOffsetChange           = false;
         /// <summary>
         /// Initializes a new instance of the <see cref="MusicTimeCoPackage"/> class.
         /// </summary>
@@ -139,17 +143,16 @@ namespace MusicTime
             await JoinableTaskFactory.SwitchToMainThreadAsync(DisposalToken);
             Logger.Debug("Initialization");
             await InitializeSoftwareStatusAsync();
-            _likeSongButton = new LikeSongButton();
-            Events2 events = (Events2)ObjDte.Events;
-            _textDocKeyEvent = events.TextDocumentKeyPressEvents;
-            _docEvents = ObjDte.Events.DocumentEvents;
+            Events2 events      = (Events2)ObjDte.Events;
+            _textDocKeyEvent    = events.TextDocumentKeyPressEvents;
+            _docEvents          = ObjDte.Events.DocumentEvents;
 
             // setup event handlers
-            _textDocKeyEvent.AfterKeyPress += AfterKeyPressedAsync;
-            _docEvents.DocumentOpened += DocEventsOnDocumentOpenedAsync;
-            _docEvents.DocumentClosing += DocEventsOnDocumentClosedAsync;
-            _docEvents.DocumentSaved += DocEventsOnDocumentSaved;
-            _docEvents.DocumentOpening += DocEventsOnDocumentOpeningAsync;
+            _textDocKeyEvent.AfterKeyPress  += AfterKeyPressedAsync;
+            _docEvents.DocumentOpened       += DocEventsOnDocumentOpenedAsync;
+            _docEvents.DocumentClosing      += DocEventsOnDocumentClosedAsync;
+            _docEvents.DocumentSaved        += DocEventsOnDocumentSaved;
+            _docEvents.DocumentOpening      += DocEventsOnDocumentOpeningAsync;
 
             //Music Commands
             await SoftwareConnectSpotifyCommand.InitializeAsync(this);
@@ -166,10 +169,8 @@ namespace MusicTime
             await PreviousTrackCommand.InitializeAsync(this);
             await PlayPauseCommand.InitializeAsync(this);
             await OpenSpotifyCommand.InitializeAsync(this);
-            musicControllerMgr = MusicController.getInstance;
-            musicControllerMgr.InjectAsyncPackage(this);
-
-            InitializeStatusBar();
+           
+           // InitializeStatusBar();
 
             var autoEvent = new AutoResetEvent(false);
 
@@ -179,7 +180,12 @@ namespace MusicTime
                      ONE_MINUTE,
                      ONE_MINUTE );
 
-           
+            offlineDataTimer = new System.Threading.Timer(
+                      SendOfflineData,
+                      null,
+                      THIRTY_MINUTES,
+                      THIRTY_MINUTES);
+
             DeviceTimer = new System.Threading.Timer(
                      GetDeviceIDLazilyAsync,
                      null,
@@ -190,50 +196,145 @@ namespace MusicTime
                      UpdateCurrentTrackOnStatusAsync,
                      null,
                      ZERO_SECOND,
-                     ONE_SECOND*10);
+                     ONE_SECOND*5);
 
             getSlackChannelTimer = new Timer(getSlackChannelsAsync, null, ZERO_SECOND, ONE_MINUTE);
-
-
+          //  Logger.Debug(GetExtensionInstallationDirectoryOrNull());
 
             this.InitializeUserInfoAsync();
 
 
 
         }
-
         private async void getSlackChannelsAsync(object state)
         {
             if (slackConnected)
             {
                 SlackChannels = await SlackControlManager.GetSalckChannels();
-                
+
+            }
+        }
+        public  async void SendOfflineData(object stateinfo)
+        {
+          
+            Logger.Info(DateTime.Now.ToString());
+            bool online = isOnline;
+
+            if (!online)
+            {
+                return;
+            }
+
+            string datastoreFile = SoftwareCoUtil.getSoftwareDataStoreFile();
+            if (File.Exists(datastoreFile) && isCodetimeInstalled() == false)
+            {
+                // get the content
+                string[] lines = File.ReadAllLines(datastoreFile, System.Text.Encoding.UTF8);
+
+                if (lines != null && lines.Length > 0)
+                {
+                    List<String> jsonLines = new List<string>();
+                    foreach (string line in lines)
+                    {
+                        if (line != null && line.Trim().Length > 0)
+                        {
+                            jsonLines.Add(line);
+                        }
+                    }
+                    string jsonContent = "[" + string.Join(",", jsonLines) + "]";
+                    HttpResponseMessage response = await SoftwareHttpManager.SendRequestAsync(HttpMethod.Post, "/data/batch", jsonContent);
+                    if (SoftwareHttpManager.IsOk(response))
+                    {
+                        // delete the file
+                        File.Delete(datastoreFile);
+                    }
+                }
+            }
+        }
+
+        public async void LaunchReadmeFileAsync()
+        {
+            try
+            {
+                string vsReadmeFile = SoftwareCoUtil.getVSReadmeFile();
+                if (File.Exists(vsReadmeFile))
+                {
+                    MusicTimeCoPackage.ObjDte.ItemOperations.OpenFile(vsReadmeFile);
+                }
+                else
+                {
+                    Assembly _assembly = Assembly.GetExecutingAssembly();
+                    string[] resourceNames = _assembly.GetManifestResourceNames();
+                    string fileName = "README.txt";
+                    string readmeFile = resourceNames.Single(n => n.EndsWith(fileName, StringComparison.InvariantCultureIgnoreCase));
+                    if (readmeFile == null && resourceNames != null && resourceNames.Length > 0)
+                    {
+                        foreach (string name in resourceNames)
+                        {
+                            if (name.IndexOf("README") != -1)
+                            {
+                                readmeFile = fileName;
+                                break;
+                            }
+                        }
+                    }
+                    if (readmeFile != null)
+                    {
+                        // SoftwareCoPackage.ObjDte.ItemOperations.OpenFile(readmeFile);
+                        StreamReader _textStreamReader = new StreamReader(_assembly.GetManifestResourceStream(readmeFile));
+                        string readmeContents = _textStreamReader.ReadToEnd();
+                        File.WriteAllText(vsReadmeFile, readmeContents, System.Text.Encoding.UTF8);
+                        MusicTimeCoPackage.ObjDte.ItemOperations.OpenFile(vsReadmeFile);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //
             }
         }
 
         private async void InitializeUserInfoAsync()
-        {           
+        {
+            string readmefile = (string) SoftwareCoUtil.getItem("displayedReadmefile");
+            if(string.IsNullOrEmpty (readmefile) || readmefile != "true")
+            {
+                LaunchReadmeFile();
+                
+            }
             bool jwtExists  = SoftwareCoUtil.jwtExists();
             UpdateMusicStatusBar(false);
             Logger.Debug("Onlinecheck");
             await isOnlineCheckAsync();
-            Logger.Debug("Online");
+            Logger.Debug(isOnline.ToString());
             bool online = isOnline;
             if (!jwtExists || !online)
             {
+                
                 return;
             }
             else
             {
                 UserStatus status = await GetSpotifyUserStatusTokenAsync(online);
                 UpdateMusicStatusBar(status.loggedIn);
-                if(status.loggedIn)
-                {
-                    slackConnected = await GetSlackUserStatusTokenAsync(online);
-                }
+                
             }
         }
-        
+
+        public static async Task LaunchReadmeFile()
+        {
+           
+            string dashboardFile = SoftwareCoUtil.getReadmeFile();
+            if (File.Exists(dashboardFile))
+            {
+                ObjDte.ItemOperations.OpenFile(dashboardFile);
+
+                SoftwareCoUtil.setItem("displayedReadmefile", "true");
+            }
+        }
+
+       
+
         public static async void UpdateUserStatusAsync(object state)
         {
             try
@@ -300,7 +401,7 @@ namespace MusicTime
 
                         if(isSongLiked)
                         {
-                            MusicManager.removeToSpotifyLiked(trackStatus.item.id);
+                            MusicManager.removeToSpotifyLiked(trackStatus.item.id ,isSongLiked);
 
                         }
                         else
@@ -320,7 +421,7 @@ namespace MusicTime
 
                     }
 
-                    public static async void GetDeviceIDLazilyAsync(object state)
+        public static async void GetDeviceIDLazilyAsync(object state)
         {
           
             if (SoftwareUserSession.GetSpotifyUserStatus())
@@ -336,14 +437,24 @@ namespace MusicTime
             
         }
 
+      
+
         public static void UpdateEnableCommands(bool status)
         {
-            
+            try
+            {
                 SoftwareConnectSpotifyCommand.UpdateEnabledState(status);
                 SoftwareDisconnectSpotifyCommand.UpdateEnabledState(status);
                 SoftwareMusicTimeDashBoardCommand.UpdateEnabledState(status);
                 OpenSpotifyCommand.UpdateEnabledState(status);
                 UpdateEnablePlayercontrol(status);
+            }
+            catch (Exception ex)
+            {
+
+               
+            }
+               
 
         }
 
@@ -361,106 +472,127 @@ namespace MusicTime
             string Pause        = "⏸️";
             string Play         = "▶️";
             string Liked        = "";
-            string LikeIcon     = "";
+        
             
             string spotify_accessToken = "";
             List<Track> LikedSongs = new List<Track>();
- 
-            spotify_accessToken = (string)SoftwareCoUtil.getItem("spotify_access_token");
-           
-            if (String.IsNullOrEmpty(spotify_accessToken))
+            try
             {
-               
-                UpdateMusicStatusBar(false);
-                
-            }
-            else if(SoftwareUserSession.GetSpotifyUserStatus())
-            {
-                if (MusicManager.isDeviceOpened())
-                {
-                    trackStatus = await MusicManager.SpotifyCurrentTrackAsync();
-                    if (trackStatus != null)
-                    {
-                        
-                        if (trackStatus.item != null)
-                        {
-                            LikedSongs = await Playlist.getSpotifyLikedSongsAsync();
+                spotify_accessToken = (string)SoftwareCoUtil.getItem("spotify_access_token");
 
-                            foreach (Track item in LikedSongs)
+                if (String.IsNullOrEmpty(spotify_accessToken))
+                {
+
+                    UpdateMusicStatusBar(false);
+
+                }
+                else if (SoftwareUserSession.GetSpotifyUserStatus())
+                {
+                    if (MusicManager.isDeviceOpened())
+                    {
+                        trackStatus = await MusicManager.GetCurrentTrackAsync();
+                        
+                          
+                            if (trackStatus.item != null)
                             {
-                              if(item.id == trackStatus.item.id)
+                                if (trackStatus.actions != null)
                                 {
-                                    Liked = "🧡";
-                                    break;
+                                    if (trackStatus.actions.disallows.skipping_prev == true)
+                                    {
+                                      PreviousTrackCommand.UpdateDisabeledState(false);
+                                    }
+                                    else
+                                        PreviousTrackCommand.UpdateDisabeledState(true);
                                 }
 
-                            }
-                           
-                            if (trackStatus.is_playing == true)
-                            {
-                                currentTrack = trackStatus.item.name;
-                                _musicStatus.SetTrackName(Pause + " " + currentTrack + " " + Liked);
-                                isValidRunningOrPausedTrack = true;
+                            MusicStateManager.getInstance.GatherMusicInfo(trackStatus.item);
 
-                               
+                            LikedSongs = await Playlist.getSpotifyLikedSongsAsync();
+
+                                foreach (Track item in LikedSongs)
+                                {
+                                    if (item.id == trackStatus.item.id)
+                                    {
+                                        Liked = "🧡";
+                                        break;
+                                    }
+
+                                }
+
+                                if (trackStatus.is_playing == true)
+                                {
+                                    currentTrack = trackStatus.item.name;
+                                    _musicStatus.SetTrackName(Pause + " " + currentTrack + " " + Liked);
+                                    isValidRunningOrPausedTrack = true;
+
+
+                                }
+                                if (trackStatus.is_playing == false)
+                                {
+                                    currentTrack = trackStatus.item.name;
+                                    _musicStatus.SetTrackName(Play + " " + currentTrack + " " + Liked);
+                                    isValidRunningOrPausedTrack = true;
+                                }
                             }
-                            if (trackStatus.is_playing == false)
-                            {
-                                currentTrack = trackStatus.item.name;
-                                _musicStatus.SetTrackName(Play + " " + currentTrack + " " + Liked);
-                                isValidRunningOrPausedTrack = true;
-                            }
-                        }
+                                                
+                    }
+                    else
+                    {
+
+                        UpdateMusicStatusBar(true);
+                        isValidRunningOrPausedTrack = false;
                     }
                 }
                 else
                 {
-                  
-                    UpdateMusicStatusBar(true);
+
                     isValidRunningOrPausedTrack = false;
+                    UpdateMusicStatusBar(false);
                 }
             }
-            else 
+            catch (Exception ex)
             {
 
-                isValidRunningOrPausedTrack = false;
-                UpdateMusicStatusBar(false);
+               
             }
+            
            
             
         }
 
-        public async Task UpdateStatusBarButtonText(String text, String iconName = null)
-        {
-            await JoinableTaskFactory.SwitchToMainThreadAsync();
-            await InitializeStatusBar();
-            iconName = "Heart_Red.png";
-            //if (!EventManager.Instance.IsShowingStatusText())
-            //{
-            //    text = "";
-
-            //}
-
-            //if (iconName == null || iconName.Equals(""))
-            //{
-            //    iconName = "cpaw.png";
-            //}
-
-            _likeSongButton.UpdateDisplayAsync(text, iconName);
-        }
+        
 
         public async Task InitializeStatusBar()
         {
-            if (_addedStatusBarButton)
+            try
             {
-                return;
+                if (_addedStatusBarButton)
+                {
+                    return;
+                }
+                await JoinableTaskFactory.SwitchToMainThreadAsync();
+                DockPanel statusBarObj = FindChildControl<DockPanel>(System.Windows.Application.Current.MainWindow, "StatusBarPanel");
+                if (statusBarObj != null)
+                {
+                    statusBarObj.Children.Insert(0, _likeSongButton);
+                    _addedStatusBarButton = true;
+                }
+
             }
-            await JoinableTaskFactory.SwitchToMainThreadAsync();
+            catch (Exception ex)
+            {
+
+                
+            }
+                    }
+
+        public async Task disposeStatusBar()
+        {
             DockPanel statusBarObj = FindChildControl<DockPanel>(System.Windows.Application.Current.MainWindow, "StatusBarPanel");
             if (statusBarObj != null)
             {
-                statusBarObj.Children.Insert(0, _likeSongButton);
-                _addedStatusBarButton = true;
+                statusBarObj.Children.Clear();
+                
             }
         }
 
@@ -777,7 +909,7 @@ namespace MusicTime
                 string softwareDataContent = _softwareData.GetAsJson();
                 Logger.Info("Code Time: sending: " + softwareDataContent);
 
-                if (SoftwareCoUtil.isTelemetryOn())
+                if (SoftwareCoUtil.isTelemetryOn() && MusicManager.hasSpotifyPlaybackAccess())
                 {
                     StorePayload(_softwareData);
                 }
@@ -795,7 +927,7 @@ namespace MusicTime
 
         private void StorePayload(SoftwareData _softwareData)
         {
-            if (_softwareData != null)
+            if (_softwareData != null && isCodetimeInstalled() == false)
             {
                 
                 string softwareDataContent  = _softwareData.GetAsJson();
@@ -810,6 +942,29 @@ namespace MusicTime
                 string musicDataFile = SoftwareCoUtil.getMusicDataStoreFile();
                 File.AppendAllText(musicDataFile, _softwareData.GetAsJson() + Environment.NewLine);
             }
+        }
+
+        public bool isCodetimeInstalled()
+        {
+            bool isCodetimeInstalled = false;
+
+            try
+            {
+                isCodetimeInstalled = (bool)SoftwareCoUtil.getItem("visualstudio_CtInit");
+            }
+            catch (Exception ex)
+            {
+
+                
+            }
+            
+
+            //if(string.IsNullOrEmpty(visualstudio_CtInit))
+            //{
+            //    isCodetimeInstalled = true;
+            //}
+
+            return isCodetimeInstalled;
         }
 
         private void OnOnStartupComplete()

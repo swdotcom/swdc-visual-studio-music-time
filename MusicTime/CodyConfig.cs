@@ -255,13 +255,17 @@ namespace MusicTime
     public class Disallows
     {
         public bool resuming { get; set; }
+        public bool skipping_prev { get; set; }
     }
 
     public class Actions
     {
         public Disallows disallows { get; set; }
+       
     }
+
     
+
     public class Tracks
     {
         public string href { get; set; }
@@ -286,6 +290,13 @@ namespace MusicTime
         public DateTime added_at { get; set; }
         public Track track { get; set; }
     }
+
+    public class sourceKey
+    {
+        public string key { get; set; }
+        public SourceData SourceData { get; set; }
+    }
+
     public partial class SourceData
     {
         [JsonProperty("paste")]

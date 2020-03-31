@@ -13,8 +13,7 @@ using System.Windows.Forms;
 namespace MusicTime
 {
     class MusicController
-    {
-       private MusicTimeCoPackage package;
+    {    
        private static MusicManager musicManager = MusicManager.getInstance;
        private static Device device             = Device.getInstance;
        private static MusicStateManager musicStateManager = MusicStateManager.getInstance;
@@ -34,11 +33,7 @@ namespace MusicTime
                 return instance;
             }
         }
-        public void InjectAsyncPackage(MusicTimeCoPackage package)
-        {
-            this.package = package;
-        }
-
+       
         public static async void PlayPauseTrackAsync()
         {
             try
@@ -49,19 +44,19 @@ namespace MusicTime
                     {
                         await MusicManager.SpotifyWebPauseAsync();
                         MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-                        MusicStateManager.getInstance.GatherMusicInfo();
+                        //MusicStateManager.getInstance.GatherMusicInfo();
                     }
                     else
                     {
                       
                         await MusicManager.SpotifyWebPlayAsync();
                         MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
-                        MusicStateManager.getInstance.GatherMusicInfo();
+                       // MusicStateManager.getInstance.GatherMusicInfo();
                     }
 
                     if (!MusicManager.isDeviceOpened())
                     {
-                        await LaunchPlayerAsync(new options());
+                       // await LaunchPlayerAsync(new options());
 
                         await MusicManager.getDevicesAsync();
 
@@ -89,7 +84,7 @@ namespace MusicTime
                 {
                     if (!MusicManager.isDeviceOpened())
                     {
-                        await LaunchPlayerAsync(new options());
+                        //await LaunchPlayerAsync(new options());
 
                         await MusicManager.getDevicesAsync();
 
@@ -98,7 +93,8 @@ namespace MusicTime
 
 
                     await MusicManager.SpotifyWebPlayPreviousAsync();
-                    MusicStateManager.getInstance.GatherMusicInfo();
+                    MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
+                   // MusicStateManager.getInstance.GatherMusicInfo();
 
                 }
 
@@ -119,14 +115,15 @@ namespace MusicTime
                 {
                     if (!MusicManager.isDeviceOpened())
                     {
-                        await LaunchPlayerAsync(new options());
+                       // await LaunchPlayerAsync(new options());
 
                         await MusicManager.getDevicesAsync();
                         
                     }
 
                      await MusicManager.SpotifyWebPlayNextAsync();
-                    MusicStateManager.getInstance.GatherMusicInfo();
+                    MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
+                   // MusicStateManager.getInstance.GatherMusicInfo();
                 }
             }
             catch (Exception ex)
@@ -160,23 +157,26 @@ namespace MusicTime
             }
             else
             {
-                string message  = "Spotify player is not installed , open web player instead ?";
+                string message = "Desktop player is not available"; /*, open web player instead ?*/
                 string title    = "SPOTIFY";
-                MessageBoxButtons buttons = MessageBoxButtons.OKCancel;
-                DialogResult result = MessageBox.Show(message, title, buttons);
+
+                //MessageBox.Show(message);
+               // MessageBoxButtons buttons = MessageBoxButtons.OKCancel;
+                DialogResult result = MessageBox.Show(message, title);
                 if (result == DialogResult.OK)
                 {
                     LaunchWebPlayerAsync(new options());
                 }
-                
-
-               // DialogResult result =  MessageBox.Show("Spotify device is not installed ");
-                
                
             }
 
             
         }
+
+        
+
+        
+    
 
         public static async void launchDevicePrompt()
         {
@@ -262,7 +262,7 @@ namespace MusicTime
                     SoftwareSpotifyManager.launchWebUrl("https://open.spotify.com/playlist/" + playlistId);
                 }
                 else
-                    SoftwareSpotifyManager.launchWebUrl("https://open.spotify.com/browse");
+                    SoftwareSpotifyManager.launchWebUrl("https://open.spotify.com");
 
 
                 MusicTimeCoPackage.UpdateEnablePlayercontrol(true);

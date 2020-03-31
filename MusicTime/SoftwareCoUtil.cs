@@ -143,7 +143,29 @@ namespace MusicTime
         {
             return getSoftwareDataDir(true) + "\\MusicTime.txt";
         }
+
+        public static String getReadmeFile()
+        {
+            
+
+            return  GetExtensionInstallationDirectoryOrNull()+ "\\Readme.txt";
+        }
+
+        public static string GetExtensionInstallationDirectoryOrNull()
+        {
+            try
+            {
+                var uri = new Uri(typeof(MusicTimeCoPackage).Assembly.CodeBase, UriKind.Absolute);
+                return Path.GetDirectoryName(uri.LocalPath);
+            }
+            catch
+            {
+                return " "; ;
+            }
+        }
+
         
+
 
         public static String getSoftwareDataDir(bool autoCreate)
         {
@@ -330,9 +352,12 @@ namespace MusicTime
             timer.Elapsed += (sender, e) => functionCopy();
             timer.Start();
         }
-       
 
 
+        public static String getVSReadmeFile()
+        {
+            return getSoftwareDataDir(true) + "\\VS_READMEMT.txt";
+        }
     }
 
     struct Date

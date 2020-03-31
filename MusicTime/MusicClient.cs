@@ -200,16 +200,11 @@ namespace MusicTime
 
         public static async Task<HttpResponseMessage> spotifyApiDeleteAsync(string api, string payload)
         {
-            HttpResponseMessage response = null;
-            HttpClient client = new HttpClient();
+            HttpResponseMessage response    = null;
+            HttpClient client               = new HttpClient();
             try
             {
-                if (payload == null)
-                { payload = ""; }
-                else
-                {
-                    api = api + "?" + payload;
-                }
+                
                 client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", codyConfig.spotifyAccessToken);
                 
@@ -223,8 +218,7 @@ namespace MusicTime
                 })
                 .Result;
 
-                
-
+              
             }
             catch (Exception ex)
             {

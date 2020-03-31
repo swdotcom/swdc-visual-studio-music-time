@@ -12,6 +12,7 @@ namespace MusicTime
 {
     class PlaylistTreeviewUtil
     {
+       
         public static PlaylistTreeviewItem GetSelectedTreeViewItemParent(PlaylistTreeviewItem item)
         {
             DependencyObject parent = null;
@@ -35,10 +36,10 @@ namespace MusicTime
         }
       
 
-        public static TreeViewItem GetTreeView(string text, string imagePath, string id)
+        public static TreeViewItem GetTreeView(string text, string imagePath, string id , string value =null)
         {
             PlaylistTreeviewItem item = new PlaylistTreeviewItem(id);
-
+            item.value = value;
             // create stack panel
             StackPanel stack = new StackPanel();
             stack.Orientation = Orientation.Horizontal;
@@ -47,6 +48,8 @@ namespace MusicTime
             {
                 // create Image
                 System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+                image.Height = 15;
+                image.Width = 15;
                 image.Source = new BitmapImage(new Uri("Resources/" + imagePath, UriKind.Relative));
                 stack.Children.Add(image);
             }
@@ -54,6 +57,7 @@ namespace MusicTime
 
             Label lbl = new Label();
             lbl.Content = text;
+            lbl.ToolTip = text;
             lbl.Foreground = System.Windows.Media.Brushes.DarkCyan;
 
             // Add into stack
@@ -75,6 +79,8 @@ namespace MusicTime
 
             // create Image
             System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+            image.Height = 15;
+            image.Width = 15;
             image.Source = new BitmapImage(new Uri("Resources/" + imagePath, UriKind.Relative));
 
             // Label
@@ -87,8 +93,9 @@ namespace MusicTime
            
             // Add into stack
             
+            
+            stack.Children.Add(image);
             stack.Children.Add(lbl);
-           // stack.Children.Add(image);
             // assign stack to header
             item.Header = stack;
             item.Background = System.Windows.Media.Brushes.Transparent;
@@ -98,9 +105,9 @@ namespace MusicTime
         public static string ResizeSongName(string text)
         {
             string result = string.Empty;
-            if (text.Length > 20)
+            if (text.Length > 50)
             {
-                result = string.Concat(text.Substring(0, 20), "...");
+                result = string.Concat(text.Substring(0, 50), "...");
             }
             else
             {

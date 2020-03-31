@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace MusicTime
 {
@@ -33,8 +35,10 @@ namespace MusicTime
         }
 
         // public static List<PlaylistItem> _Playlists { get; set; }
-        public static List<Track> Software_Playlists { get; set; }
-        public static List<Track> Liked_Playlist { get; set; }
+        public static List<Track> SoftwareTOP_Tracks    = new List<Track>();
+        public static List<Track> Liked_Tracks        = new List<Track>();
+       public static List<PlaylistItem> _UsersPlaylists = new List<PlaylistItem>();
+        public static int offset = 0;
         public static Dictionary<PlaylistItem, List<Track>> Users_Playlist = new Dictionary<PlaylistItem, List<Track>>();
 
         public static string PlayListID { get; set; }
@@ -44,20 +48,21 @@ namespace MusicTime
             List<PlaylistItem> _Playlists = new List<PlaylistItem>();
             if (codyConfig.spoftifyUserId!= null)
             {
-               _Playlists = await getPlaylistsForUserAsync(codyConfig.spoftifyUserId,50,0);     
+                offset = 0;
+               _UsersPlaylists.Clear();
+               _Playlists = await getPlaylistsForUserAsync(codyConfig.spoftifyUserId);     
             }
             return _Playlists;
         }
 
-        public static async Task<List<PlaylistItem>> getPlaylistsForUserAsync(string spotifyUserid,
-            int limit,int offset)
+        public static async Task<List<PlaylistItem>> getPlaylistsForUserAsync(string spotifyUserid)
         {
             HttpResponseMessage response    = null;
-
-            string api                      = "/v1/users/"+ spotifyUserid +"/playlists";
-
+            string api                      = "/v1/users/"+ spotifyUserid + "/playlists?offset="+offset+"&limit=50";
+          
+            int playlistCount               = 0;
             SpotifySongs PlaylistItems      = new SpotifySongs();
-            List<PlaylistItem>  _Playlists = new List<PlaylistItem>();
+           
 
 
             try
@@ -79,9 +84,15 @@ namespace MusicTime
 
                     foreach (PlaylistItem item in PlaylistItems.items)
                     {
-                        _Playlists.Add(item);
+                        _UsersPlaylists.Add(item);
+                        playlistCount++;
                     }
 
+                }
+                if(playlistCount==50)
+                {
+                    offset += 50;
+                    _UsersPlaylists = await getPlaylistsForUserAsync(codyConfig.spoftifyUserId);
                 }
 
             }
@@ -90,21 +101,43 @@ namespace MusicTime
 
 
             }
-            return _Playlists;
+            return _UsersPlaylists;
         }
 
-        public static async Task<List<string>> getPlaylistNamesAsync()
+        public static async Task<string> getPlaylistNamesAsync(string playlist_id)
         {
-            List<string> names                  = new List<string>();
-            List<PlaylistItem> playlistItems    = null;
-            playlistItems                       = await getPlaylistsAsync();
-
-            foreach (PlaylistItem item in playlistItems)
+            string api = "/v1/playlists/"+playlist_id;
+            HttpResponseMessage response = null;
+            PlaylistItem playlist = new PlaylistItem();
+            string playlistName = "";
+            try
             {
-                names.Add(item.name);
+                response = await MusicClient.SpotifyApiGetAsync(api);
+
+                //if (response == null || !response.IsSuccessStatusCode)
+                //{
+                //    // refresh the tokens
+                //    await MusicClient.refreshSpotifyTokenAsync();
+                //    // Try again
+                //    response = await MusicClient.SpotifyApiGetAsync(api);
+                //}
+
+                if (MusicClient.IsOk(response))
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    playlist        = JsonConvert.DeserializeObject<PlaylistItem>(responseBody);
+                    playlistName = playlist.name; 
+                }
+              
+
+            }
+            catch (Exception ex)
+            {
+
+
             }
 
-            return names;
+            return playlistName;
         }
 
         public static async Task<List<Track>> getPlaylistTracksAsync(string playlistId)
@@ -138,7 +171,10 @@ namespace MusicTime
                         tracks.Add(item.track);
                     }
                 }
-
+                if(playlistId ==  Constants.SOFTWARE_TOP_40_ID)
+                {
+                    SoftwareTOP_Tracks = tracks;
+                }
                 
             }
             catch (Exception ex)
@@ -340,7 +376,7 @@ namespace MusicTime
                     }
                 }
 
-
+                Liked_Tracks = LikedSongs;
 
             }
             catch (Exception ex)
@@ -384,18 +420,21 @@ namespace MusicTime
             string api = "/v1/playlists/" + playlist_id + "/tracks";
             HttpResponseMessage response = null;
             string _payload = null;
-            string trackUris = MusicUtil.createUriFromTrackId(track_id);
-
-
-
+            JsonObject trackPayload = new JsonObject();
             JsonObject payload = new JsonObject();
-            string[] stringArray = new string[] { trackUris };
-            payload.Add("ids", stringArray);
 
-            _payload = payload.ToString();
+            string trackUri = MusicUtil.createUriFromTrackId(track_id);
+            JsonArray jsonArray = new JsonArray();
+            payload.Add("uri", trackUri);
+            jsonArray.Add(payload);
+            trackPayload.Add("tracks", jsonArray);
+            
+            _payload = trackPayload.ToString();
+           
+            
             response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
 
-            if (response == null || !response.IsSuccessStatusCode)
+            if (response == null || !response.IsSuccessStatusCode || response.StatusCode != HttpStatusCode.Forbidden)
             {
                 // refresh the tokens
                 await MusicClient.refreshSpotifyTokenAsync();
@@ -403,6 +442,20 @@ namespace MusicTime
                 response = await MusicClient.spotifyApiDeleteAsync(api, _payload);
             }
 
+
+            // string playlistName = await getPlaylistNamesAsync(playlist_id);
+            string playlistName = "";
+            if (MusicClient.IsOk(response))
+            {
+                string message = "Removed song from playlist" ;
+                MessageBox.Show(message,"Spotify");
+            }
+            else
+            {
+                string message =   " You can only remove song from the playlist that you own";
+                MessageBox.Show(message, "Failed to remove song");
+
+            }
 
         }
     }

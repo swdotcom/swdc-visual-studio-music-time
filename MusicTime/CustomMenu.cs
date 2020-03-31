@@ -20,12 +20,23 @@ namespace MusicTime
         public string deviceName { get; set; }
         public string playlist_id { get; set; }
         public string track_id { get; set; }
+        public List<Track> tracks = new List<Track>();
     }
 
-    public class customCombo : ComboBoxItem
+    public class customCombo : ComboBox
     {
-        public string playlist_id { get; set; }
-        public string playlist_name { get; set; }
+        public string categoryValue { get; set; }
+    }
+    public class MoodMenu : MenuItem
+    {
+        public string moodValue { get; set; }
+        
+        public MoodMenu(string value)
+        {
+            moodValue = value;
+            Header = value;
+            
+        }
     }
 
 }

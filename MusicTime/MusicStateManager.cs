@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Net.Http;
+using Newtonsoft.Json.Converters;
 
 namespace MusicTime
 {
@@ -34,77 +35,86 @@ namespace MusicTime
             }
         }
 
-        public async void GatherMusicInfo()
+        public async void GatherMusicInfo(Track PlayingTrack)
         {
-            if (MusicManager.hasSpotifyPlaybackAccess())
+            try
             {
-                Track playingTrack      = new Track();
-                playingTrack            = await musicManager.GetCurrentTrackAsync();
-                NowTime nowTime         = SoftwareCoUtil.GetNowTime();
-
-                if (playingTrack != null)
+                if (MusicManager.hasSpotifyPlaybackAccess())
                 {
-                    
-                    if (playingTrack.uri == null && playingTrack.id != null)
+
+
+                    Track playingTrack  = new Track();
+                    playingTrack        = PlayingTrack;
+                    NowTime nowTime     = SoftwareCoUtil.GetNowTime();
+
+                    if (playingTrack != null)
                     {
-                        playingTrack.uri = MusicUtil.createUriFromTrackId(playingTrack.id);
-                    }
-                    else
-                        playingTrack.id = MusicUtil.CreateSpotifyIdFromUri(playingTrack.id);
 
-
-
-                    changeStatus = await getChangeStatus(playingTrack, nowTime);
-
-                    if (changeStatus.isNewSong)
-                    {
-                       
-
-                    }
-
-
-                    if (changeStatus.sendSongSession)
-                    {
-                        ExsitingTrack.state = trackState.Playing;
-
-                        if (ExsitingTrack.end == 0)
+                        if (playingTrack.uri == null && playingTrack.id != null)
                         {
-                            ExsitingTrack.end       = nowTime.now;
-                            ExsitingTrack.local_end = nowTime.local_now;
+                            playingTrack.uri = MusicUtil.createUriFromTrackId(playingTrack.id);
                         }
+                        else
+                            playingTrack.id = MusicUtil.CreateSpotifyIdFromUri(playingTrack.id);
 
-                        Track SongSession = ExsitingTrack;
 
-                        gatherCodingDataAndSendSongSessionAsync(SongSession);
 
-                        ExsitingTrack       = null;
-                        if (playingTrack    != null)
-                        {
-                            ExsitingTrack = new Track();
-                        }
+                        changeStatus = await getChangeStatus(playingTrack, nowTime);
                         
 
-                        ExsitingTrack.start         = nowTime.now;
-                        ExsitingTrack.local_start   = nowTime.local_now;
+                        if (changeStatus.sendSongSession)
+                        {
+                            ExsitingTrack.state = trackState.Playing;
+                            NowTime Loacal_nowTime = SoftwareCoUtil.GetNowTime();
+                            if (ExsitingTrack.end == 0)
+                            {
+                                ExsitingTrack.end = Loacal_nowTime.now;
+                                ExsitingTrack.local_end = Loacal_nowTime.local_now;
+                            }
 
-                        resetTrackProgressInfo(playingTrack);
+                            Track SongSession = ExsitingTrack;
+
+                            gatherCodingDataAndSendSongSessionAsync(SongSession);
+
+                            ExsitingTrack = null;
+                            if (playingTrack != null)
+                            {
+                                ExsitingTrack = new Track();
+                              
+                            }
+
+
+                            ExsitingTrack.start = nowTime.now;
+                            ExsitingTrack.local_start = nowTime.local_now;
+
+                            resetTrackProgressInfo(playingTrack);
+                        }
+
+                        if (ExsitingTrack.id != playingTrack.id)
+                        {
+                            ExsitingTrack = playingTrack;
+                        }
+                        if (ExsitingTrack.state != playingTrack.state)
+                        {
+                            ExsitingTrack.state = playingTrack.state;
+                        }
+                        if (ExsitingTrack.start == 0)
+                        {
+                            ExsitingTrack.start = nowTime.now;
+                            ExsitingTrack.local_start = nowTime.local_now;
+                        }
+                        ExsitingTrack.end = 0;
+
                     }
-
-                    if(ExsitingTrack.id != playingTrack.id)
-                    {
-                        ExsitingTrack = playingTrack;
-                    }
-                    if(ExsitingTrack.state !=playingTrack.state)
-                    {
-                        ExsitingTrack.state = playingTrack.state;
-                    }
-
-                    ExsitingTrack.start = nowTime.now;
-                    ExsitingTrack.local_start = nowTime.local_now;
-                    ExsitingTrack.end = 0;
-
                 }
+
             }
+            catch (Exception ex)
+            {
+
+                
+            }
+           
         }
 
         private void resetTrackProgressInfo(Track playingTrack)
@@ -131,6 +141,7 @@ namespace MusicTime
             
             bool isValidSession     = songSession.end - songSession.start > 5;
 
+           // Logger.Debug("isvalidSession " + isValidSession.ToString());
             if (!isValidSession)
             {
                 return;
@@ -187,9 +198,10 @@ namespace MusicTime
             if (payloads.Count > 0)
             {
                 List<SoftwareData> softwareData = new List<SoftwareData>();
-
+                
                 foreach (string item in payloads)
                 {
+                  
                     SoftwareData datas = new SoftwareData();
                     datas = JsonConvert.DeserializeObject<SoftwareData>(item);
                     softwareData.Add(datas);
@@ -237,13 +249,13 @@ namespace MusicTime
         private TrackData buildAggregateData(List<SoftwareData> softwareData, TrackData songSession)
         {
             long TotalKeystroke = 0;
-            long add  = 0;
+            long add    = 0;
             long delete = 0;
-            long open = 0;
-            long close = 0;
-            long linesAdded = 0;
-            long linesRemoved = 0;
-            long netkeys = 0;
+            long open   = 0;
+            long close  = 0;
+            long linesAdded     = 0;
+            long linesRemoved   = 0;
+            long netkeys        = 0;
 
             #region OS_Version_Offset_Values
 
@@ -269,37 +281,68 @@ namespace MusicTime
             }
 
             #endregion
-            List<SourceData> sourceData = new List<SourceData>();
+            List<SourceData> sourceData     = new List<SourceData>();
+            
             foreach (SoftwareData item in softwareData)
             {
-               
-                JsonObject Jobj = new JsonObject();
-                TotalKeystroke = TotalKeystroke + item.keystrokes;
+
+               // TotalKeystroke  = TotalKeystroke + item.keystrokes;
               
                 foreach (KeyValuePair<string, object> entry in item.source)
                 {
-                    //Jobj =(JsonObject)entry;
-                  
-                    SourceData datas    = new SourceData();
-                    datas = SimpleJson.DeserializeObject<SourceData>(entry.Value.ToString()); 
-                    //datas               = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
-                    sourceData.Add(datas);
-                   
-                }
-                songSession.source = item.source;
-            }
-           
+                    
+                    SourceData datas      = new SourceData();
+                
+                    datas                 = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
+                   // sourceData.Add(datas);
 
-            
-            
-            if(sourceData.Count>0)
+                    if (songSession.source.ContainsKey(entry.Key))
+                    {
+                        SourceData data = new SourceData();
+                        data            = datas;
+                        aggregateSource(songSession, entry.Key, data);
+                       
+                    }
+                    else
+                    {
+                        songSession.source.Add(entry.Key, datas);
+                    }
+
+                }
+
+               
+            }
+
+
+
+            foreach (SoftwareData item in softwareData)
+            {
+
+                TotalKeystroke = TotalKeystroke + item.keystrokes;
+
+                foreach (KeyValuePair<string, object> entry in item.source)
+                {
+
+                    SourceData datas = new SourceData();
+
+                    datas = JsonConvert.DeserializeObject<SourceData>(entry.Value.ToString());
+                    sourceData.Add(datas);
+
+
+                }
+
+
+            }
+
+
+            if (sourceData.Count>0)
             {
                 foreach (SourceData item in sourceData)
                 {
-                    add     = add + item.Add;
-                    delete  = delete + item.Delete;
-                    open    = open + item.Open;
-                    close   = close + item.Close;
+                    add             = add + item.Add;
+                    delete          = delete + item.Delete;
+                    open            = open + item.Open;
+                    close           = close + item.Close;
                     linesAdded      = linesAdded + item.LinesAdded;
                     linesRemoved    = linesRemoved + item.LinesRemoved;
                     netkeys         = netkeys + item.Netkeys;
@@ -320,11 +363,42 @@ namespace MusicTime
 
         }
 
+        private void aggregateSource( TrackData songSession,  string key, SourceData datas)
+        {
+            foreach (KeyValuePair<string, object> entry in songSession.source)
+            {
+
+                if (entry.Key == key)
+                {
+                   SourceData fileInfoData = null;
+
+                    fileInfoData =  (SourceData) songSession.source[entry.Key];
+
+                    fileInfoData.Add = fileInfoData.Add + datas.Add;
+                    fileInfoData.Close = fileInfoData.Close + datas.Close;
+                    fileInfoData.Delete = fileInfoData.Delete + datas.Delete;
+                    fileInfoData.Paste = fileInfoData.Paste + datas.Paste;
+                    fileInfoData.Open = fileInfoData.Open + datas.Open;
+                    fileInfoData.Length = fileInfoData.Length + datas.Length;
+                    fileInfoData.Lines = fileInfoData.Lines + datas.Lines ;
+                    fileInfoData.LinesAdded = fileInfoData.LinesAdded + datas.LinesAdded;
+                    fileInfoData.LinesRemoved = fileInfoData.LinesRemoved + datas.LinesRemoved;
+                    fileInfoData.Netkeys = fileInfoData.Netkeys + datas.Netkeys; 
+                    songSession.source[entry.Key] = fileInfoData;
+                    break;
+                }
+            }
+
+
+        }
+
+           
+
         private async void sendMusicDataAsync(TrackData songSessionPayload)
         {
             Logger.Debug(songSessionPayload.GetAsJson());
-            string datastoreFile = SoftwareCoUtil.getMusicDataStoreFile();
-            string api = "/music/session";
+            string datastoreFile    = SoftwareCoUtil.getMusicDataStoreFile();
+            string api              = "/music/session";
             HttpResponseMessage response = null;
             string app_jwt = SoftwareUserSession.GetJwt();
             if (app_jwt != null)
@@ -348,7 +422,7 @@ namespace MusicTime
             {
                 payload = File.ReadAllText(FilePath);
                 string[] stringSeparators = new string[] { "\r\n" };
-                string[] lines = payload.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                string[] lines            = payload.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (string val in lines)
                 {
@@ -360,10 +434,11 @@ namespace MusicTime
 
         public async Task<ChangeStatus> getChangeStatus(Track playingTrack,NowTime LocalUTC)
         {
-            changeStatus.isNewSong = false;
+            changeStatus.isNewSong      = false;
 
-            bool isValidExistingTrack = ExsitingTrack != null ? true : false;
+            bool isValidExistingTrack   = ExsitingTrack != null ? true : false;
 
+         //   Logger.Debug(isValidExistingTrack.ToString());
             if (ExsitingTrack!=null)
             {
                  changeStatus.isNewSong = ExsitingTrack.id != playingTrack.id ? true : false;
@@ -376,13 +451,23 @@ namespace MusicTime
             bool endInRange = isEndInRange(playingTrack);
 
 
-            long lastUpdatedUtc = playingTrack.state == trackState.Playing ? LocalUTC.now : trackProgressInfo.lastUpdateUtc;
-            //changeStatus.trackIsDone     = isTrackDone(playingTrack);
+
+            long lastUpdatedUtc;
+            if (playingTrack.state == trackState.Playing)
+            {
+               lastUpdatedUtc = LocalUTC.now;
+            }
+            else
+                lastUpdatedUtc = trackProgressInfo.lastUpdateUtc;
+
+
+          //  long lastUpdatedUtc = playingTrack.state == trackState.Playing ? LocalUTC.now : trackProgressInfo.lastUpdateUtc;
+          //  changeStatus.trackIsDone     = isTrackDone(playingTrack);
             changeStatus.isLongPaused    = isTrackLongPaused(playingTrack);
+            
 
-
-            changeStatus.sendSongSession = isValidExistingTrack && (changeStatus.isNewSong || changeStatus.isLongPaused) ? true : false;
-
+            changeStatus.sendSongSession = isValidExistingTrack && (changeStatus.isNewSong || changeStatus.isLongPaused /*|| endInRange*/) ? true : false;
+            
             if (changeStatus.isLongPaused)
             {
                 if (changeStatus.sendSongSession)
@@ -404,30 +489,50 @@ namespace MusicTime
 
         private void SetTrackProgressInfo(Track playingTrack, bool endInRange, long lastUpdatedUtc)
         {
-            trackProgressInfo.endInRange = endInRange;
+            trackProgressInfo.endInRange    = endInRange;
             trackProgressInfo.lastUpdateUtc = lastUpdatedUtc;
-            trackProgressInfo.progress_ms = playingTrack.progress_ms;
-            trackProgressInfo.duration_ms = playingTrack.duration_ms;
-            trackProgressInfo.id = playingTrack.id;
+            trackProgressInfo.progress_ms   = playingTrack.progress_ms;
+            trackProgressInfo.duration_ms   = playingTrack.duration_ms;
+            trackProgressInfo.id            = playingTrack.id;
 
         }
 
         private bool isEndInRange(Track playingTrack)
         {
+            //double duration_ms = playingTrack.duration_ms;
+
+
+
+            //double progress_ms = trackProgressInfo.progress_ms;
+
+
+
+            //double endInRange = duration_ms - progress_ms;
+
+            //if(endInRange <=5000)
+            //{
+            //    Logger.Debug(true.ToString());
+            //    return true; 
+            //}
+
+            //return false;
             double buffer = playingTrack.duration_ms * 0.07;
             return playingTrack.progress_ms >= playingTrack.duration_ms - buffer;
+
 
         }
 
         private bool isTrackLongPaused(Track playingTrack)
         {
-            bool hasProgress = playingTrack.progress_ms > 0 ? true : false;
+            bool hasProgress    = playingTrack.progress_ms > 0 ? true : false;
 
-            NowTime nowTime = SoftwareCoUtil.GetNowTime();
+            NowTime nowTime     = SoftwareCoUtil.GetNowTime();
             double pauseThreshold = 60;
 
             double diff = nowTime.now - trackProgressInfo.lastUpdateUtc;
 
+            //Logger.Debug(trackProgressInfo.lastUpdateUtc.ToString());
+            //Logger.Debug(playingTrack.state.ToString());
             if (hasProgress && trackProgressInfo.lastUpdateUtc > 0 && diff > pauseThreshold )
             {
                 return true;

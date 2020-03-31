@@ -22,7 +22,7 @@ namespace MusicTime
     {
         public LikeSongButton()
         {
-            InitializeComponent();
+            InitializeComponent();           
         }
 
         public  async Task UpdateDisplayAsync(string label, string iconName)
@@ -39,7 +39,7 @@ namespace MusicTime
         {
             e.Handled = true;
             MusicTimeCoPackage.LikeUnlikeSong();
-            //MusicTimeCoPackage.UpdateCurrentTrackOnStatusAsync(null);
+          
 
         }
     }

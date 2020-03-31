@@ -6,6 +6,10 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
+using Microsoft.VisualStudio.Threading;
 using Newtonsoft.Json;
 namespace MusicTime
 {
@@ -15,6 +19,7 @@ namespace MusicTime
         private static int THIRTY_SECONDS = 1000 * 30;
         private static int ONE_MINUTE = THIRTY_SECONDS * 2;
         public static SpotifyTokens spotifyTokens;
+        
 
         public static async Task ConnectToSpotifyAsync()
         {
@@ -36,6 +41,7 @@ namespace MusicTime
                     if (app_jwt != null)
                     {
                         SoftwareCoUtil.setItem("jwt", app_jwt);
+                        
                     }
                 }
                 else
@@ -100,6 +106,7 @@ namespace MusicTime
                         Logger.Debug("AuthsLogeedIn");
                         MusicTimeCoPackage.UpdateMusicStatusBar(true);
                         MusicTimeCoPackage.UpdateEnableCommands(auths.LoggedIn);
+                     
                     }
                     
                 }
@@ -218,18 +225,20 @@ namespace MusicTime
         }
         public static async Task DisConnectToSpotifyAsync()
         {
-            HttpResponseMessage response = null;
-            string app_jwt = "";
-            bool online = MusicTimeCoPackage.isOnline;
-            if (!online)
+            HttpResponseMessage response    = null;
+            string app_jwt                  = "";
+
+            if (!MusicTimeCoPackage.isOnline)
             {
-                return;
+                await SoftwareUserSession.isOnlineCheckAsync();
             }
-            
-                app_jwt     = SoftwareUserSession.GetJwt();
-                string api  = "/auth/spotify/disconnect";
-               
-                response = await SoftwareHttpManager.SendRequestPutAsync(api,null);
+            if (MusicTimeCoPackage.isOnline)
+            {
+
+                app_jwt = SoftwareUserSession.GetJwt();
+                string api = "/auth/spotify/disconnect";
+
+                response = await SoftwareHttpManager.SendRequestPutAsync(api, null);
                 if (SoftwareHttpManager.IsOk(response))
                 {
                     MusicManager.clearSpotifyAccessInfo(spotifyTokens);
@@ -238,8 +247,10 @@ namespace MusicTime
                     SoftwareDisconnectSlackCommand.UpdateEnabledState(false);
 
                 }
-            
+            }
         }
+
+
 
     }
     

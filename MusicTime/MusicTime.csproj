@@ -107,6 +107,7 @@
     <None Include="app.config" />
     <None Include="Key.snk" />
     <None Include="packages.config" />
+    <None Include="README.md" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -123,6 +124,18 @@
     </Content>
     <Resource Include="Resources\connected_dark.png" />
     <Resource Include="Resources\Connected.png" />
+    <Resource Include="Resources\beaker.png" />
+    <Resource Include="Resources\filter.png" />
+    <Resource Include="Resources\dashboard.png" />
+    <Resource Include="Resources\dashboard_new.png" />
+    <Content Include="README.txt">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Resources\app-icon-blue-ct.png" />
+    <Resource Include="Resources\beaker_ct.png" />
+    <Content Include="Resources\cpaw_ct.png" />
+    <Resource Include="Resources\dashboard_ct.png" />
+    <Resource Include="Resources\filter_ct.png" />
     <Content Include="Resources\headphones.png" />
     <Content Include="Resources\headphones_dark.png" />
     <Content Include="Resources\heart-filled.png" />
@@ -130,7 +143,9 @@
     <Content Include="Resources\heart-outlined.png" />
     <Content Include="Resources\heart-outlined_dark.png" />
     <Resource Include="Resources\Heart_Red.png" />
-    <Content Include="Resources\loading.png" />
+    <Content Include="Resources\iconfinder_Heart.png" />
+    <Resource Include="Resources\loading.png" />
+    <Resource Include="Resources\loading_blue.png" />
     <Content Include="Resources\loading_dark.png" />
     <Resource Include="Resources\menu.png" />
     <Content Include="Resources\MusicTimeCo.png" />
@@ -141,7 +156,15 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Resources\open-menu.png" />
-    <Content Include="Resources\paw_dark.png" />
+    <Content Include="Resources\paw-purple.png" />
+    <Resource Include="Resources\paw_dark.png" />
+    <Resource Include="Resources\playlist.png" />
+    <Resource Include="Resources\PAW_Circle.png" />
+    <Resource Include="Resources\PAW_Circle_purple.png" />
+    <Resource Include="Resources\playlist_w.png" />
+    <Resource Include="Resources\playlist_blue.png" />
+    <Resource Include="Resources\playlist_i.png" />
+    <Resource Include="Resources\playlistblue_mt.png" />
     <Content Include="Resources\PlayPauseCommand.png" />
     <Content Include="Resources\PreviousTrackCommand.png" />
     <Resource Include="Resources\settingss.png" />
@@ -149,6 +172,9 @@
     <Resource Include="Resources\share.png" />
     <Resource Include="Resources\refresh.png" />
     <Resource Include="Resources\settings.png" />
+    <Resource Include="Resources\readme.png" />
+    <Resource Include="Resources\readme_old.png" />
+    <Resource Include="Resources\readme_ct.png" />
     <Content Include="Resources\SoftwareConnectSlackCommand.png" />
     <Content Include="Resources\SoftwareConnectSpotifyCommand.png" />
     <Content Include="Resources\SoftwareDisconnectSlackCommand.png" />
@@ -159,6 +185,9 @@
     <Resource Include="Resources\spotify.png" />
     <Content Include="Resources\SpotifyPlayListCommand.png" />
     <Resource Include="Resources\spotify_dark.png" />
+    <Resource Include="Resources\track.png" />
+    <Resource Include="Resources\track_w.png" />
+    <Resource Include="Resources\spotify_ct.png" />
     <Content Include="stylesheet.css" />
   </ItemGroup>
   <ItemGroup>
@@ -274,6 +303,9 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Microsoft\VisualStudio\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
